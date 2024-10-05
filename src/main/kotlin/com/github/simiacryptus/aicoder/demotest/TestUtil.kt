@@ -51,9 +51,6 @@ object TestUtil {
         messageBuffer.clear()
     }
 
-
-
-
     fun speak(text: String) {
         log.info("Speaking: $text")
         val speechWavBytes = OpenAIClient().createSpeech(

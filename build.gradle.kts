@@ -46,6 +46,8 @@ dependencies {
 
     compileOnly(group = "ch.qos.logback", name = "logback-classic", version = logback_version)
     compileOnly(group = "ch.qos.logback", name = "logback-core", version = logback_version)
+// https://mvnrepository.com/artifact/org.jsoup/jsoup
+    implementation("org.jsoup:jsoup:1.18.1")
 
     implementation(group = "com.fasterxml.jackson.core", name = "jackson-databind", version = jackson_version)
     implementation(group = "com.fasterxml.jackson.core", name = "jackson-annotations", version = jackson_version)
@@ -155,6 +157,7 @@ tasks {
             events("passed", "skipped", "failed")
         }
         classpath = sourceSets.test.get().runtimeClasspath
+
     }
 
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {

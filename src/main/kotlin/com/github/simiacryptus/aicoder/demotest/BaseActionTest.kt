@@ -41,5 +41,3 @@ abstract class BaseActionTest : ScreenRec() {
     }
 
 }
-
-class TimeoutException(message: String) : Exception(message)

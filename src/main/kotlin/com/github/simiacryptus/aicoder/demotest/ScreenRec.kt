@@ -18,6 +18,8 @@ import java.awt.Rectangle
 import java.io.File
 import java.io.IOException
 import java.nio.ByteOrder
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.concurrent.atomic.AtomicBoolean
 
 open class ScreenRec {
@@ -116,6 +118,7 @@ open class ScreenRec {
             }
         }
     }
+    open protected val testName = this@ScreenRec.javaClass.simpleName
 
     protected fun stopScreenRecording() {
         synchronized(lock) {
@@ -127,7 +130,7 @@ open class ScreenRec {
                 log.info("Stopping screen recording...")
                 screenRecorder?.stop()
                 screenRecorder?.createdMovieFiles?.firstOrNull()?.absoluteFile?.apply {
-                    val dest = this.parentFile.resolve(this@ScreenRec.javaClass.simpleName + ".avi")
+                    val dest = this.parentFile.resolve("$testName.${SimpleDateFormat("yyyyMMddHHmmss").format(Date())}.avi")
                     waitFor("Waiting for file to exist: $this", timeoutMs = 10000) // Reduced timeout
                     log.info("Rename $this to $dest")
                     if (!this.renameTo(dest)) {
