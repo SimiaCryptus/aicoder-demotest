@@ -19,7 +19,7 @@ repositories {
 val slf4j_version = "2.0.16"
 val remoterobot_version = "0.11.23"
 val jackson_version = "2.17.2"
-val logback_version = "1.4.11"
+val logback_version = "1.5.8"
 
 dependencies {
     implementation("ch.randelshofer:org.monte.media.screenrecorder:17.1")
@@ -44,9 +44,8 @@ dependencies {
         exclude(group = "org.slf4j", module = "slf4j-api")
     }
 
-    compileOnly(group = "ch.qos.logback", name = "logback-classic", version = logback_version)
-    compileOnly(group = "ch.qos.logback", name = "logback-core", version = logback_version)
-// https://mvnrepository.com/artifact/org.jsoup/jsoup
+    implementation(group = "ch.qos.logback", name = "logback-classic", version = logback_version)
+    implementation(group = "ch.qos.logback", name = "logback-core", version = logback_version)
     implementation("org.jsoup:jsoup:1.18.1")
 
     implementation(group = "com.fasterxml.jackson.core", name = "jackson-databind", version = jackson_version)
@@ -95,11 +94,6 @@ sourceSets {
         }
     }
 }
-tasks.named("compileKotlin", org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class) {
-    compilerOptions {
-        moduleName.set("com.github.simiacryptus.aicoder.test.demotest")
-    }
-}
 
 java {
     sourceSets {
@@ -118,7 +112,8 @@ java {
 }
 
 tasks {
-    compileJava {
+    compileKotlin {
+        destinationDirectory.set(compileJava.get().destinationDirectory)
         doLast {
             val servicesDir = File(destinationDirectory.get().asFile, "META-INF/services")
             servicesDir.mkdirs()
@@ -137,17 +132,8 @@ tasks {
         }
     }
 
-    compileKotlin {
-        destinationDirectory.set(compileJava.get().destinationDirectory)
-    }
-
     jar {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        manifest {
-            attributes(
-                "Automatic-Module-Name" to "com.github.simiacryptus.aicoder.demotest"
-            )
-        }
         from(sourceSets.main.get().output)
     }
 
@@ -164,7 +150,6 @@ tasks {
         compilerOptions {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
             javaParameters.set(true)
-            moduleName.set("com.github.simiacryptus.aicoder.test.demotest")
         }
     }
 

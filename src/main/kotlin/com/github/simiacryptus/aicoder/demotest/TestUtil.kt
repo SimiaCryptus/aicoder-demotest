@@ -51,13 +51,13 @@ object TestUtil {
         messageBuffer.clear()
     }
 
-    fun speak(text: String) {
+    fun speak(text: String, voice: String = "shimmer") {
         log.info("Speaking: $text")
         val speechWavBytes = OpenAIClient().createSpeech(
             ApiModel.SpeechRequest(
                 input = text,
                 model = AudioModels.TTS.modelName,
-                voice = "alloy",
+                voice = voice,
                 speed = 1.0,
                 response_format = "wav"
             )

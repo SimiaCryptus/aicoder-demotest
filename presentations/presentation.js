@@ -13,6 +13,10 @@ function handleVideoElements(callback) {
     if (video) {
         if (isAutoPlaying) {
             video.play();
+            video.onerror = () => {
+                log('Video failed to load, proceeding to next step');
+                if (callback) callback();
+            };
             video.onended = () => {
                 if (callback) callback();
             };
@@ -20,8 +24,11 @@ function handleVideoElements(callback) {
             video.pause();
             video.currentTime = 0;
             video.onended = null;
+            video.onerror = null;
+            video.onerror = null;
         }
     } else {
+        
         if (callback) callback();
     }
 }
@@ -59,6 +66,25 @@ function speakNotes() {
     log('Entering speakNotes function');
     let notes = Reveal.getCurrentSlide().querySelector('aside.notes');
     if (notes) {
+        let audioSrc = notes.getAttribute('data-audio-src');
+        if (audioSrc) {
+            let audio = new Audio(audioSrc);
+            audio.onended = () => {
+                if (isAutoPlaying) {
+                    log('Audio ended, moving to next slide in 1 second');
+                    setTimeout(() => handleVideoElements(() => Reveal.next()), 1000);
+                } else {
+                    log('Audio ended, autoplay is off');
+                }
+            };
+            try {
+                audio.play();
+                log(`Playing audio from ${audioSrc}`);
+            } catch (error) {
+                log(`Error playing audio: ${error.message}`);
+            }
+            return; // Exit the function to prevent speech synthesis
+        }
         let text = notes.textContent.replace(/\s+/g, ' ').trim();
         log(`Notes text: ${text.substring(0, 50)}...`);
         utterances = createUtterances(text);
