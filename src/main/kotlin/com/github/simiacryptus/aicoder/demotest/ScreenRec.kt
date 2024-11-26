@@ -4,10 +4,7 @@ import org.monte.media.av.Format
 import org.monte.media.av.FormatKeys
 import org.monte.media.av.FormatKeys.MediaType
 import org.monte.media.av.FormatKeys.MediaTypeKey
-import org.monte.media.av.codec.audio.AudioFormatKeys
-import org.monte.media.av.codec.audio.AudioFormatKeys.ChannelsKey
-import org.monte.media.av.codec.audio.AudioFormatKeys.SampleRateKey
-import org.monte.media.av.codec.audio.AudioFormatKeys.SampleSizeInBitsKey
+import org.monte.media.av.codec.audio.AudioFormatKeys.*
 import org.monte.media.av.codec.video.VideoFormatKeys
 import org.monte.media.math.Rational
 import org.monte.media.screenrecorder.ScreenRecorder
@@ -17,12 +14,11 @@ import java.awt.GraphicsEnvironment
 import java.awt.Rectangle
 import java.io.File
 import java.io.IOException
-import java.nio.ByteOrder
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
-open class ScreenRec {
+open class ScreenRec : TestUtil() {
     companion object {
         private val log = LoggerFactory.getLogger(ScreenRec::class.java)
     }

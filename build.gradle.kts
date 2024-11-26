@@ -38,7 +38,7 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
 
-    implementation(group = "com.simiacryptus", name = "jo-penai", version = "1.1.7")
+    implementation(group = "com.simiacryptus", name = "jo-penai", version = "1.1.13")
 
     implementation(group = "org.apache.httpcomponents.client5", name = "httpclient5", version = "5.3.1") {
         exclude(group = "org.slf4j", module = "slf4j-api")
@@ -61,6 +61,8 @@ dependencies {
 
     implementation(platform("org.junit:junit-bom:5.10.1"))
     implementation("org.junit.jupiter:junit-jupiter")
+
+    implementation("io.github.bonigarcia:webdrivermanager:5.9.2")
 
 }
 
@@ -86,11 +88,6 @@ sourceSets {
     main {
         kotlin {
             srcDirs("src/main/kotlin")
-        }
-    }
-    test {
-        kotlin {
-            srcDirs("src/test/kotlin")
         }
     }
 }

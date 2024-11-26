@@ -5,16 +5,18 @@ import com.simiacryptus.jopenai.models.ApiModel
 import com.simiacryptus.jopenai.models.AudioModels
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
+import java.net.DatagramPacket
+import java.net.DatagramSocket
+import java.util.concurrent.ConcurrentLinkedQueue
 import javax.sound.sampled.AudioInputStream
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.Clip
-import java.net.DatagramSocket
-import java.net.DatagramPacket
 import kotlin.concurrent.thread
-import java.util.concurrent.ConcurrentLinkedQueue
 
-object TestUtil {
-    private const val UDP_PORT = 41390
+open class TestUtil {
+    companion object {
+        private const val UDP_PORT = 41390
+    }
     private var isServerRunning = false
     private val messageBuffer = ConcurrentLinkedQueue<String>()
 
@@ -51,7 +53,9 @@ object TestUtil {
         messageBuffer.clear()
     }
 
+    private val silent = true
     fun speak(text: String, voice: String = "shimmer") {
+        if (silent) return
         log.info("Speaking: $text")
         val speechWavBytes = OpenAIClient().createSpeech(
             ApiModel.SpeechRequest(

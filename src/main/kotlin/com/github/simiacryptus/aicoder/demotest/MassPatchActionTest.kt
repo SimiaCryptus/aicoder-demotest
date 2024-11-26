@@ -8,61 +8,73 @@ import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.slf4j.LoggerFactory
-import java.time.Duration
 import org.openqa.selenium.By
 import org.openqa.selenium.JavascriptExecutor
-import org.openqa.selenium.chrome.ChromeDriver
-import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.support.ui.WebDriverWait
+import org.slf4j.LoggerFactory
 import java.awt.event.KeyEvent
+import java.time.Duration
+
+/**
+ * Tests the Mass Patch functionality of the AI Coder plugin.
+ *
+ * Prerequisites:
+ * - IntelliJ IDEA must be running with the AI Coder plugin installed
+ * - The test project "DataGnome" must be open
+ * - The project must have the following structure:
+ *   DataGnome/
+ *     src/
+ *       main/
+ *         kotlin/
+ *           com.simiacryptus.util/
+ *             files/
+ *
+ * Test Flow:
+ * 1. Opens the Project View panel
+ * 2. Selects the target directory in the project structure
+ * 3. Opens the AI Coder context menu
+ * 4. Initiates the Mass Patch action
+ * 5. Configures the patch to add logging to all methods
+ * 6. Reviews the generated patches through web interface
+ * 7. Demonstrates patch review functionality
+ *
+ * Expected State:
+ * - IDE should be in its default layout
+ * - No dialogs should be open
+ * - Project View may be closed (will be opened by test)
+ */
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MassPatchActionTest :BaseActionTest() {
 
-
     companion object {
         val log = LoggerFactory.getLogger(MassPatchActionTest::class.java)
     }
+
     @Test
     fun testMassPatchAction() = with(remoteRobot) {
-    TestUtil.speak("Welcome to the AI Coder demo. We'll explore the Mass Patch feature for applying consistent changes across multiple files.")
+        speak("Welcome to the AI Coder demo. We'll explore the Mass Patch feature for applying consistent changes across multiple files.")
         log.info("Starting testMassPatchAction")
         Thread.sleep(3000)
 
-        step("Open project view") {
-        TestUtil.speak("Opening the project view to access the file structure.")
-            find(CommonContainerFixture::class.java, byXpath("//div[@class='ProjectViewTree']")).click()
-            log.info("Project view opened")
-            Thread.sleep(2000)
-        }
+        openProjectView()
+        speak("Opening the project view to access the file structure.")
 
         step("Select a directory") {
-        TestUtil.speak("Selecting the target directory for the mass patch.")
+            speak("Selecting the target directory for the mass patch.")
             val projectTree = find(JTreeFixture::class.java, byXpath("//div[@class='ProjectViewTree']"))
-            projectTree.rightClickPath(*arrayOf("DataGnome", "src", "main", "kotlin", "com.simiacryptus.util", "files"), fullMatch = false)
+            val path = arrayOf("DataGnome", "src", "main", "kotlin", "com.simiacryptus.util", "files")
+            projectTree.expandAll(path)
+            projectTree.rightClickPath(*path, fullMatch = false)
             log.info("Directory selected")
             Thread.sleep(3000)
         }
 
-        step("Select 'AI Coder' menu") {
-        TestUtil.speak("Selecting the AI Coder option from the context menu.")
-            waitFor(Duration.ofSeconds(10)) {
-                try {
-                    val aiCoderMenu = find(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenu') and contains(@text, 'AI Coder')]"))
-                    aiCoderMenu.click()
-                    log.info("'AI Coder' menu clicked")
-                    true
-                } catch (e: Exception) {
-                    log.warn("Failed to find or click 'AI Coder' menu: ${e.message}")
-                    false
-                }
-            }
-            Thread.sleep(3000)
-        }
+        selectAICoderMenu()
+        speak("Selecting the AI Coder option from the context menu.")
 
         step("Click 'Mass Patch' action") {
-        TestUtil.speak("Initiating the Mass Patch action.")
+            speak("Initiating the Mass Patch action.")
             waitFor(Duration.ofSeconds(10)) {
                 try {
                     findAll(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Mass Patch')]"))
@@ -78,7 +90,7 @@ class MassPatchActionTest :BaseActionTest() {
         }
 
         step("Configure Mass Patch") {
-        TestUtil.speak("Configuring Mass Patch settings.")
+            speak("Configuring Mass Patch settings.")
             waitFor(Duration.ofSeconds(10)) {
                 val dialog = find(CommonContainerFixture::class.java, byXpath("//div[@class='MyDialog' and @title='Compile Documentation']"))
                 if (dialog.isShowing) {
@@ -90,7 +102,7 @@ class MassPatchActionTest :BaseActionTest() {
                         }
                         enterText("Add logging to all methods")
                     }
-                    TestUtil.speak("Instructing the AI to add logging to all methods in the selected files.")
+                    speak("Instructing the AI to add logging to all methods in the selected files.")
                     val okButton = dialog.find(CommonContainerFixture::class.java, byXpath("//div[@class='JButton' and @text='OK']"))
                     okButton.click()
                     log.info("Mass Patch configured and started")
@@ -103,23 +115,20 @@ class MassPatchActionTest :BaseActionTest() {
         }
 
         step("Get URL from UDP messages") {
-            val messages = TestUtil.getReceivedMessages()
+            val messages = getReceivedMessages()
             val url = messages.firstOrNull { it.startsWith("http") }
             if (url != null) {
                 log.info("Retrieved URL: $url")
-                TestUtil.speak("Opening the AI-generated URL to review proposed changes.")
-                val options = ChromeOptions()
-                options.addArguments("--start-fullscreen")
-                driver = ChromeDriver(options)
-                (driver as JavascriptExecutor).executeScript("document.body.style.zoom='150%'")
+                speak("Opening the AI-generated URL to review proposed changes.")
+                initializeWebDriver()
                 driver.get(url)
-                val wait = WebDriverWait(this@MassPatchActionTest.driver, Duration.ofSeconds(10))
+                val wait = WebDriverWait(driver, Duration.ofSeconds(10))
                 wait.until<Boolean> {
                     val loadingElements = it.findElements(By.xpath("//span[contains(@class, 'sr-only') and contains(text(), 'Loading')]"))
                     loadingElements.none { element -> element.isDisplayed }
                 }
                 val chatInput = driver.findElement(By.className("response-message"))
-                TestUtil.speak("Reviewing AI-proposed patches.")
+                speak("Reviewing AI-proposed patches.")
                 Thread.sleep(4000)
 
                 // Wait for the patches to be generated
@@ -129,34 +138,37 @@ class MassPatchActionTest :BaseActionTest() {
                         val containers = it.findElements(By.xpath("//div[contains(@class, 'message-container')]"))
                         containers.any { container -> container.isDisplayed }
                     }
-                    TestUtil.speak("AI has generated patches. Examining proposed changes.")
+                    speak("AI has generated patches. Examining proposed changes.")
                     Thread.sleep(3000)
 
                     // Find all tab buttons
                     val tabButtons = driver.findElements(By.cssSelector(".tabs-container > .tabs > .tab-button"))
                         .filter { it.isDisplayed }
-                Thread({ TestUtil.speak("${tabButtons.size} patches to review. Each can be individually applied or rejected.") }).start()
+                    Thread({ speak("${tabButtons.size} patches to review. Each can be individually applied or rejected.") }).start()
                     tabButtons.take(3).forEachIndexed { index, button ->
-                    TestUtil.speak("Examining patch ${index + 1}. AI has added logging statements to methods.")
+                        speak("Examining patch ${index + 1}. AI has added logging statements to methods.")
                         (this@MassPatchActionTest.driver as JavascriptExecutor).executeScript("arguments[0].click();", button)
                         Thread.sleep(3000)
                     }
                 } catch (e: Exception) {
                     log.warn("Patches not found within the expected time.", e)
-                    TestUtil.speak("AI is taking longer than expected to generate patches. This can occur with larger codebases or complex changes.")
+                    speak("AI is taking longer than expected to generate patches. This can occur with larger codebases or complex changes.")
                 }
 
                 Thread.sleep(4000)
-                TestUtil.speak("Mass Patch feature demonstration complete. This tool enables consistent changes across multiple files, enhancing productivity for large-scale refactoring or code improvements.")
-                this@MassPatchActionTest.driver.quit()
+                speak("Mass Patch feature demonstration complete. This tool enables consistent changes across multiple files, enhancing productivity for large-scale refactoring or code improvements.")
+                try {
+                    driver.quit()
+                } finally {
+                    clearMessageBuffer()
+                }
             } else {
                 log.error("No URL found in UDP messages")
-                TestUtil.speak("Error retrieving URL for Mass Patch interface. In a real scenario, we would troubleshoot or rerun the action.")
+                speak("Error retrieving URL for Mass Patch interface. In a real scenario, we would troubleshoot or rerun the action.")
             }
-            TestUtil.clearMessageBuffer()
         }
 
-        TestUtil.speak("AI Coder Mass Patch demo concluded. We've demonstrated initiating a Mass Patch operation, from directory selection to patch review. This feature streamlines development, especially for large codebases, combining AI efficiency with developer control.")
+        speak("AI Coder Mass Patch demo concluded. We've demonstrated initiating a Mass Patch operation, from directory selection to patch review. This feature streamlines development, especially for large codebases, combining AI efficiency with developer control.")
     Thread.sleep(10000)
     }
 }

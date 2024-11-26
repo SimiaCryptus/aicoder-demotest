@@ -5,18 +5,45 @@ import com.intellij.remoterobot.fixtures.JTreeFixture
 import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.stepsProcessing.step
 import com.intellij.remoterobot.utils.waitFor
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.slf4j.LoggerFactory
-import java.time.Duration
 import org.openqa.selenium.By
+import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.WebElement
-import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.openqa.selenium.JavascriptExecutor
-import org.openqa.selenium.chrome.ChromeOptions
+import org.slf4j.LoggerFactory
+import java.time.Duration
+
+/**
+ * Tests the Multi-Diff Chat functionality of the AI Coder plugin.
+ *
+ * Prerequisites:
+ * - IntelliJ IDEA must be running with the AI Coder plugin installed
+ * - A test project named "TestProject" must be open
+ * - The project must contain a readme.md file
+ * - The IDE should be in its default layout with no open editors
+ * - Remote Robot server must be running and accessible
+ * - UDP message receiving capability must be configured
+ * - WebDriver must be properly configured for browser automation
+ *
+ * Test Flow:
+ * 1. Opens the Project View if not already visible
+ * 2. Locates and right-clicks in the project tree
+ * 3. Navigates through context menu to select AI Coder > Patch Files
+ * 4. Waits for and captures the URL from UDP messages
+ * 5. Opens the Multi-Diff Chat interface in a browser
+ * 6. Submits a request to add a Mermaid diagram to readme.md
+ * 7. Waits for AI to generate the patch
+ * 8. Applies the generated patch
+ * 9. Verifies the changes in the IDE
+ * 10. Cleans up by closing the browser
+ *
+ * Expected Results:
+ * - The readme.md file should be modified to include a Mermaid diagram
+ * - The test verifies the presence of "```mermaid" in the file content
+ */
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MultiDiffChatActionTest : BaseActionTest() {
@@ -27,52 +54,32 @@ class MultiDiffChatActionTest : BaseActionTest() {
     }
     @Test
     fun testMultiDiffChatAction() = with(remoteRobot) {
-        TestUtil.speak("Welcome to the AI Coder demo. We'll explore the Multi-Diff Chat feature for AI-assisted file editing.")
+        speak("Welcome to the AI Coder demo. We'll explore the Multi-Diff Chat feature for AI-assisted file editing.")
         log.info("Starting testMultiDiffChatAction")
         Thread.sleep(2000)
 
         step("Open project view") {
-            TestUtil.speak("Opening the project view to access our files.")
-            find(CommonContainerFixture::class.java, byXpath("//div[@class='ProjectViewTree']")).click()
-            log.info("Project view opened")
+            speak("Opening the project view to access our files.")
+            openProjectView()
             Thread.sleep(2000)
         }
 
-        step("Select readme.md file") {
-            TestUtil.speak("Selecting the readme.md file for modification.")
-            val projectTree = find(JTreeFixture::class.java, byXpath("//div[@class='ProjectViewTree']"))
-            projectTree.clickPath(*arrayOf("TestProject", "readme.md"), fullMatch = false)
-            log.info("readme.md file selected")
-            Thread.sleep(2000)
-        }
 
         step("Open context menu") {
-            TestUtil.speak("Opening the context menu to access AI Coder options.")
-            val projectTree = find(JTreeFixture::class.java, byXpath("//div[@class='ProjectViewTree']"))
-            projectTree.rightClick()
-            log.info("Context menu opened via right-click")
+            speak("Opening the context menu to access AI Coder options.")
+
+            find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).rightClick()
+            Thread.sleep(2000)
+        }
+        step("Select 'AI Coder' menu") {
+            speak("Selecting the AI Coder option from the context menu.")
+            selectAICoderMenu()
             Thread.sleep(2000)
         }
 
-        step("Select 'AI Coder' menu") {
-            TestUtil.speak("Selecting the AI Coder option from the context menu.")
-            waitFor(Duration.ofSeconds(15)) {
-                try {
-                    val aiCoderMenu = find(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenu') and contains(@text, 'AI Coder')]"))
-                    aiCoderMenu.click()
-                    log.info("'AI Coder' menu clicked")
-                    true
-                } catch (e: Exception) {
-                    log.warn("Failed to find or click 'AI Coder' menu: ${e.message}")
-                    TestUtil.speak("Failed to locate the AI Coder menu. Retrying.")
-                    false
-                }
-            }
-            Thread.sleep(2000)
-        }
 
         step("Click 'Patch Files' action") {
-            TestUtil.speak("Initiating the Multi-Diff Chat feature via the 'Patch Files' action.")
+            speak("Initiating the Multi-Diff Chat feature via the 'Patch Files' action.")
             waitFor(Duration.ofSeconds(15)) {
                 try {
                     findAll(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Patch Files')]"))
@@ -81,7 +88,7 @@ class MultiDiffChatActionTest : BaseActionTest() {
                     true
                 } catch (e: Exception) {
                     log.warn("Failed to find 'Patch Files' action: ${e.message}")
-                    TestUtil.speak("Failed to find 'Patch Files' action. Retrying.")
+                    speak("Failed to find 'Patch Files' action. Retrying.")
                     false
                 }
             }
@@ -89,76 +96,86 @@ class MultiDiffChatActionTest : BaseActionTest() {
         }
 
         step("Get URL from UDP messages") {
-            TestUtil.speak("Opening the Multi-Diff Chat interface in a new browser window.")
-            val messages = TestUtil.getReceivedMessages()
+            speak("Opening the Multi-Diff Chat interface in a new browser window.")
+            val messages = getReceivedMessages()
             val url = messages.firstOrNull { it.startsWith("http") }
             if (url != null) {
                 log.info("Retrieved URL: $url")
-                TestUtil.speak("Retrieved URL for the Multi-Diff Chat interface.")
-                val options = ChromeOptions()
-                options.addArguments("--start-fullscreen")
-                driver = ChromeDriver(options)
+                speak("Retrieved URL for the Multi-Diff Chat interface.")
+
+                initializeWebDriver()
                 (driver as JavascriptExecutor).executeScript("document.body.style.zoom='150%'")
                 driver.get(url)
-                TestUtil.speak("Viewing the Multi-Diff Chat interface.")
+                speak("Viewing the Multi-Diff Chat interface.")
                 val wait = WebDriverWait(this@MultiDiffChatActionTest.driver, Duration.ofSeconds(10))
                 val chatInput = wait.until<WebElement>(ExpectedConditions.elementToBeClickable(By.id("chat-input")))
                 chatInput.click()
-                TestUtil.speak("Typing request to add a Mermaid diagram to the readme.md file.")
+                chatInput.clear()
+                speak("Typing request to add a Mermaid diagram to the readme.md file.")
                 Thread.sleep(2000)
                 val request = "Add a Mermaid diagram to the readme.md file showing the basic structure of this project"
+                // Use JavaScript to set text instead of character-by-character input
+                (driver as JavascriptExecutor).executeScript(
+                    "arguments[0].value = arguments[1]", chatInput, request
+                )
                 request.forEach { char ->
                     chatInput.sendKeys(char.toString())
                     Thread.sleep(100) // Add a small delay between each character
                 }
                 Thread.sleep(2000) // Pause after typing the full request
                 val submitButton = wait.until<WebElement>(ExpectedConditions.elementToBeClickable(By.xpath("//button[@type='submit']")))
-                TestUtil.speak("Submitting request to AI.")
+                speak("Submitting request to AI.")
                 log.info("Submitting request to AI")
                 submitButton.click()
                 Thread.sleep(3000) // Longer pause after clicking submit
-                TestUtil.speak("Waiting for AI to generate the patch.")
+                speak("Waiting for AI to generate the patch.")
                 val longWait = WebDriverWait(this@MultiDiffChatActionTest.driver, Duration.ofSeconds(60))
                 try {
                     val patchContent = longWait.until<WebElement>(ExpectedConditions.presenceOfElementLocated(By.xpath("//pre[contains(@class, 'language-diff')]")))
-                    TestUtil.speak("AI has generated a patch. Reviewing proposed changes.")
+                    speak("AI has generated a patch. Reviewing proposed changes.")
                     log.info("Patch generated: ${patchContent.text}")
                     Thread.sleep(3000)
 
                     // Simulate clicking the "Apply Diff" button
                     val applyButton =
                         longWait.until<WebElement>(ExpectedConditions.elementToBeClickable(By.xpath("//a[contains(@class, 'cmd-button') and contains(text(), 'Apply Diff')]")))
-                    TestUtil.speak("Applying the diff to readme.md file.")
+                    speak("Applying the diff to readme.md file.")
                     applyButton.click()
                     Thread.sleep(3000) // Wait for the apply action to complete
 
-                    TestUtil.speak("Diff applied. Verifying changes in the IDE.")
+                    speak("Diff applied. Verifying changes in the IDE.")
                     // Close the browser window
                     this@MultiDiffChatActionTest.driver.close()
-                    TestUtil.speak("Returned to IDE. Verifying file contents.")
-                    // Verify that the file was changed
+                    speak("Returned to IDE. Verifying file contents.")
                     val projectViewTree = find(JTreeFixture::class.java, byXpath("//div[@class='ProjectViewTree']"))
                     projectViewTree.doubleClickPath(*arrayOf("TestProject", "readme.md"), fullMatch = false)
                     val editor = find<CommonContainerFixture>(byXpath("//div[@class='EditorComponentImpl']"))
                     val fileContent = editor.findAllText().joinToString("") { it.text }
                     assertTrue(fileContent.contains("```mermaid"), "The readme.md file should contain a Mermaid diagram")
-                    TestUtil.speak("Verified: readme.md now contains a Mermaid diagram.")
+                    speak("Verified: readme.md now contains a Mermaid diagram.")
                     Thread.sleep(3000)
                 } catch (e: Exception) {
                     log.warn("Failed to generate or apply patch: ${e.message}")
-                    TestUtil.speak("Encountered an issue while generating or applying the patch. Check logs for details.")
+                    speak("Encountered an issue while generating or applying the patch. Check logs for details.")
+                } finally {
+                    try {
+                        driver.quit()
+                    } catch (e: Exception) {
+                        log.error("Error closing browser", e)
+                    }
                 }
 
-                TestUtil.speak("Demo concluded. Multi-Diff Chat successfully added a Mermaid diagram to readme.md.")
+                speak("Demo concluded. Multi-Diff Chat successfully added a Mermaid diagram to readme.md.")
                 this@MultiDiffChatActionTest.driver.quit()
             } else {
                 log.error("No URL found in UDP messages")
-                TestUtil.speak("Failed to retrieve URL for Multi-Diff Chat interface. Check logs for details.")
+                speak("Failed to retrieve URL for Multi-Diff Chat interface. Check logs for details.")
             }
-            TestUtil.clearMessageBuffer()
+            clearMessageBuffer()
+
         }
 
-        TestUtil.speak("AI Coder Multi-Diff Chat demo complete. This feature streamlines code modifications and documentation updates, enhancing developer productivity.")
+        speak("AI Coder Multi-Diff Chat demo complete. This feature streamlines code modifications and documentation updates, enhancing developer productivity.")
         Thread.sleep(10000) // Final sleep of 10 seconds
     }
 }

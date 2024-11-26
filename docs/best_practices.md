@@ -1,3 +1,4 @@
+```kotlin
 package com.github.simiacryptus.aicoder.demotest
 
 import com.intellij.remoterobot.RemoteRobot
@@ -23,10 +24,8 @@ abstract class BaseActionTest : ScreenRec() {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(this.javaClass)
-
-        const val PROJECT_TREE_XPATH = "//div[@class='ProjectViewTree']"
-
-        const val AI_CODER_MENU_XPATH = "//div[contains(@class, 'ActionMenu') and contains(@text, 'AI Coder')]"
+        protected const val PROJECT_TREE_XPATH = "//div[@class='ProjectViewTree']"
+        protected const val AI_CODER_MENU_XPATH = "//div[contains(@class, 'ActionMenu') and contains(@text, 'AI Coder')]"
     }
 
     protected lateinit var driver: WebDriver
@@ -49,19 +48,21 @@ abstract class BaseActionTest : ScreenRec() {
         }
     }
 
-    protected fun JTreeFixture.expandAll(path: Array<String>) {
-        (0 until path.size - 1).forEach { i ->
-            waitFor(Duration.ofSeconds(10)) {
-                try {
-                    this.expand(*path.sliceArray(0..i))
-                    log.info("Navigated to ${path[i]}")
-                    true
-                } catch (e: Exception) {
-                    log.warn("Failed to navigate to ${path[i]}: ${e.message}")
-                    false
-                }
+    protected fun navigateProjectTree(path: Array<String>, maxAttempts: Int = 3) {
+        var attempts = 0
+        while (attempts < maxAttempts) {
+            try {
+                val projectTree = remoteRobot.find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH))
+                projectTree.clickPath(*path, fullMatch = false)
+                log.info("Successfully navigated to ${path.last()}")
+                return
+            } catch (e: Exception) {
+                attempts++
+                log.warn("Navigation attempt $attempts failed", e)
+                Thread.sleep(1000)
             }
         }
+        throw RuntimeException("Failed to navigate after $maxAttempts attempts")
     }
 
     protected fun openProjectView() {
@@ -92,7 +93,7 @@ abstract class BaseActionTest : ScreenRec() {
     @BeforeAll
     fun setup() {
         remoteRobot = RemoteRobot("http://127.0.0.1:8082")
-        startUdpServer()
+        TestUtil.startUdpServer()
         System.setProperty("webdriver.chrome.driver", "/usr/bin/chromedriver")
         try {
             startScreenRecording()
@@ -104,12 +105,13 @@ abstract class BaseActionTest : ScreenRec() {
 
     @AfterAll
     fun tearDown() {
-        stopUdpServer()
+        TestUtil.stopUdpServer()
         if (::driver.isInitialized) {
             driver.quit()
         }
         stopScreenRecording()
-        clearMessageBuffer()
+        TestUtil.clearMessageBuffer()
     }
 
 }
+```
