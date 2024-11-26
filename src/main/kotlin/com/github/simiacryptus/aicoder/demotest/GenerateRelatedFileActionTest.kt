@@ -44,16 +44,6 @@ class GenerateRelatedFileActionTest : BaseActionTest() {
         val log = LoggerFactory.getLogger(GenerateRelatedFileActionTest::class.java)
     }
 
-    private val maxAttempts = 3
-
-    private fun initializeResources() {
-        try {
-            log.info("Initializing test resources")
-        } catch (e: Exception) {
-            log.error("Resource initialization failed", e)
-            throw e
-        }
-    }
     @Test
     fun testGenerateRelatedFile() = with(remoteRobot) {
         speak("This demo showcases the Generate Related File feature, converting a README.md to a reveal.js HTML presentation.")
@@ -130,7 +120,7 @@ class GenerateRelatedFileActionTest : BaseActionTest() {
                 }
             }
             speak("Waiting for file generation.")
-        Thread.sleep(5000)
+            Thread.sleep(5000)
         }
 
         step("Verify file creation") {
@@ -149,7 +139,7 @@ class GenerateRelatedFileActionTest : BaseActionTest() {
         }
 
         speak("Demo concluded. The Generate Related File feature has converted README.md to a reveal.js HTML presentation.")
-    Thread.sleep(10000)
+        Thread.sleep(10000)
     }
 
     @AfterAll

@@ -69,7 +69,7 @@ class PlanAheadActionTest : BaseActionTest() {
             speak("Selecting a directory to initiate the Task Runner operation.")
             val path = arrayOf("DataGnome", "src", "main", "kotlin")
             val tree = remoteRobot.find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
-            waitFor(Duration.ofSeconds(10)) { tree.clickPath(*path, fullMatch = false); true }
+            waitFor(Duration.ofSeconds(10)) { tree.rightClickPath(*path, fullMatch = false); true }
             log.info("Directory selected")
             Thread.sleep(3000)
         }
@@ -128,8 +128,12 @@ class PlanAheadActionTest : BaseActionTest() {
         }
 
         step("Interact with Task Runner interface") {
-            val messages = getReceivedMessages()
-            val url = messages.firstOrNull { it.startsWith("http") }
+            var url: String? = null
+            waitFor(Duration.ofSeconds(90)) {
+                val messages = getReceivedMessages()
+                url = messages.firstOrNull { it.startsWith("http") } ?: ""
+                url?.isNotEmpty() ?: false
+            }
             if (url != null) {
                 log.info("Retrieved URL: $url")
                 speak("Task Runner web interface opened.")

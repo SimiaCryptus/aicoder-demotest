@@ -57,7 +57,7 @@ abstract class BaseActionTest : ScreenRec() {
                     log.info("Navigated to ${path[i]}")
                     true
                 } catch (e: Exception) {
-                    log.warn("Failed to navigate to ${path[i]}: ${e.message}")
+//                    log.warn("Failed to navigate to ${path[i]}: ${e.message}")
                     false
                 }
             }
@@ -65,12 +65,15 @@ abstract class BaseActionTest : ScreenRec() {
     }
 
     protected fun openProjectView() {
-        try {
-            remoteRobot.find(CommonContainerFixture::class.java, byXpath(PROJECT_TREE_XPATH)).click()
-            log.info("Project view opened")
-        } catch (e: Exception) {
-            log.error("Failed to open project view", e)
-            throw e
+        waitFor(Duration.ofSeconds(10)) {
+            try {
+                remoteRobot.find(CommonContainerFixture::class.java, byXpath(PROJECT_TREE_XPATH)).click()
+                log.info("Project view opened")
+                true
+            } catch (e: Exception) {
+                log.info("Failed to open project view: ${e.message}")
+                false
+            }
         }
     }
 
@@ -82,7 +85,7 @@ abstract class BaseActionTest : ScreenRec() {
                 log.info("'AI Coder' menu clicked")
                 true
             } catch (e: Exception) {
-                log.warn("Failed to find or click 'AI Coder' menu: ${e.message}")
+                log.info("Failed to find or click 'AI Coder' menu: ${e.message}")
                 false
             }
         }

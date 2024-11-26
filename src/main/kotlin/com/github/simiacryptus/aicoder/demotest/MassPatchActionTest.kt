@@ -92,7 +92,7 @@ class MassPatchActionTest :BaseActionTest() {
         step("Configure Mass Patch") {
             speak("Configuring Mass Patch settings.")
             waitFor(Duration.ofSeconds(10)) {
-                val dialog = find(CommonContainerFixture::class.java, byXpath("//div[@class='MyDialog' and @title='Compile Documentation']"))
+                val dialog = find(CommonContainerFixture::class.java, byXpath("//div[@class='MyDialog' and @title='Mass Patch']"))
                 if (dialog.isShowing) {
                     val aiInstructionField = dialog.find(CommonContainerFixture::class.java, byXpath("//div[@class='JBTextArea']"))
                     aiInstructionField.click()

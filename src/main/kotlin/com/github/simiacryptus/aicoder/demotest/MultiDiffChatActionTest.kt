@@ -31,7 +31,7 @@ import java.time.Duration
  * Test Flow:
  * 1. Opens the Project View if not already visible
  * 2. Locates and right-clicks in the project tree
- * 3. Navigates through context menu to select AI Coder > Patch Files
+ * 3. Navigates through context menu to select AI Coder > Modify Files
  * 4. Waits for and captures the URL from UDP messages
  * 5. Opens the Multi-Diff Chat interface in a browser
  * 6. Submits a request to add a Mermaid diagram to readme.md
@@ -78,17 +78,17 @@ class MultiDiffChatActionTest : BaseActionTest() {
         }
 
 
-        step("Click 'Patch Files' action") {
-            speak("Initiating the Multi-Diff Chat feature via the 'Patch Files' action.")
+        step("Click 'Modify Files' action") {
+            speak("Initiating the Multi-Diff Chat feature via the 'Modify Files' action.")
             waitFor(Duration.ofSeconds(15)) {
                 try {
-                    findAll(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Patch Files')]"))
+                    findAll(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Modify Files')]"))
                         .firstOrNull()?.click()
-                    log.info("'Patch Files' action clicked")
+                    log.info("'Modify Files' action clicked")
                     true
                 } catch (e: Exception) {
-                    log.warn("Failed to find 'Patch Files' action: ${e.message}")
-                    speak("Failed to find 'Patch Files' action. Retrying.")
+                    log.warn("Failed to find 'Modify Files' action: ${e.message}")
+                    speak("Failed to find 'Modify Files' action. Retrying.")
                     false
                 }
             }
