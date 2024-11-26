@@ -106,13 +106,19 @@ class PlanAheadActionTest : BaseActionTest() {
             waitFor(Duration.ofSeconds(10)) {
                 val dialog = find(CommonContainerFixture::class.java, byXpath("//div[@class='MyDialog' and @title='Configure Plan Ahead Action']"))
                 if (dialog.isShowing) {
-
-                    // Select autofix checkbox
-                    val autoFixCheckbox = dialog.find(JCheckboxFixture::class.java, byXpath("//div[@class='JCheckBox' and @text='Auto-apply fixes']"))
-                    if (!autoFixCheckbox.isSelected()) {
-                        autoFixCheckbox.click()
-                        log.info("Auto-apply fixes checkbox selected")
-                        speak("Enabled auto-apply fixes option.")
+                    dialog.find(JCheckboxFixture::class.java, byXpath("//div[@class='JCheckBox' and @text='Auto-apply fixes']")).apply {
+                        if (!isSelected()) {
+                            click()
+                            log.info("Auto-apply fixes checkbox selected")
+                            speak("Enabled auto-apply fixes option.")
+                        }
+                    }
+                    dialog.find(JCheckboxFixture::class.java, byXpath("//div[@class='JCheckBox' and @text='Allow blocking']")).apply {
+                        if (!isSelected()) {
+                            click()
+                            log.info("Enable Blocking checkbox selected")
+                            speak("Enabled blocking mode.")
+                        }
                     }
                     Thread.sleep(3000)
 
