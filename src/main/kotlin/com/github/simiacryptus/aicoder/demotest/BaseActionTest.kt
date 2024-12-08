@@ -1,13 +1,12 @@
 package com.github.simiacryptus.aicoder.demotest
 
+import com.github.simiacryptus.aicoder.demotest.PlanAheadActionTest.Companion
 import com.intellij.remoterobot.RemoteRobot
 import com.intellij.remoterobot.fixtures.CommonContainerFixture
 import com.intellij.remoterobot.fixtures.JTreeFixture
 import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.utils.waitFor
 import io.github.bonigarcia.wdm.WebDriverManager
-import org.openqa.selenium.OutputType
-import org.openqa.selenium.TakesScreenshot
 import org.junit.jupiter.api.AfterAll
  import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -18,8 +17,6 @@ import org.junit.jupiter.api.TestInstance
  import org.junit.jupiter.api.extension.TestExecutionExceptionHandler
  import org.junit.jupiter.api.extension.BeforeTestExecutionCallback
  import org.junit.jupiter.api.extension.AfterTestExecutionCallback
-import org.openqa.selenium.JavascriptExecutor
-import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
  import java.lang.management.ManagementFactory
@@ -31,6 +28,10 @@ import java.time.Duration
  import java.time.format.DateTimeFormatter
 import java.time.Instant
 import org.junit.jupiter.api.TestInfo
+import org.openqa.selenium.*
+import org.openqa.selenium.support.ui.ExpectedConditions
+import org.openqa.selenium.support.ui.WebDriverWait
+
 @ExtendWith(TestRetryHandler::class)
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -51,6 +52,46 @@ abstract class BaseActionTest : ScreenRec() {
        val SHORT_TIMEOUT = Duration.ofSeconds(10)
        val MEDIUM_TIMEOUT = Duration.ofSeconds(30)
        val LONG_TIMEOUT = Duration.ofSeconds(90)
+
+
+        fun clickElement(driver: WebDriver, wait: WebDriverWait, selector: String) = runElement(
+            driver, wait, selector, """
+                arguments[0].scrollIntoView(true);
+                arguments[0].click();
+            """.trimIndent()
+        )
+
+        fun runElement(
+            driver: WebDriver,
+            wait: WebDriverWait,
+            selector: String,
+            js: String
+        ): WebElement {
+            while (true) {
+                try {
+                    return wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(selector))).apply {
+                        (driver as JavascriptExecutor).executeScript(js, this)
+                    }
+                } catch (e: WebDriverException) {
+                    if (e is TimeoutException) throw e
+                    log.info("Failed to click $selector: ${e.message}")
+                }
+            }
+        }
+        fun <T>runElement(
+            wait: WebDriverWait,
+            selector: String,
+            fn: (WebElement) -> T
+        ): T {
+            while (true) {
+                try {
+                    return wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(selector))).let { fn(it) }
+                } catch (e: WebDriverException) {
+                    if (e is TimeoutException) throw e
+                    log.info("Failed to click $selector: ${e.message}")
+                }
+            }
+        }
     }
 
     protected lateinit var driver: WebDriver

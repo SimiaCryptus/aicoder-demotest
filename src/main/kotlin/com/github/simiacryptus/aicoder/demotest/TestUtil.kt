@@ -92,6 +92,6 @@ open class TestUtil {
         }
         log.info("Audio playback completed")
     }
-    val log = LoggerFactory.getLogger(TestUtil::class.java)
+    private val log = LoggerFactory.getLogger(TestUtil::class.java)
 
 }

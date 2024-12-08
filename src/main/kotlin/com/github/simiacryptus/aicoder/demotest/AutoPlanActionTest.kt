@@ -9,7 +9,6 @@ import com.intellij.remoterobot.utils.waitFor
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.openqa.selenium.By
-import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
 import org.slf4j.LoggerFactory
@@ -163,7 +162,7 @@ class AutoPlanActionTest : BaseActionTest() {
           chatInput.sendKeys("Create a new utility class for string manipulation with methods for common operations")
           speak("Submitting task: Create a new utility class for string manipulation.")
 
-          driver.findElement(By.id("send-message-button")).click()
+          clickElement(driver, wait, "#send-message-button")
           log.info("Task description submitted successfully")
           speak("Task description submitted.")
           sleep(1000)
@@ -179,21 +178,16 @@ class AutoPlanActionTest : BaseActionTest() {
             if(planIndex > 8 && !hasStopped) {
               log.info("Reached maximum demonstration iterations, initiating stop sequence")
               speak("Auto-Plan can continue to iterate over agent plans. However, for demonstration purposes, we will stop here.")
-              val controlsButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".tabs-container > div > button:nth-child(1)")))
-              controlsButton.click()
+              clickElement(driver, wait, ".tabs-container > div > button:nth-child(1)")
               log.debug("Controls button clicked")
               sleep(1000)
-              val stopLink =
-                wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".tabs-container > .tab-content.active > .href-link")))
-              stopLink.click()
+              clickElement(driver, wait, ".tabs-container > .tab-content.active > .href-link")
               log.info("Stop sequence completed")
               hasStopped = true
               sleep(1000)
             }
 
-            val planButton =
-              wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("div.tabs-container > div.tabs > button:nth-child($planIndex)")))
-            planButton.click()
+            val planButton = clickElement(driver, wait, "div.tabs-container > div.tabs > button:nth-child($planIndex)")
             if (planButton.text === "Summary") {
               log.info("Reached summary stage - execution plan complete")
               speak("Task analysis completed. Review the summary for the execution plan.")
@@ -206,9 +200,7 @@ class AutoPlanActionTest : BaseActionTest() {
             var taskIndex = 2
             while (true) {
               log.debug("Processing task iteration $taskIndex")
-              val taskButton =
-                wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("div.tabs-container > div.active div.iteration.tabs-container > div.tabs > button:nth-child($taskIndex)")))
-              taskButton.click()
+              val taskButton = clickElement(driver, wait, "div.tabs-container > div.active div.iteration.tabs-container > div.tabs > button:nth-child($taskIndex)")
               if (taskButton.text.trim().equals("Thinking Status", ignoreCase = true)) {
                 log.info("Task ${taskIndex-1} execution completed")
                 speak("Task execution complete. Updating Thinking State.")
