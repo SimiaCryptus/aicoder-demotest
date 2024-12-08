@@ -5,16 +5,15 @@ import com.intellij.remoterobot.fixtures.JCheckboxFixture
 import com.intellij.remoterobot.fixtures.JTreeFixture
 import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.stepsProcessing.step
-import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.openqa.selenium.By
 import org.openqa.selenium.JavascriptExecutor
-import org.openqa.selenium.WebElement
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
 import org.slf4j.LoggerFactory
+import java.lang.Thread.sleep
 import java.time.Duration
 
 /**
@@ -38,149 +37,212 @@ import java.time.Duration
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AutoPlanActionTest : BaseActionTest() {
 
-    companion object {
-        private val log = LoggerFactory.getLogger(AutoPlanActionTest::class.java)
-        private const val AUTO_PLAN_XPATH = "//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Auto-Plan')]"
+  companion object {
+    private val log = LoggerFactory.getLogger(AutoPlanActionTest::class.java)
+    private const val AUTO_PLAN_XPATH = "//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Auto-Plan')]"
+  }
+
+  @Test
+  fun testAutoPlanAction() = with(remoteRobot) {
+    log.debug("Initializing Auto-Plan test execution")
+    speak("Welcome to the AI Coder Auto-Plan demonstration. This feature provides automated planning and execution of coding tasks.")
+    log.info("Starting Auto-Plan demonstration test")
+    sleep(3000)
+
+    step("Open project view") {
+      log.debug("Attempting to open project view")
+      speak("Opening the project view to access the file structure.")
+      openProjectView()
+      log.info("Project view opened successfully")
+      sleep(2000)
     }
 
-    @Test
-    fun testAutoPlanAction() = with(remoteRobot) {
-        speak("Welcome to the AI Coder Auto-Plan demonstration. This feature provides automated planning and execution of coding tasks.")
-        log.info("Starting testAutoPlanAction")
-        Thread.sleep(3000)
+    step("Select source directory") {
+      log.debug("Starting source directory selection")
+      speak("Navigating to the source directory.")
+      val path = arrayOf("src", "main", "kotlin")
+      log.debug("Attempting to locate project tree with path: ${path.joinToString("/")}")
+      val tree = find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
+      log.debug("Project tree found, expanding path")
+      waitFor(Duration.ofSeconds(10)) { tree.rightClickPath(*path, fullMatch = false); true }
+      log.info("Source directory selected and right-clicked successfully")
+      sleep(3000)
+    }
 
-        step("Open project view") {
-            speak("Opening the project view to access the file structure.")
-            openProjectView()
-            Thread.sleep(2000)
+    step("Open AI Coder menu") {
+      log.debug("Attempting to open AI Coder menu")
+      speak("Opening the AI Coder menu.")
+      selectAICoderMenu()
+      log.info("AI Coder menu opened successfully")
+      speak("AI Coder menu opened.")
+      sleep(3000)
+    }
+
+    step("Select Auto-Plan action") {
+      log.debug("Starting Auto-Plan action selection")
+      speak("Selecting the Auto-Plan feature.")
+      waitFor(Duration.ofSeconds(10)) {
+        try {
+          findAll(CommonContainerFixture::class.java, byXpath(AUTO_PLAN_XPATH))
+            .firstOrNull()?.click()
+          log.info("Auto-Plan action found and clicked successfully")
+          speak("Auto-Plan feature initiated.")
+          true
+        } catch (e: Exception) {
+          log.warn("Failed to find Auto-Plan action. Error: ${e.message}", e)
+          speak("Failed to find Auto-Plan action. Retrying...")
+          false
         }
+      }
+      sleep(3000)
+    }
 
-        step("Select source directory") {
-            speak("Navigating to the source directory.")
-            val path = arrayOf("src", "main", "kotlin")
-            val tree = find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
-            waitFor(Duration.ofSeconds(10)) { tree.rightClickPath(*path, fullMatch = false); true }
-            log.info("Source directory selected")
-            Thread.sleep(3000)
-        }
-
-        step("Open AI Coder menu") {
-            speak("Opening the AI Coder menu.")
-            selectAICoderMenu()
-            speak("AI Coder menu opened.")
-            Thread.sleep(3000)
-        }
-
-        step("Select Auto-Plan action") {
-            speak("Selecting the Auto-Plan feature.")
-            waitFor(Duration.ofSeconds(10)) {
-                try {
-                    findAll(CommonContainerFixture::class.java, byXpath(AUTO_PLAN_XPATH))
-                        .firstOrNull()?.click()
-                    log.info("Auto-Plan action clicked")
-                    speak("Auto-Plan feature initiated.")
-                    true
-                } catch (e: Exception) {
-                    log.warn("Failed to find Auto-Plan action: ${e.message}")
-                    speak("Failed to find Auto-Plan action. Retrying...")
-                    false
-                }
+    step("Configure Task Runner") {
+      log.debug("Starting Task Runner configuration")
+      speak("Configuring Task Runner settings.")
+      waitFor(Duration.ofSeconds(10)) {
+        val dialog = find(CommonContainerFixture::class.java, byXpath("//div[@class='MyDialog' and @title='Configure Plan Ahead Action']"))
+        if (dialog.isShowing) {
+          log.debug("Configuration dialog found and visible")
+          dialog.find(JCheckboxFixture::class.java, byXpath("//div[@class='JCheckBox' and @text='Auto-apply fixes']")).apply {
+            if (!isSelected()) {
+              click()
+              log.info("Auto-apply fixes checkbox toggled to selected state")
+              speak("Enabled 'auto-apply fixes'; automatically apply suggested code changes.")
             }
-            Thread.sleep(3000)
-        }
-
-        step("Configure Task Runner") {
-            speak("Configuring Task Runner settings.")
-            waitFor(Duration.ofSeconds(10)) {
-                val dialog = find(CommonContainerFixture::class.java, byXpath("//div[@class='MyDialog' and @title='Configure Plan Ahead Action']"))
-                if (dialog.isShowing) {
-                    dialog.find(JCheckboxFixture::class.java, byXpath("//div[@class='JCheckBox' and @text='Auto-apply fixes']")).apply {
-                        if (!isSelected()) {
-                            click()
-                            log.info("Auto-apply fixes checkbox selected")
-                            speak("Enabled auto-apply fixes option.")
-                        }
-                    }
-                    dialog.find(JCheckboxFixture::class.java, byXpath("//div[@class='JCheckBox' and @text='Allow blocking']")).apply {
-                        if (!isSelected()) {
-                            click()
-                            log.info("Enable Blocking checkbox selected")
-                            speak("Enabled blocking mode.")
-                        }
-                    }
-                    Thread.sleep(3000)
-
-                    val okButton = dialog.find(CommonContainerFixture::class.java, byXpath("//div[@class='JButton' and @text='OK']"))
-                    okButton.click()
-                    log.info("Task Runner configured and started")
-                    speak("Task Runner configured and started.")
-                    true
-                } else {
-                    false
-                }
+          }
+          dialog.find(JCheckboxFixture::class.java, byXpath("//div[@class='JCheckBox' and @text='Allow blocking']")).apply {
+            if (isSelected()) {
+              click()
+              log.info("Allow blocking checkbox toggled to deselected state")
+              speak("Disabled 'blocking'; do not wait for user input.")
             }
-        }
+          }
+          sleep(3000)
+          log.debug("Attempting to click OK button")
 
-        step("Interact with Auto-Plan interface") {
-            var url: String? = null
-            waitFor(Duration.ofSeconds(90)) {
-                val messages = getReceivedMessages()
-                url = messages.firstOrNull { it.startsWith("http") } ?: ""
-                url?.isNotEmpty() ?: false
+          val okButton = dialog.find(CommonContainerFixture::class.java, byXpath("//div[@class='JButton' and @text='OK']"))
+          okButton.click()
+          log.info("Task Runner configuration completed and dialog closed")
+          speak("Task Runner configured and started.")
+          true
+        } else {
+          log.warn("Configuration dialog not found or not visible")
+          false
+        }
+      }
+    }
+
+    step("Interact with Auto-Plan interface") {
+      log.debug("Starting Auto-Plan interface interaction")
+      var url: String? = null
+      waitFor(Duration.ofSeconds(90)) {
+        val messages = getReceivedMessages()
+        url = messages.firstOrNull { it.startsWith("http") } ?: ""
+        log.debug("Searching for URL in messages. Found: ${url?.take(50) ?: "none"}")
+        url?.isNotEmpty() ?: false
+      }
+
+      if (url != null) {
+        log.info("Retrieved Auto-Plan interface URL: $url")
+        speak("Auto-Plan web interface opened.")
+        log.debug("Initializing web driver")
+        initializeWebDriver()
+        driver.get(url)
+        log.debug("Setting up WebDriverWait with 90 second timeout")
+
+        val wait = WebDriverWait(driver, Duration.ofSeconds(90))
+        val chatInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("message-input")))
+        log.info("Chat interface loaded successfully")
+        speak("Interface loaded. Submitting task description.")
+        sleep(1000)
+
+        try {
+          // Submit task description
+          log.debug("Submitting task description to chat interface")
+          chatInput.sendKeys("Create a new utility class for string manipulation with methods for common operations")
+          speak("Submitting task: Create a new utility class for string manipulation.")
+
+          driver.findElement(By.id("send-message-button")).click()
+          log.info("Task description submitted successfully")
+          speak("Task description submitted.")
+          sleep(1000)
+
+          // Monitor execution progress
+          log.debug("Beginning execution progress monitoring")
+          speak("Auto-Plan is analyzing the task and creating an execution plan.")
+
+          var planIndex = 3
+          var hasStopped = false
+          while (true) {
+
+            if(planIndex > 8 && !hasStopped) {
+              log.info("Reached maximum demonstration iterations, initiating stop sequence")
+              speak("Auto-Plan can continue to iterate over agent plans. However, for demonstration purposes, we will stop here.")
+              val controlsButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".tabs-container > div > button:nth-child(1)")))
+              controlsButton.click()
+              log.debug("Controls button clicked")
+              sleep(1000)
+              val stopLink =
+                wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".tabs-container > .tab-content.active > .href-link")))
+              stopLink.click()
+              log.info("Stop sequence completed")
+              hasStopped = true
+              sleep(1000)
             }
 
-            if (url != null) {
-                log.info("Retrieved URL: $url")
-                speak("Auto-Plan web interface opened.")
-                initializeWebDriver()
-                driver.get(url)
-
-                val wait = WebDriverWait(driver, Duration.ofSeconds(90))
-                val chatInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("chat-input")))
-                speak("Interface loaded. Submitting task description.")
-                Thread.sleep(3000)
-
-                try {
-                    // Submit task description
-                    chatInput.sendKeys("Create a new utility class for string manipulation with methods for common operations")
-                    keyboard { enter() }
-                    speak("Task description submitted.")
-                    Thread.sleep(5000)
-
-                    // Monitor execution progress
-                    speak("Auto-Plan is analyzing the task and creating an execution plan.")
-                    Thread.sleep(8000)
-
-                    // Wait for and monitor thinking status updates
-                    wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[contains(text(), 'Thinking Status')]")))
-                    speak("AI is now processing the task and breaking it down into manageable steps.")
-                    Thread.sleep(10000)
-
-                    // Monitor task execution
-                    val taskExecutions = driver.findElements(By.xpath("//div[contains(text(), 'Task Execution')]"))
-                    if (taskExecutions.isNotEmpty()) {
-                        speak("Tasks are being executed automatically.")
-                        // Scroll to view task executions
-                        (driver as JavascriptExecutor).executeScript("arguments[0].scrollIntoView(true);", taskExecutions.last())
-                    }
-                    Thread.sleep(15000)
-
-                    speak("Auto-Plan has completed the task execution. You can review the results in the interface.")
-                } catch (e: Exception) {
-                    log.error("Error during Auto-Plan interaction", e)
-                    speak("Encountered an error during Auto-Plan execution. Please check the logs for details.")
-                } finally {
-                    Thread.sleep(5000)
-                    driver.quit()
-                }
+            val planButton =
+              wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("div.tabs-container > div.tabs > button:nth-child($planIndex)")))
+            planButton.click()
+            if (planButton.text === "Summary") {
+              log.info("Reached summary stage - execution plan complete")
+              speak("Task analysis completed. Review the summary for the execution plan.")
+              break
             } else {
-                log.error("No URL found in UDP messages")
-                speak("Failed to retrieve Auto-Plan interface URL.")
+              log.debug("Processing agent iteration ${planIndex - 2}: ${planButton.text}")
+              speak("Agent iteration ${planIndex - 2} in progress.")
             }
-            clearMessageBuffer()
-        }
 
-        speak("Auto-Plan demonstration completed. This feature automates the planning and execution of coding tasks, improving development efficiency.")
-        Thread.sleep(5000)
+            var taskIndex = 2
+            while (true) {
+              log.debug("Processing task iteration $taskIndex")
+              val taskButton =
+                wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("div.tabs-container > div.active div.iteration.tabs-container > div.tabs > button:nth-child($taskIndex)")))
+              taskButton.click()
+              if (taskButton.text.trim().equals("Thinking Status", ignoreCase = true)) {
+                log.info("Task ${taskIndex-1} execution completed")
+                speak("Task execution complete. Updating Thinking State.")
+                break;
+              } else {
+                log.debug("Executing task ${taskIndex-1}: ${taskButton.text}")
+                speak("Task ${taskIndex-1} in progress.")
+                sleep(3000)
+              }
+              taskIndex += 1
+            }
+            planIndex += 1
+          }
+
+          sleep(5000)
+          log.info("Auto-Plan execution completed successfully")
+
+          speak("Auto-Plan has completed the task execution. You can review the results in the interface.")
+        } catch (e: Exception) {
+          log.error("Error during Auto-Plan interaction: ${e.message}", e)
+          speak("Encountered an error during Auto-Plan execution. Please check the logs for details.")
+        } finally {
+          log.debug("Cleaning up web driver resources")
+          driver.quit()
+          log.info("Web driver cleanup completed")
+        }
+      } else {
+        log.error("Failed to retrieve Auto-Plan interface URL from UDP messages")
+        speak("Failed to retrieve Auto-Plan interface URL.")
+      }
+      log.debug("Clearing message buffer")
+      clearMessageBuffer()
     }
+    log.info("Auto-Plan demonstration test completed successfully")
+    speak("Auto-Plan demonstration completed. This feature automates the planning and execution of coding tasks, improving development efficiency.")
+  }
 }

@@ -6,30 +6,56 @@ import com.intellij.remoterobot.fixtures.JTreeFixture
 import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.utils.waitFor
 import io.github.bonigarcia.wdm.WebDriverManager
+import org.openqa.selenium.OutputType
+import org.openqa.selenium.TakesScreenshot
 import org.junit.jupiter.api.AfterAll
+ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
+ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
+ import org.junit.jupiter.api.extension.ExtendWith
+ import org.junit.jupiter.api.extension.ExtensionContext
+ import org.junit.jupiter.api.extension.TestExecutionExceptionHandler
+ import org.junit.jupiter.api.extension.BeforeTestExecutionCallback
+ import org.junit.jupiter.api.extension.AfterTestExecutionCallback
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
+ import java.lang.management.ManagementFactory
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
+ import java.io.File
+ import java.time.LocalDateTime
+ import java.time.format.DateTimeFormatter
+import java.time.Instant
+import org.junit.jupiter.api.TestInfo
+@ExtendWith(TestRetryHandler::class)
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class BaseActionTest : ScreenRec() {
     protected lateinit var remoteRobot: RemoteRobot
+    protected val metricsCollector = TestMetricsCollector()
+    protected lateinit var testInfo: TestInfo
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(this.javaClass)
 
-        const val PROJECT_TREE_XPATH = "//div[@class='ProjectViewTree']"
+        const val PROJECT_TREE_XPATH: String = "//div[@class='ProjectViewTree']"
 
-        const val AI_CODER_MENU_XPATH = "//div[contains(@class, 'ActionMenu') and contains(@text, 'AI Coder')]"
+        const val AI_CODER_MENU_XPATH: String = "//div[contains(@class, 'ActionMenu') and contains(@text, 'AI Coder')]"
+        const val MAX_RETRIES: Int = 3
+        const val RETRY_DELAY_MS: Long = 1000L
+       // Common test timeouts
+       val SHORT_TIMEOUT = Duration.ofSeconds(10)
+       val MEDIUM_TIMEOUT = Duration.ofSeconds(30)
+       val LONG_TIMEOUT = Duration.ofSeconds(90)
     }
 
     protected lateinit var driver: WebDriver
+    protected var testStartTime: LocalDateTime? = null
+    protected val screenshotDir = File("test-screenshots").apply { mkdirs() }
     protected fun initializeWebDriver() {
         try {
             WebDriverManager.chromedriver().setup()
@@ -46,6 +72,101 @@ abstract class BaseActionTest : ScreenRec() {
         } catch (e: Exception) {
             log.error("Failed to initialize WebDriver", e)
             throw RuntimeException("WebDriver initialization failed", e)
+        }
+    }
+    @BeforeEach
+    fun setUp(testInfo: TestInfo) {
+        this.testInfo = testInfo
+        testStartTime = LocalDateTime.now()
+        log.info("Starting test at ${testStartTime}")
+    }
+    @AfterEach
+    fun tearDownTest() {
+        if (::driver.isInitialized) {
+            try {
+                takeScreenshot("test_end")
+                driver.quit()
+            } catch (e: Exception) {
+                log.error("Error during test teardown", e)
+            }
+        }
+    }
+    protected fun takeScreenshot(description: String) {
+        try {
+            val timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"))
+            val screenshotFile = File(screenshotDir, "${javaClass.simpleName}_${description}_$timestamp.png")
+            (driver as JavascriptExecutor).executeScript("window.scrollTo(0, 0)")
+            (driver as TakesScreenshot).getScreenshotAs(OutputType.FILE).copyTo(screenshotFile)
+            log.info("Screenshot saved: ${screenshotFile.absolutePath}")
+        } catch (e: Exception) {
+            log.error("Failed to take screenshot", e)
+        }
+    }
+    class MetricsCollectorExtension : BeforeTestExecutionCallback, AfterTestExecutionCallback {
+        override fun beforeTestExecution(context: ExtensionContext) {
+            val testInstance = context.testInstance.get() as BaseActionTest
+            val testId = context.uniqueId
+            testInstance.metricsCollector.getExecutionMetrics(testId).apply {
+                setupTime = Duration.between(testInstance.testStartTime, Instant.now())
+            }
+        }
+        override fun afterTestExecution(context: ExtensionContext) {
+            val testInstance = context.testInstance.get() as BaseActionTest
+            val testId = context.uniqueId
+            testInstance.metricsCollector.getExecutionMetrics(testId).apply {
+                testRunTime = Duration.between(testInstance.testStartTime, Instant.now())
+                memoryUsageMB = getMemoryUsage()
+                cpuUtilization = getCpuUtilization()
+            }
+        }
+        private fun getMemoryUsage(): Long {
+            val runtime = Runtime.getRuntime()
+            return (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024)
+        }
+        private fun getCpuUtilization(): Double {
+            val bean = ManagementFactory.getOperatingSystemMXBean()
+            return if (bean is com.sun.management.OperatingSystemMXBean) {
+                bean.processCpuLoad * 100
+            } else 0.0
+        }
+    }
+    protected fun retryOnFailure(maxAttempts: Int = MAX_RETRIES, action: () -> Unit) {
+        var attempts = 0
+        var lastException: Exception? = null
+        val startTime = Instant.now()
+        while (attempts < maxAttempts) {
+            try {
+                action()
+                if (attempts > 0) {
+                    metricsCollector.getExecutionMetrics(testInfo.displayName).retryCount++
+                }
+                return
+            } catch (e: Exception) {
+                lastException = e
+                log.warn("Attempt ${attempts + 1} failed: ${e.message}")
+                metricsCollector.getExecutionMetrics(testInfo.displayName).errorCount++
+                attempts++
+                if (attempts < maxAttempts) Thread.sleep(RETRY_DELAY_MS)
+            }
+        }
+        metricsCollector.recordMetric(
+            "retry_duration",
+            Duration.between(startTime, Instant.now()).toMillis(),
+            mapOf("operation" to action.toString())
+        )
+        throw lastException ?: RuntimeException("Action failed after $maxAttempts attempts")
+    }
+    protected fun measureOperation(name: String, action: () -> Unit) {
+        val startTime = Instant.now()
+        try {
+            action()
+        } finally {
+            val duration = Duration.between(startTime, Instant.now())
+            metricsCollector.recordMetric(
+                "operation_duration",
+                duration.toMillis(),
+                mapOf("operation" to name)
+            )
         }
     }
 
@@ -65,7 +186,7 @@ abstract class BaseActionTest : ScreenRec() {
     }
 
     protected fun openProjectView() {
-        waitFor(Duration.ofSeconds(10)) {
+        waitFor(SHORT_TIMEOUT) {
             try {
                 remoteRobot.find(CommonContainerFixture::class.java, byXpath(PROJECT_TREE_XPATH)).click()
                 log.info("Project view opened")
@@ -77,18 +198,29 @@ abstract class BaseActionTest : ScreenRec() {
         }
     }
 
+
     protected fun selectAICoderMenu() {
-        waitFor(Duration.ofSeconds(10)) {
-            try {
-                val aiCoderMenu = remoteRobot.find(CommonContainerFixture::class.java, byXpath(AI_CODER_MENU_XPATH))
-                aiCoderMenu.click()
-                log.info("'AI Coder' menu clicked")
-                true
-            } catch (e: Exception) {
-                log.info("Failed to find or click 'AI Coder' menu: ${e.message}")
-                false
+        measureOperation("selectAICoderMenu") {
+            waitFor(SHORT_TIMEOUT) {
+                try {
+                    val aiCoderMenu = remoteRobot.find(CommonContainerFixture::class.java, byXpath(AI_CODER_MENU_XPATH))
+                    aiCoderMenu.click()
+                    log.info("'AI Coder' menu clicked")
+                    true
+                } catch (e: Exception) {
+                    log.info("Failed to find or click 'AI Coder' menu: ${e.message}")
+                    false
+                }
             }
         }
+    }
+    private fun getNetworkCallCount(): Int {
+        return (driver as JavascriptExecutor)
+            .executeScript("return window.performance.getEntries().length")
+            .toString().toInt()
+    }
+    private fun getFileOperationCount(): Int {
+        return screenshotDir.listFiles()?.size ?: 0
     }
 
 

@@ -7,73 +7,61 @@ plugins {
 
 group = "com.github.simiacryptus"
 version = properties("pluginVersion")
-
 repositories {
     mavenCentral()
     maven(url = "https://www.jetbrains.com/intellij-repository/releases")
     maven(url = "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies")
     maven(url = "https://packages.jetbrains.team/maven/p/iuia/qa-automation-maven")
 }
-
-
 val slf4j_version = "2.0.16"
 val remoterobot_version = "0.11.23"
 val jackson_version = "2.17.2"
 val logback_version = "1.5.8"
-
 dependencies {
-    implementation("ch.randelshofer:org.monte.media.screenrecorder:17.1")
-    implementation("ch.randelshofer:org.monte.media:17.1")
-    implementation("ch.randelshofer:org.monte.media.swing:17.1")
-    implementation("org.seleniumhq.selenium:selenium-java:4.15.0") {
-        exclude(group = "com.intellij.remoterobot", module = "remote-robot")
-    }
+    implementation(kotlin("stdlib-jdk8"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation(group = "com.simiacryptus", name = "jo-penai", version = "1.1.13")
     implementation("software.amazon.awssdk:bedrock:2.25.7")
     implementation("software.amazon.awssdk:bedrockruntime:2.25.7")
-
-    implementation(kotlin("stdlib-jdk8"))
-    implementation("org.junit.jupiter:junit-jupiter-api:5.7.0")
-    implementation("org.seleniumhq.selenium:selenium-java:3.141.59")
-    implementation("org.slf4j:slf4j-api:1.7.30")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-
-    implementation(group = "com.simiacryptus", name = "jo-penai", version = "1.1.13")
-
     implementation(group = "org.apache.httpcomponents.client5", name = "httpclient5", version = "5.3.1") {
         exclude(group = "org.slf4j", module = "slf4j-api")
     }
+    implementation("org.jsoup:jsoup:1.18.1")
+
+    implementation("ch.randelshofer:org.monte.media.screenrecorder:17.1")
+    implementation("ch.randelshofer:org.monte.media:17.1")
+    implementation("ch.randelshofer:org.monte.media.swing:17.1")
+
+    implementation("org.seleniumhq.selenium:selenium-java:4.27.0") {
+        exclude(group = "com.intellij.remoterobot", module = "remote-robot")
+    }
+    implementation("io.github.bonigarcia:webdrivermanager:5.9.2")
+
+    implementation(group = "com.intellij.remoterobot", name = "remote-fixtures", version = remoterobot_version)
+    implementation(group = "com.intellij.remoterobot", name = "remote-robot", version = remoterobot_version)
 
     implementation(group = "ch.qos.logback", name = "logback-classic", version = logback_version)
     implementation(group = "ch.qos.logback", name = "logback-core", version = logback_version)
-    implementation("org.jsoup:jsoup:1.18.1")
+    implementation(group = "org.slf4j", name = "slf4j-api", version = slf4j_version)
 
     implementation(group = "com.fasterxml.jackson.core", name = "jackson-databind", version = jackson_version)
     implementation(group = "com.fasterxml.jackson.core", name = "jackson-annotations", version = jackson_version)
     implementation(group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version = jackson_version)
 
-    implementation(group = "org.slf4j", name = "slf4j-api", version = slf4j_version)
-
-    implementation(group = "com.intellij.remoterobot", name = "remote-fixtures", version = remoterobot_version)
-    implementation(group = "com.intellij.remoterobot", name = "remote-robot", version = remoterobot_version)
-
     implementation(group = "com.squareup.okhttp3", name = "okhttp", version = "4.12.0")
-
     implementation(platform("org.junit:junit-bom:5.10.1"))
     implementation("org.junit.jupiter:junit-jupiter")
-
-    implementation("io.github.bonigarcia:webdrivermanager:5.9.2")
-
+    implementation("org.junit.jupiter:junit-jupiter-api:5.7.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.0")
 }
-
 java {
-    modularity.inferModulePath.set(false)
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
 }
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
         freeCompilerArgs = listOf("-Xjsr305=strict")
     }
 }
@@ -81,9 +69,6 @@ tasks.test {
     useJUnitPlatform()
 }
 
-kotlin {
-    jvmToolchain(17)
-}
 sourceSets {
     main {
         kotlin {
