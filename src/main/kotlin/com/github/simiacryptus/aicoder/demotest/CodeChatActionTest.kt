@@ -15,6 +15,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
 import org.slf4j.LoggerFactory
 import java.awt.event.KeyEvent
+import java.lang.Thread.sleep
 import java.time.Duration
 
 
@@ -57,7 +58,7 @@ class CodeChatActionTest : BaseActionTest() {
 
         speak("Welcome to the AI Coder demo. We'll explore the Code Chat feature, which enables AI interaction for code-related queries and assistance.")
         log.info("Starting testCodeChatAction")
-        Thread.sleep(2000)
+        sleep(2000)
 
         step("Open project view") {
             openProjectView()
@@ -68,7 +69,7 @@ class CodeChatActionTest : BaseActionTest() {
                 log.warn("Failed to provide audio feedback: ${e.message}")
             }
 
-            Thread.sleep(2000)
+            sleep(2000)
         }
 
         step("Open a Kotlin file") {
@@ -77,7 +78,7 @@ class CodeChatActionTest : BaseActionTest() {
             val tree = remoteRobot.find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
             waitFor(Duration.ofSeconds(10)) { tree.clickPath(*path, fullMatch = false); true }
             log.info("Kotlin file opened")
-            Thread.sleep(2000)
+            sleep(2000)
         }
 
         step("Select code") {
@@ -90,7 +91,7 @@ class CodeChatActionTest : BaseActionTest() {
                 }
             }
             log.info("Code selected")
-            Thread.sleep(2000)
+            sleep(2000)
         }
 
         step("Open context menu") {
@@ -98,19 +99,22 @@ class CodeChatActionTest : BaseActionTest() {
             val editor = find(EditorFixture::class.java, byXpath("//div[@class='EditorComponentImpl']"))
             editor.rightClick()
             log.info("Context menu opened via right-click")
-            Thread.sleep(2000)
+            sleep(2000)
         }
 
         step("Select 'AI Coder' menu") {
             speak("Selecting the 'AI Coder' option from the context menu.")
             selectAICoderMenu()
-            Thread.sleep(2000)
+            sleep(2000)
         }
 
         step("Click 'Code Chat' action") {
             speak("Initiating the 'Code Chat' feature for an interactive dialogue with AI about our code.")
             waitFor(Duration.ofSeconds(15)) {
                 try {
+                    findAll(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'AI Editor')]"))
+                        .firstOrNull()?.click()
+                    sleep(1000)
                     findAll(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Code Chat')]"))
                         .firstOrNull()?.click()
                     log.info("'Code Chat' action clicked")
@@ -120,7 +124,7 @@ class CodeChatActionTest : BaseActionTest() {
                     false
                 }
             }
-            Thread.sleep(2000)
+            sleep(2000)
         }
 
         step("Get URL from UDP messages") {
@@ -138,23 +142,23 @@ class CodeChatActionTest : BaseActionTest() {
                 val request = "Create a user manual for this class"
                 request.forEach { char ->
                     chatInput.sendKeys(char.toString())
-                    Thread.sleep(100) // Add a small delay between each character
+                    sleep(100) // Add a small delay between each character
                 }
-                Thread.sleep(3000) // Pause after typing the full request
+                sleep(3000) // Pause after typing the full request
 
                 val submitButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@type='submit']")))
                 speak("Submitting the request to the AI.")
                 log.info("Submitting request to AI")
                 submitButton.click()
-                Thread.sleep(3000) // Short pause after clicking submit
+                sleep(3000) // Short pause after clicking submit
                 speak("Waiting for the AI to process the request and generate a response.")
                 try {
                     val markdownTab =
                         longWait.until(ExpectedConditions.elementToBeClickable(By.xpath("(//button[contains(@class, 'tab-button') and contains(text(), 'Markdown')])[3]")))
-                    Thread.sleep(2000)
+                    sleep(2000)
                     speak("Switching to the Markdown tab for better readability of the AI response.")
                     markdownTab.click()
-                    Thread.sleep(2000)
+                    sleep(2000)
                     // Simulate mouseover on the upper-right corner of the message container
                     val responseContent =
                         longWait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[contains(@class, 'tab-content') and @data-tab='Markdown']")))
@@ -174,7 +178,7 @@ class CodeChatActionTest : BaseActionTest() {
                     speak("AI response is delayed. Skipping the copy action.")
                 }
 
-                Thread.sleep(3000) // Wait for the hide action to complete
+                sleep(3000) // Wait for the hide action to complete
                 speak("We've successfully interacted with the Code Chat interface. As you can see, this feature provides quick, context-aware assistance for your coding tasks.")
                 this@CodeChatActionTest.driver.quit()
             } else {
@@ -185,7 +189,7 @@ class CodeChatActionTest : BaseActionTest() {
         }
 
         speak("Demo concluded. We've demonstrated initiating a Code Chat session, submitting a query, and receiving an AI-generated response.")
-        Thread.sleep(5000) // Final sleep of 5 seconds
+        sleep(5000) // Final sleep of 5 seconds
     }
 
     companion object {

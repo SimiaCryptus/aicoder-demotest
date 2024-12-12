@@ -1,6 +1,8 @@
 package com.github.simiacryptus.aicoder.demotest
 
+import com.intellij.remoterobot.RemoteRobot
 import com.intellij.remoterobot.fixtures.CommonContainerFixture
+import com.intellij.remoterobot.fixtures.ComponentFixture
 import com.intellij.remoterobot.fixtures.JCheckboxFixture
 import com.intellij.remoterobot.fixtures.JTreeFixture
 import com.intellij.remoterobot.search.locators.byXpath
@@ -68,10 +70,11 @@ class AutoPlanActionTest : BaseActionTest() {
       sleep(3000)
     }
 
+    lateinit var aiCoderMenu: CommonContainerFixture
     step("Open AI Coder menu") {
       log.debug("Attempting to open AI Coder menu")
       speak("Opening the AI Coder menu.")
-      selectAICoderMenu()
+      aiCoderMenu = selectAICoderMenu()
       log.info("AI Coder menu opened successfully")
       speak("AI Coder menu opened.")
       sleep(3000)
@@ -82,8 +85,18 @@ class AutoPlanActionTest : BaseActionTest() {
       speak("Selecting the Auto-Plan feature.")
       waitFor(Duration.ofSeconds(10)) {
         try {
-          findAll(CommonContainerFixture::class.java, byXpath(AUTO_PLAN_XPATH))
-            .firstOrNull()?.click()
+          val taskMenu = find(CommonContainerFixture::class.java, byXpath("//div[@text='AI Coder']//div[@text='\uD83D\uDCCB Task Plans']"))
+            .apply {
+              robot.mouseMove(this.locationOnScreen.x, aiCoderMenu.locationOnScreen.y)
+              this.moveMouse()
+            }
+          sleep(1000)
+          findAll(CommonContainerFixture::class.java, byXpath("//div[@text='AI Coder']//div[@text='\uD83E\uDD16 Auto-Plan']"))
+            .firstOrNull()?.apply {
+              robot.mouseMove(this.locationOnScreen.x, taskMenu.locationOnScreen.y)
+              this.moveMouse()
+              click()
+            }
           log.info("Auto-Plan action found and clicked successfully")
           speak("Auto-Plan feature initiated.")
           true
@@ -100,17 +113,17 @@ class AutoPlanActionTest : BaseActionTest() {
       log.debug("Starting Task Runner configuration")
       speak("Configuring Task Runner settings.")
       waitFor(Duration.ofSeconds(10)) {
-        val dialog = find(CommonContainerFixture::class.java, byXpath("//div[@class='MyDialog' and @title='Configure Plan Ahead Action']"))
+        val dialog = find(CommonContainerFixture::class.java, byXpath("//div[@class='MyDialog']"))
         if (dialog.isShowing) {
           log.debug("Configuration dialog found and visible")
-          dialog.find(JCheckboxFixture::class.java, byXpath("//div[@class='JCheckBox' and @text='Auto-apply fixes']")).apply {
+          dialog.find(JCheckboxFixture::class.java, byXpath("//div[@text='Auto-apply fixes']")).apply {
             if (!isSelected()) {
               click()
               log.info("Auto-apply fixes checkbox toggled to selected state")
               speak("Enabled 'auto-apply fixes'; automatically apply suggested code changes.")
             }
           }
-          dialog.find(JCheckboxFixture::class.java, byXpath("//div[@class='JCheckBox' and @text='Allow blocking']")).apply {
+          dialog.find(JCheckboxFixture::class.java, byXpath("//div[@text='Allow blocking']")).apply {
             if (isSelected()) {
               click()
               log.info("Allow blocking checkbox toggled to deselected state")
@@ -237,4 +250,5 @@ class AutoPlanActionTest : BaseActionTest() {
     log.info("Auto-Plan demonstration test completed successfully")
     speak("Auto-Plan demonstration completed. This feature automates the planning and execution of coding tasks, improving development efficiency.")
   }
+
 }

@@ -75,6 +75,9 @@ class CommandAutofixActionTest : BaseActionTest() {
             speak("Selecting the 'Auto-Fix' action.")
             waitFor(Duration.ofSeconds(10)) {
                 try {
+          findAll(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Agents')]"))
+            .firstOrNull()?.click()
+          sleep(1000)
                     findAll(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Run ... and Fix')]"))
                         .firstOrNull()?.click()
                     log.info("'Auto-Fix' action clicked")
