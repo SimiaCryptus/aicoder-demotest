@@ -1,5 +1,6 @@
-package com.github.simiacryptus.aicoder.demotest
+package com.github.simiacryptus.aicoder.demotest.flow
 
+import com.github.simiacryptus.aicoder.demotest.BaseActionTest
 import com.intellij.remoterobot.fixtures.CommonContainerFixture
 import com.intellij.remoterobot.fixtures.EditorFixture
 import com.intellij.remoterobot.fixtures.JTreeFixture

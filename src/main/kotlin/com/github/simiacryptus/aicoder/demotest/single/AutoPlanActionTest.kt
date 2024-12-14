@@ -1,8 +1,7 @@
-package com.github.simiacryptus.aicoder.demotest
+package com.github.simiacryptus.aicoder.demotest.single
 
-import com.intellij.remoterobot.RemoteRobot
+import com.github.simiacryptus.aicoder.demotest.BaseActionTest
 import com.intellij.remoterobot.fixtures.CommonContainerFixture
-import com.intellij.remoterobot.fixtures.ComponentFixture
 import com.intellij.remoterobot.fixtures.JCheckboxFixture
 import com.intellij.remoterobot.fixtures.JTreeFixture
 import com.intellij.remoterobot.search.locators.byXpath

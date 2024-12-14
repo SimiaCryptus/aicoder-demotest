@@ -1,5 +1,6 @@
-package com.github.simiacryptus.aicoder.demotest
+package com.github.simiacryptus.aicoder.demotest.single
 
+import com.github.simiacryptus.aicoder.demotest.BaseActionTest
 import com.intellij.remoterobot.fixtures.CommonContainerFixture
 import com.intellij.remoterobot.fixtures.JTreeFixture
 import com.intellij.remoterobot.search.locators.byXpath
@@ -45,7 +46,7 @@ import java.time.Duration
  */
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class MassPatchActionTest :BaseActionTest() {
+class MassPatchActionTest : BaseActionTest() {
 
     companion object {
         val log = LoggerFactory.getLogger(MassPatchActionTest::class.java)
