@@ -5,7 +5,7 @@ plugins {
     kotlin("jvm") version "2.0.20"
 }
 
-group = "com.github.simiacryptus"
+group = "com.simiacryptus"
 version = properties("pluginVersion")
 repositories {
     mavenCentral()

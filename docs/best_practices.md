@@ -1,5 +1,5 @@
 ```kotlin
-package com.github.simiacryptus.aicoder.demotest
+package com.simiacryptus.aicoder.demotest
 
 import com.intellij.remoterobot.RemoteRobot
 import com.intellij.remoterobot.fixtures.CommonContainerFixture
