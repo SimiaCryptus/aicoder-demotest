@@ -32,6 +32,7 @@ open class ScreenRec {
     SwingUtilities.invokeLater {
       splashFrame = JFrame().apply {
         isUndecorated = true
+        isAlwaysOnTop = true
         background = Color.WHITE
         extendedState = JFrame.MAXIMIZED_BOTH
         val editorPane = JEditorPane().apply {
@@ -121,11 +122,8 @@ open class ScreenRec {
           screenRecordingStarted.set(true)
           log.info("Screen recording started successfully")
           // Keep splash screen visible for 5 seconds after recording starts
-          Thread {
-            waitWithSplashDisplayed()
-            hideSplashScreen()
-          }.start()
-
+          waitWithSplashDisplayed()
+          hideSplashScreen()
         } catch (e: Exception) {
           log.error("Failed to initialize ScreenRecorder", e)
           log.error("GraphicsDevice: ${gd.iDstring}, isFullScreenSupported: ${gd.isFullScreenSupported}")

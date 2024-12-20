@@ -15,6 +15,7 @@ import org.openqa.selenium.support.ui.WebDriverWait
 import org.slf4j.LoggerFactory
 import java.lang.Thread.sleep
 import java.time.Duration
+import kotlin.io.path.name
 
 /**
  * Test class for the Auto Plan Chat feature of AI Coder plugin.
@@ -36,6 +37,10 @@ import java.time.Duration
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AutoPlanActionTest : DemoTestBase() {
+
+  override fun getTemplateProjectPath(): String {
+    return "demo_projects/DataGnome"
+  }
 
   companion object {
     private val log = LoggerFactory.getLogger(AutoPlanActionTest::class.java)
@@ -60,7 +65,7 @@ class AutoPlanActionTest : DemoTestBase() {
     step("Select source directory") {
       log.debug("Starting source directory selection")
       speak("Navigating to the source directory.")
-      val path = arrayOf("src", "main", "kotlin")
+      val path = arrayOf(testProjectDir.name, "src", "main", "kotlin")
       log.debug("Attempting to locate project tree with path: ${path.joinToString("/")}")
       val tree = find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
       log.debug("Project tree found, expanding path")
@@ -162,7 +167,7 @@ class AutoPlanActionTest : DemoTestBase() {
         log.debug("Setting up WebDriverWait with 90 second timeout")
 
         val wait = WebDriverWait(driver, Duration.ofSeconds(90))
-        val chatInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("message-input")))
+        val chatInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("chat-input")))
         log.info("Chat interface loaded successfully")
         speak("Interface loaded. Submitting task description.")
         sleep(1000)

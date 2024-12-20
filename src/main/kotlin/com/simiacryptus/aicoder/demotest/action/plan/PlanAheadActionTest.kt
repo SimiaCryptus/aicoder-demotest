@@ -15,6 +15,7 @@ import org.openqa.selenium.support.ui.WebDriverWait
 import org.slf4j.LoggerFactory
 import java.lang.Thread.sleep
 import java.time.Duration
+import kotlin.io.path.name
 
 /**
  * Test class for the Plan Ahead Action feature of AI Coder plugin.
@@ -47,6 +48,10 @@ import java.time.Duration
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PlanAheadActionTest : DemoTestBase() {
 
+  override fun getTemplateProjectPath(): String {
+    return "demo_projects/TestProject"
+  }
+
   companion object {
     private val log = LoggerFactory.getLogger(PlanAheadActionTest::class.java)
     private const val TASK_RUNNER_XPATH = "//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Task Runner')]"
@@ -66,7 +71,7 @@ class PlanAheadActionTest : DemoTestBase() {
     step("Select source directory") {
       log.debug("Starting source directory selection")
       speak("Selecting a directory to initiate the Task Runner operation.")
-      val path = arrayOf("src", "main", "kotlin")
+      val path = arrayOf(testProjectDir.name, "src", "main", "kotlin")
       log.debug("Attempting to locate project tree with path: ${path.joinToString("/")}")
       val tree = remoteRobot.find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
       log.debug("Project tree found, expanding path")
@@ -89,6 +94,11 @@ class PlanAheadActionTest : DemoTestBase() {
       speak("Selecting the 'Task Runner' action.")
       waitFor(Duration.ofSeconds(10)) {
         try {
+          // First navigate to Task Plans submenu 
+          val taskPlansMenu = find(CommonContainerFixture::class.java, byXpath("//div[@text='AI Coder']//div[@text='📋 Task Plans']"))
+          taskPlansMenu.moveMouse()
+          sleep(1000)
+          // Then find and click Task Runner
           findAll(CommonContainerFixture::class.java, byXpath(TASK_RUNNER_XPATH))
             .firstOrNull()?.click()
           log.info("Task Runner action found and clicked successfully")
@@ -107,17 +117,17 @@ class PlanAheadActionTest : DemoTestBase() {
       log.debug("Starting Task Runner configuration")
       speak("Configuring Task Runner settings.")
       waitFor(Duration.ofSeconds(10)) {
-        val dialog = find(CommonContainerFixture::class.java, byXpath("//div[@class='MyDialog' and @title='Configure Plan Ahead Action']"))
+        val dialog = find(CommonContainerFixture::class.java, byXpath("//div[@class='MyDialog' and @title='Configure Planning and Tasks']"))
         if (dialog.isShowing) {
           log.debug("Configuration dialog found and visible")
-          dialog.find(JCheckboxFixture::class.java, byXpath("//div[@class='JCheckBox' and @text='Auto-apply fixes']")).apply {
+          dialog.find(JCheckboxFixture::class.java, byXpath("//div[contains(@class, 'JCheckBox') and contains(@text, 'Auto-apply fixes')]")).apply {
             if (!isSelected()) {
               click()
               log.info("Auto-apply fixes checkbox toggled to selected state")
               speak("Enabled 'auto-apply fixes'; automatically apply suggested code changes.")
             }
           }
-          dialog.find(JCheckboxFixture::class.java, byXpath("//div[@class='JCheckBox' and @text='Allow blocking']")).apply {
+          dialog.find(JCheckboxFixture::class.java, byXpath("//div[contains(@class, 'JCheckBox') and contains(@text, 'Allow blocking')]")).apply {
             if (isSelected()) {
               click()
               log.info("Allow blocking checkbox toggled to deselected state")
@@ -127,7 +137,7 @@ class PlanAheadActionTest : DemoTestBase() {
           sleep(3000)
           log.debug("Attempting to click OK button")
 
-          val okButton = dialog.find(CommonContainerFixture::class.java, byXpath("//div[@class='JButton' and @text='OK']"))
+          val okButton = dialog.find(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'JButton') and contains(@text, 'OK')]"))
           okButton.click()
           log.info("Task Runner configuration completed and dialog closed")
           speak("Task Runner configured and started.")
@@ -155,7 +165,7 @@ class PlanAheadActionTest : DemoTestBase() {
         driver.get(url)
         log.debug("Setting up WebDriverWait with 90 second timeout")
         val wait = WebDriverWait(this@PlanAheadActionTest.driver, Duration.ofSeconds(90))
-        val chatInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("message-input")))
+        val chatInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("chat-input")))
         log.info("Chat interface loaded successfully")
         speak("Interface loaded. Interacting with Task Runner.")
         sleep(1000)
@@ -171,14 +181,29 @@ class PlanAheadActionTest : DemoTestBase() {
           speak("Task Runner is analyzing the task and creating an execution plan.")
 
           var planIndex = 1
+          var maxPlanIterations = 10
           while (true) {
+            if (planIndex > maxPlanIterations) {
+              log.info("Reached maximum plan iterations")
+              break
+            }
+            
             val duration = Duration.ofSeconds(if (planIndex == 1) 300 else 60)
             val wait = WebDriverWait(driver, duration)
             log.debug("Waiting $duration for plan iteration $planIndex")
-            clickElement(driver, wait, "div.task-tabs.tabs-container > div.tabs > .tab-button:nth-child($planIndex)")
-            val planButtonText = runElement(wait, "div.task-tabs.tabs-container > div.tabs > .tab-button:nth-child($planIndex)") { it.text}
-            log.debug("Processing plan task $planIndex: ${planButtonText}")
-            speak("Plan iteration $planIndex in progress: ${planButtonText}")
+            try {
+              clickElement(driver, wait, "div.task-tabs.tabs-container > div.tabs > .tab-button:nth-child($planIndex)")
+              val planButtonText = runElement(wait, "div.task-tabs.tabs-container > div.tabs > .tab-button:nth-child($planIndex)") { it.text}
+              if (planButtonText.contains("Summary", ignoreCase = true)) {
+                log.info("Reached summary tab - execution complete")
+                break
+              }
+              log.debug("Processing plan task $planIndex: ${planButtonText}")
+              speak("Plan iteration $planIndex in progress: ${planButtonText}")
+            } catch (e: Exception) {
+              log.warn("Error processing plan iteration $planIndex: ${e.message}")
+              break
+            }
             sleep(500)
             runElement(
               driver, wait, "div.task-tabs.tabs-container > div.active div.tab-content", """

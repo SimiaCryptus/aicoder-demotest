@@ -51,7 +51,12 @@ abstract class DemoTestBase : ScreenRec() {
       log.info("Configuring Chrome options")
       val options = ChromeOptions().apply {
         addArguments(
-          "--start-maximized", "--remote-allow-origins=*", "--disable-dev-shm-usage", "--no-sandbox"
+          "--start-maximized",
+          "--remote-allow-origins=*",
+          "--disable-dev-shm-usage",
+          "--no-sandbox",
+          "--disable-application-cache",
+          "--kiosk",
         )
       }
       log.info("Initializing ChromeDriver with configured options")
@@ -105,7 +110,7 @@ abstract class DemoTestBase : ScreenRec() {
   }
 
   protected open fun getTemplateProjectPath(): String {
-    return "demo_projects/DataGnome"
+    return "demo_projects/TestProject"
   }
 
   private fun initializeTestProject() {
@@ -135,6 +140,7 @@ abstract class DemoTestBase : ScreenRec() {
         val open = remoteRobot.find(CommonContainerFixture::class.java, byXpath("//div[@text='File']//div[@text='Open...']"))
         robot.mouseMove(menu.locationOnScreen.x, open.locationOnScreen.y)
         open.click()
+        sleep(3000)
         log.debug("Typing project path and pressing enter")
         remoteRobot.keyboard {
           this.enterText(txt.replace("\\", "\\\\"))
@@ -144,7 +150,7 @@ abstract class DemoTestBase : ScreenRec() {
         sleep(1000)
         remoteRobot.findAll(CommonContainerFixture::class.java, byXpath("//div[@text='Trust Project']")).firstOrNull()?.click()
         log.info("Project opened in IntelliJ IDEA")
-        sleep(1000)
+        waitAfterProjectOpen()
         true
       } catch (e: Exception) {
         log.error("Failed to open project: ${e.message}", e)
@@ -154,22 +160,19 @@ abstract class DemoTestBase : ScreenRec() {
     }
   }
 
-  private fun typeString(txt: String) {
-    txt.forEach {
-      robot.keyPress((it.code))
-      robot.keyRelease((it.code))
-    }
+  protected open fun waitAfterProjectOpen() {
+    sleep(15000)
   }
 
   private fun cleanupTestProject() {
     if (::testProjectDir.isInitialized) {
-      testProjectDir.toFile().deleteRecursively()
-      log.info("Cleaned up test project directory")
+//      testProjectDir.toFile().deleteRecursively()
+//      log.info("Cleaned up test project directory")
     }
   }
 
   protected fun JTreeFixture.expandAll(path: Array<String>) {
-    (0 until path.size - 1).forEach { i ->
+    (0 until path.size).forEach { i ->
       waitFor(Duration.ofSeconds(10)) {
         try {
           this.expand(*path.sliceArray(0..i))
@@ -306,6 +309,7 @@ abstract class DemoTestBase : ScreenRec() {
     fun runElement(
       driver: WebDriver, wait: WebDriverWait, selector: String, js: String
     ): WebElement {
+      val startTime = System.currentTimeMillis()
       while (true) {
         try {
           return wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(selector))).apply {
@@ -313,7 +317,9 @@ abstract class DemoTestBase : ScreenRec() {
           }
         } catch (e: WebDriverException) {
           if (e is TimeoutException) throw e
+          if (System.currentTimeMillis() - startTime > 30000) throw e
           log.info("Failed to click $selector: ${e.message}")
+          sleep(500)
         }
       }
     }
@@ -321,12 +327,15 @@ abstract class DemoTestBase : ScreenRec() {
     fun <T> runElement(
       wait: WebDriverWait, selector: String, fn: (WebElement) -> T
     ): T {
+      val startTime = System.currentTimeMillis()
       while (true) {
         try {
           return wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(selector))).let { fn(it) }
         } catch (e: WebDriverException) {
           if (e is TimeoutException) throw e
+          if (System.currentTimeMillis() - startTime > 30000) throw e
           log.info("Failed to click $selector: ${e.message}")
+          sleep(500)
         }
       }
     }

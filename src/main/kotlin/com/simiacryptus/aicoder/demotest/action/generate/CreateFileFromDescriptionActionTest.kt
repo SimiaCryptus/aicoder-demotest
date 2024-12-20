@@ -13,7 +13,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.slf4j.LoggerFactory
 import java.awt.event.KeyEvent
+import java.lang.Thread.sleep
 import java.time.Duration
+import kotlin.io.path.name
 
 /**
  * Integration test for the Create File from Description action.
@@ -38,134 +40,147 @@ import java.time.Duration
  *
  * Note: This test includes voice narration for demonstration purposes
  */
-
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CreateFileFromDescriptionActionTest : DemoTestBase() {
+  override fun getTemplateProjectPath(): String {
+    return "demo_projects/TestProject"
+  }
 
+  companion object {
+    val log = LoggerFactory.getLogger(CreateFileFromDescriptionActionTest::class.java)
+  }
 
-    companion object {
-        val log = LoggerFactory.getLogger(CreateFileFromDescriptionActionTest::class.java)
+  @Test
+  fun testCreateFileFromDescription() = with(remoteRobot) {
+    speak("Welcome to the AI Coder demo. We'll explore the 'Create File from Description' feature, which generates Kotlin files from natural language instructions.")
+    log.info("Starting testCreateFileFromDescription")
+    sleep(2000)
+
+    step("Open project view") {
+      openProjectView()
     }
-    @Test
-    fun testCreateFileFromDescription() = with(remoteRobot) {
-        speak("Welcome to the AI Coder demo. We'll explore the 'Create File from Description' feature, which generates Kotlin files from natural language instructions.")
-        log.info("Starting testCreateFileFromDescription")
-        Thread.sleep(2000)
 
-        step("Open project view") {
-            openProjectView()
-        }
-
-        step("Open context menu") {
-            speak("Navigating to the Kotlin source directory.")
-            val projectTree = find(JTreeFixture::class.java, byXpath("//div[@class='ProjectViewTree']"))
-            projectTree.doubleClickPath(*arrayOf("TestProject"), fullMatch = false)
-            projectTree.doubleClickPath(*arrayOf("TestProject", "src"), fullMatch = false)
-            projectTree.doubleClickPath(*arrayOf("TestProject", "src", "main"), fullMatch = false)
-            speak("Opening the context menu to access AI Coder features.")
-            projectTree.rightClickPath(*arrayOf("TestProject", "src", "main", "kotlin"), fullMatch = false)
-            log.info("Context menu opened")
-            Thread.sleep(2000)
-        }
-        Thread.sleep(3000)
-
-        step("Select 'AI Coder' menu") {
-            speak("Selecting the 'AI Coder' option from the context menu.")
-            selectAICoderMenu()
-        }
-
-        step("Click 'Create File from Description' action") {
-            speak("Selecting 'Create File from Description' action.")
-            waitFor(Duration.ofSeconds(30)) {
-                try {
-                    val menuItems = findAll(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenuItem')]"))
-                    log.info("Found ${menuItems.size} menu items")
-                    menuItems.forEach { log.info("Menu item: ${it.findAllText().joinToString(" / ") { "\t${it.text}" }}") }
-                } catch (e: Exception) {
-                    log.warn("Failed to list menu items: ${e.message}")
-                }
-                try {
-                    findAll(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Create File from Description')]"))
-                        .firstOrNull()?.click()
-                    log.info("'Create File from Description' action clicked")
-                    speak("'Create File from Description' action initiated.")
-                    true
-                } catch (e: Exception) {
-                    log.warn("Failed to find 'Create File from Description' action: ${e.message}")
-                    false
-                }
-            }
-            Thread.sleep(2000)
-        }
-
-        step("Enter file description") {
-            speak("Entering a natural language description for a new Kotlin data class.")
-            waitFor(Duration.ofSeconds(10)) {
-                try {
-                    val textField = find(JTextAreaFixture::class.java, byXpath("//div[@class='JTextArea']"))
-                    textField.click()
-                    remoteRobot.keyboard {
-                        this.pressing(KeyEvent.VK_CONTROL) {
-                            key(KeyEvent.VK_A)
-                        }
-                        enterText("Create a Kotlin data class named Person with properties: name (String), age (Int), and email (String)")
-                    }
-                    speak("Description entered: Create a Kotlin data class named Person with properties: name (String), age (Int), and email (String).")
-                    log.info("File description entered")
-                    Thread.sleep(2000)
-                    val okButton = find(CommonContainerFixture::class.java, byXpath("//div[@class='JButton' and @text='Generate']"))
-                    okButton.click()
-                    log.info("Generate button clicked")
-                    true
-                } catch (e: Exception) {
-                    log.warn("Failed to enter file description or click OK: ${e.message}")
-                    false
-                }
-            }
-            Thread.sleep(3000)
-        }
-
-        step("Verify file creation") {
-            speak("Verifying file creation in the project structure.")
-            waitFor(Duration.ofSeconds(20)) {
-                val path = arrayOf("TestProject", "src", "main", "kotlin")
-                val tree = remoteRobot.find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
-                waitFor(Duration.ofSeconds(10)) { tree.clickPath(*path, fullMatch = false); true }
-                val fileCreated = find(JTreeFixture::class.java, byXpath("//div[@class='ProjectViewTree']"))
-                    .collectRows().any { it.contains("Person.kt") }
-                if (fileCreated) {
-                    speak("Person.kt file successfully created.")
-                }
-                fileCreated
-            }
-            Thread.sleep(2000)
-        }
-
-        step("Open created file") {
-            speak("Opening the created file to examine its contents.")
-            find(JTreeFixture::class.java, byXpath("//div[@class='ProjectViewTree']"))
-                .doubleClickPath(*arrayOf("TestProject", "src", "main", "kotlin", "Person"), fullMatch = false)
-            Thread.sleep(2000)
-        }
-
-        step("Verify file content") {
-            speak("Verifying the content of the generated file.")
-            val editor = find(EditorFixture::class.java, byXpath("//div[@class='EditorComponentImpl']"))
-            waitFor(Duration.ofSeconds(5)) {
-                val txt = editor.findAllText().joinToString("") { it.text }.replace("\n", "")
-                val contentCorrect = txt.contains("data class Person(") &&
-                        txt.contains("val name: String,") &&
-                        txt.contains("val age: Int,") &&
-                        txt.contains("val email: String")
-                if (contentCorrect) {
-                    speak("File content verified: Person data class with specified properties created successfully.")
-                }
-                contentCorrect
-            }
-            Thread.sleep(2000)
-        }
-        speak("Demo concluded. The 'Create File from Description' feature successfully generated a Kotlin file from natural language input, demonstrating its potential to streamline development processes.")
-        Thread.sleep(5000)
+    step("Open context menu") {
+      speak("Navigating to the Kotlin source directory.")
+      val projectTree = find(JTreeFixture::class.java, byXpath("//div[@class='ProjectViewTree']"))
+      val path = arrayOf(testProjectDir.name, "src", "main", "kotlin")
+      projectTree.expandAll(path)
+      speak("Opening the context menu to access AI Coder features.")
+      projectTree.rightClickPath(*path, fullMatch = false)
+      log.info("Context menu opened")
+      sleep(2000)
     }
+    sleep(3000)
+
+    step("Select 'AI Coder' menu") {
+      speak("Selecting the 'AI Coder' option from the context menu.")
+      selectAICoderMenu()
+    }
+
+    step("Click 'Create File from Description' action") {
+      speak("Selecting 'Create File from Description' action.")
+      waitFor(Duration.ofSeconds(15)) {
+        try {
+          // Find and hover over Generate menu
+          findAll(CommonContainerFixture::class.java, byXpath("//div[@text='⚡ Generate']")).firstOrNull()?.moveMouse()
+          sleep(1000)
+          // Click Create File from Description option
+          findAll(
+            CommonContainerFixture::class.java,
+            byXpath("//div[@class='ActionMenuItem' and contains(@text, 'Create File from Description')]")
+          ).firstOrNull()?.click()
+          log.info("'Create File from Description' action clicked")
+          speak("'Create File from Description' action initiated.")
+          true
+        } catch (e: Exception) {
+          log.warn("Failed to find 'Create File from Description' action: ${e.message}")
+          false
+        }
+      }
+      sleep(2000)
+    }
+
+    step("Enter file description") {
+      speak("Entering a natural language description for a new Kotlin data class.")
+      waitFor(Duration.ofSeconds(10)) {
+        try {
+          val textField = find(JTextAreaFixture::class.java, byXpath("//div[@class='JTextArea']"))
+          textField.click()
+          remoteRobot.keyboard {
+            this.pressing(KeyEvent.VK_CONTROL) {
+              key(KeyEvent.VK_A)
+            }
+            enterText("Create a Kotlin data class named Person with properties: name (String), age (Int), and email (String)")
+          }
+          speak("Description entered: Create a Kotlin data class named Person with properties: name (String), age (Int), and email (String).")
+          log.info("File description entered")
+          sleep(2000)
+          val okButton = find(CommonContainerFixture::class.java, byXpath("//div[@class='JButton' and @text='Generate']"))
+          okButton.click()
+          log.info("Generate button clicked")
+          true
+        } catch (e: Exception) {
+          log.warn("Failed to enter file description or click OK: ${e.message}")
+          false
+        }
+      }
+      sleep(3000)
+    }
+
+    step("Verify file creation") {
+      speak("Verifying file creation in the project structure.")
+      val path = arrayOf(testProjectDir.name, "src", "main", "kotlin")
+      waitFor(Duration.ofSeconds(20)) {
+        remoteRobot.find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
+        val rows = find(JTreeFixture::class.java, byXpath("//div[@class='ProjectViewTree']")).collectRows()
+        val fileCreated = rows.any { it.contains("Person") }
+        if (fileCreated) {
+          speak("Person file successfully created.")
+        } else {
+          log.info(
+            """Current rows: ${
+              rows.joinToString("\n") {
+                it.replace("\n", "\n  ")
+              }
+            }
+            
+            """)
+        }
+        fileCreated
+      }
+      sleep(2000)
+    }
+
+    step("Open created file") {
+      speak("Opening the created file to examine its contents.")
+      find(JTreeFixture::class.java, byXpath("//div[@class='ProjectViewTree']")).doubleClickPath(
+        *arrayOf(
+          testProjectDir.name,
+          "src",
+          "main",
+          "kotlin",
+          "Person"
+        ), fullMatch = false
+      )
+      sleep(2000)
+    }
+
+    step("Verify file content") {
+      speak("Verifying the content of the generated file.")
+      val editor = find(EditorFixture::class.java, byXpath("//div[@class='EditorComponentImpl']"))
+      waitFor(Duration.ofSeconds(5)) {
+        val txt = editor.findAllText().joinToString("") { it.text }.replace("\n", "")
+        val contentCorrect =
+          txt.contains("data class Person(") && txt.contains("val name: String,") && txt.contains("val age: Int,") && txt.contains("val email: String")
+        if (contentCorrect) {
+          speak("File content verified: Person data class with specified properties created successfully.")
+        }
+        contentCorrect
+      }
+      sleep(2000)
+    }
+    speak("Demo concluded. The 'Create File from Description' feature successfully generated a Kotlin file from natural language input, demonstrating its potential to streamline development processes.")
+    sleep(5000)
+  }
 
 }

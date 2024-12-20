@@ -10,7 +10,7 @@ plugins {
 }
 application {
     // Replace 'com.simiacryptus.MainKt' with the fully qualified name of your main class
-   mainClass.set("com.simiacryptus.MainKt")
+    mainClass.set("com.simiacryptus.MainKt")
 }
 
 fun properties(key: String) = project.findProperty(key).toString()
@@ -24,13 +24,6 @@ repositories {
             artifact()
         }
     }
-}
-
-kotlin {
-    compilerOptions {
-        javaParameters = true
-    }
-    jvmToolchain(17)
 }
 
 val jackson_version = "2.15.3"
@@ -53,16 +46,6 @@ dependencies {
 }
 
 tasks {
-    compileKotlin {
-        compilerOptions {
-            javaParameters = true
-        }
-    }
-    compileTestKotlin {
-        compilerOptions {
-            javaParameters = true
-        }
-    }
     test {
         useJUnitPlatform()
         systemProperty("surefire.useManifestOnlyJar", "false")

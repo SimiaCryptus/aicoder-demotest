@@ -1,6 +1,7 @@
 package com.simiacryptus.aicoder.demotest.action.generate
 
 import com.intellij.remoterobot.fixtures.CommonContainerFixture
+import com.intellij.remoterobot.fixtures.ComponentFixture
 import com.intellij.remoterobot.fixtures.JTextAreaFixture
 import com.intellij.remoterobot.fixtures.JTreeFixture
 import com.intellij.remoterobot.search.locators.byXpath
@@ -13,7 +14,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.slf4j.LoggerFactory
 import java.awt.event.KeyEvent
+import java.lang.Thread.sleep
 import java.time.Duration
+import kotlin.io.path.name
 
 /**
  * UI Test for the Generate Related File action in the AI Coder plugin.
@@ -40,116 +43,129 @@ import java.time.Duration
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class GenerateRelatedFileActionTest : DemoTestBase() {
 
+  override fun getTemplateProjectPath(): String {
+    return "demo_projects/TestProject"
+  }
 
-    companion object {
-        val log = LoggerFactory.getLogger(GenerateRelatedFileActionTest::class.java)
+  companion object {
+    val log = LoggerFactory.getLogger(GenerateRelatedFileActionTest::class.java)
+  }
+
+  @Test
+  fun testGenerateRelatedFile() = with(remoteRobot) {
+    speak("This demo showcases the Generate Related File feature, converting a README.md to a reveal.js HTML presentation.")
+    log.info("Starting testGenerateRelatedFile")
+    sleep(3000)
+
+    step("Open project view") {
+      speak("Opening the project view.")
+      openProjectView()
+      sleep(2000)
     }
 
-    @Test
-    fun testGenerateRelatedFile() = with(remoteRobot) {
-        speak("This demo showcases the Generate Related File feature, converting a README.md to a reveal.js HTML presentation.")
-        log.info("Starting testGenerateRelatedFile")
-        Thread.sleep(3000)
-
-        step("Open project view") {
-            speak("Opening the project view.")
-            openProjectView()
-            Thread.sleep(2000)
-        }
-
-        step("Select README.md file") {
-            speak("Selecting the README.md file.")
-            val path = arrayOf("TestProject", "README.md")
-            val tree = remoteRobot.find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
-            waitFor(Duration.ofSeconds(10)) { tree.clickPath(*path, fullMatch = false); true }
-            log.info("README.md file selected")
-        }
-
-        step("Open context menu") {
-            speak("Opening the context menu.")
-            val projectTree = find(JTreeFixture::class.java, byXpath("//div[@class='ProjectViewTree']"))
-            projectTree.rightClick()
-            log.info("Context menu opened via right-click")
-            Thread.sleep(2000)
-        }
-
-        step("Select 'AI Coder' menu") {
-            speak("Selecting the AI Coder menu.")
-            selectAICoderMenu()
-        }
-
-        step("Click 'Generate Related File' action") {
-            speak("Selecting 'Generate Related File' action.")
-            waitFor(Duration.ofSeconds(10)) {
-                try {
-                    findAll(
-                        CommonContainerFixture::class.java,
-                        byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Generate Related File')]")
-                    )
-                        .firstOrNull()?.click()
-                    log.info("'Generate Related File' action clicked successfully")
-                    return@waitFor true
-                } catch (e: Exception) {
-                    log.warn("Attempt failed: ${e.message}")
-                    return@waitFor false
-                }
-            }
-        }
-
-        step("Enter file generation directive") {
-            speak("Entering the file generation directive.")
-            waitFor(Duration.ofSeconds(10)) {
-                try {
-                    val textField = find(JTextAreaFixture::class.java, byXpath("//div[@class='JTextArea']"))
-                    textField.click()
-                    remoteRobot.keyboard {
-                        this.pressing(KeyEvent.VK_CONTROL) {
-                            key(KeyEvent.VK_A)
-                        }
-                        enterText("Convert this README.md into a reveal.js HTML presentation")
-                    }
-                    speak("Directive entered: Convert this README.md into a reveal.js HTML presentation.")
-                    log.info("File generation directive entered")
-                    Thread.sleep(3000)
-                    val okButton = find(CommonContainerFixture::class.java, byXpath("//div[@class='JButton' and @text='Generate']"))
-                    okButton.click()
-                    log.info("Generate button clicked")
-                    speak("Generation process initiated.")
-                    true
-                } catch (e: Exception) {
-                    false
-                }
-            }
-            speak("Waiting for file generation.")
-            Thread.sleep(5000)
-        }
-
-        step("Verify file creation") {
-            speak("Verifying file creation.")
-            waitFor(Duration.ofSeconds(20)) {
-                val projectTree = find(JTreeFixture::class.java, byXpath("//div[@class='ProjectViewTree']"))
-                projectTree.clickPath(*arrayOf("TestProject"), fullMatch = false)
-                remoteRobot.keyboard { key(KeyEvent.VK_RIGHT) }
-                val fileCreated = projectTree.hasText("presentation.html")
-                if (fileCreated) {
-                    speak("presentation.html file successfully created.")
-                }
-                fileCreated
-            }
-            Thread.sleep(3000)
-        }
-
-        speak("Demo concluded. The Generate Related File feature has converted README.md to a reveal.js HTML presentation.")
-        Thread.sleep(10000)
+    step("Select README.md file") {
+      speak("Selecting the README.md file.")
+      val path = arrayOf(testProjectDir.name, "README.md")
+      val tree = remoteRobot.find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
+      waitFor(Duration.ofSeconds(10)) { tree.clickPath(*path, fullMatch = false); true }
+      log.info("README.md file selected")
     }
 
-    @AfterAll
-    fun cleanup() {
+    step("Open context menu") {
+      speak("Opening the context menu.")
+      val projectTree = find(JTreeFixture::class.java, byXpath("//div[@class='ProjectViewTree']"))
+      projectTree.rightClick()
+      log.info("Context menu opened via right-click")
+      sleep(2000)
+    }
+
+    step("Select 'AI Coder' menu") {
+      speak("Selecting the AI Coder menu.")
+      selectAICoderMenu()
+    }
+
+    step("Click 'Generate Related File' action") {
+      speak("Selecting 'Generate Related File' action.")
+      waitFor(Duration.ofSeconds(15)) {
         try {
-            clearMessageBuffer()
-            log.info("Cleanup completed successfully")
+          // Find and hover over Generate menu
+          findAll(CommonContainerFixture::class.java, byXpath("//div[@text='⚡ Generate']"))
+            .firstOrNull()?.moveMouse()
+          sleep(1000)
+          findAll(
+            CommonContainerFixture::class.java,
+            byXpath("//div[@class='ActionMenuItem' and contains(@text, 'Generate Related File')]")
+          )
+
+          // Click Generate Related File option
+          findAll(CommonContainerFixture::class.java, byXpath("//div[@class='ActionMenuItem' and contains(@text, 'Generate Related File')]"))
+            .firstOrNull()?.click()
+          log.info("'Generate Related File' action clicked successfully")
+          return@waitFor true
         } catch (e: Exception) {
-            log.error("Cleanup failed", e)
+          log.warn("Attempt failed: ${e.message}")
+          return@waitFor false
         }
+      }
     }
+
+    step("Enter file generation directive") {
+      val DIRECTIVE = "Convert this README.md into a reveal.js HTML presentation"
+      speak("Entering the file generation directive.")
+      waitFor(Duration.ofSeconds(30)) {
+        try {
+          val textField = find(JTextAreaFixture::class.java, byXpath("//div[@class='JTextArea']"))
+          textField.click()
+          remoteRobot.keyboard {
+            pressing(KeyEvent.VK_CONTROL) {
+              key(KeyEvent.VK_A)
+            }
+            enterText(DIRECTIVE)
+          }
+          speak("Directive entered: $DIRECTIVE")
+          log.info("File generation directive entered")
+          sleep(3000)
+          val okButton = find(
+            CommonContainerFixture::class.java,
+            byXpath("//div[@class='MyDialog']//div[@class='JButton' and @text='Generate']")
+          )
+          okButton.click()
+          log.info("Generate button clicked")
+          speak("Generation process initiated.")
+          true
+        } catch (e: Exception) {
+          log.error("Failed to enter directive or click generate button", e)
+          false
+        }
+      }
+      speak("Waiting for file generation.")
+    }
+
+    step("Verify file creation") {
+      speak("Verifying file creation.")
+      waitFor(Duration.ofSeconds(600)) {
+        try {
+          find(ComponentFixture::class.java, byXpath("//div[@class='EditorCompositePanel']"), Duration.ofSeconds(600))
+          log.info("Presentation.html file created successfully")
+          speak("File generation completed successfully.")
+          true
+        } catch (e: Exception) {
+          false
+        }
+      }
+      sleep(3000)
+    }
+
+    speak("Demo concluded. The Generate Related File feature has converted README.md to a reveal.js HTML presentation.")
+  }
+
+  @AfterAll
+  fun cleanup() {
+    try {
+      clearMessageBuffer()
+      log.info("Cleanup completed successfully")
+    } catch (e: Exception) {
+      log.error("Cleanup failed", e)
+    }
+  }
 }

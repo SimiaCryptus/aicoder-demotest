@@ -78,6 +78,9 @@ class CodeChatActionTest : DemoTestBase() {
             speak("Opening a Kotlin file for the Code Chat demonstration.")
             val path = arrayOf(projectName, "src", "main", "kotlin", "Person")
             val tree = remoteRobot.find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
+            for (i in (0 until path.size - 1)) {
+                waitFor(Duration.ofSeconds(10)) { tree.isPathExists(*path.sliceArray(0..i), fullMatch = false) }
+            }
             waitFor(Duration.ofSeconds(10)) { tree.doubleClickPath(*path, fullMatch = false); true }
             log.info("Kotlin file opened")
             sleep(2000)
@@ -154,29 +157,27 @@ class CodeChatActionTest : DemoTestBase() {
                     speak("Interface loaded. Submitting request.")
                     sleep(1000)
 
-                    // Submit request
+                    val tabsById = driver.findElements(By.cssSelector("div.tabs-container")).toList().associateBy { it.getDomAttribute("id") }.toMutableMap()
+                    tabsById.forEach { (id, element) ->
+                        element.findElements(By.cssSelector(":scope > tabs > .tab-button")).firstOrNull { it.text == "Hide" }?.click()
+                    }
+
                     log.debug("Submitting request to chat interface")
                     chatInput.click()
                     speak("Entering a request for the AI to create a user manual for our class.")
-                    val request = "Create a user manual for this class"
-                    chatInput.sendKeys(request)
+                    chatInput.sendKeys("Create a user manual for this class")
                     sleep(1000)
 
-                    clickElement(driver, wait, "//button[@type='submit']")
+                    wait.until(ExpectedConditions.elementToBeClickable(By.id("send-message-button"))).click()
                     log.info("Request submitted successfully")
                     speak("Request submitted. Waiting for AI response.")
                     sleep(2000)
-                    // Switch to Markdown view
-                    log.debug("Switching to Markdown view")
-                    speak("Switching to Markdown view for better readability.")
-                    clickElement(driver, wait, "(//button[contains(@class, 'tab-button') and contains(text(), 'Markdown')])[3]")
-                    // Get response content
-                    val responseContent = wait.until(
-                        ExpectedConditions.presenceOfElementLocated(
-                            By.xpath("//div[contains(@class, 'tab-content') and @data-tab='Markdown']")
-                        )
-                    )
-                    log.info("Response received: ${responseContent.text.take(200)}...")
+
+                    driver.findElements(By.cssSelector("div.tabs-container")).toList().associateBy { it.getDomAttribute("id") }.filterNot { tabsById.containsKey(it.key) }.forEach {
+                        log.info("New tab id: ${it.key}")
+                        tabsById[it.key] = it.value
+                    }
+
                     speak("AI response received and displayed.")
                     sleep(3000)
                     log.info("Code Chat interaction completed successfully")
