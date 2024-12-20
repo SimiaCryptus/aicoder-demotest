@@ -15,6 +15,7 @@ import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import java.awt.event.KeyEvent
 import java.time.Duration
+import kotlin.io.path.name
 
 /**
  * Tests the editor-specific features of the AI Coder plugin.
@@ -62,7 +63,7 @@ class EditorFeaturesTest : DemoTestBase() {
     step("Open project view and file") {
       log.info("Opening project view and navigating to test file")
       openProjectView()
-      val path = arrayOf("TestProject", "src", "main", "kotlin", "Person")
+      val path = arrayOf(testProjectDir.name, "src", "main", "kotlin", "Main.kt")
       log.debug("Navigating to file path: {}", path.joinToString("/"))
       val tree = find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
       waitFor(Duration.ofSeconds(10)) { tree.doubleClickPath(*path, fullMatch = false); true }

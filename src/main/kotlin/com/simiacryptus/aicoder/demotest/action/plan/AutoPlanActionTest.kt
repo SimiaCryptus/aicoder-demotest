@@ -191,7 +191,7 @@ class AutoPlanActionTest : DemoTestBase() {
           var hasStopped = false
           while (true) {
 
-            if(planIndex > 8 && !hasStopped) {
+            if (planIndex > 8 && !hasStopped) {
               log.info("Reached maximum demonstration iterations, initiating stop sequence")
               speak("Auto-Plan can continue to iterate over agent plans. However, for demonstration purposes, we will stop here.")
               clickElement(driver, wait, ".tabs-container > div > button:nth-child(1)")
@@ -216,14 +216,15 @@ class AutoPlanActionTest : DemoTestBase() {
             var taskIndex = 2
             while (true) {
               log.debug("Processing task iteration $taskIndex")
-              val taskButton = clickElement(driver, wait, "div.tabs-container > div.active div.iteration.tabs-container > div.tabs > button:nth-child($taskIndex)")
+              val taskButton =
+                clickElement(driver, wait, "div.tabs-container > div.active div.iteration.tabs-container > div.tabs > button:nth-child($taskIndex)")
               if (taskButton.text.trim().equals("Thinking Status", ignoreCase = true)) {
-                log.info("Task ${taskIndex-1} execution completed")
+                log.info("Task ${taskIndex - 1} execution completed")
                 speak("Task execution complete. Updating Thinking State.")
-                break;
+                break
               } else {
-                log.debug("Executing task ${taskIndex-1}: ${taskButton.text}")
-                speak("Task ${taskIndex-1} in progress.")
+                log.debug("Executing task ${taskIndex - 1}: ${taskButton.text}")
+                speak("Task ${taskIndex - 1} in progress.")
                 sleep(3000)
               }
               taskIndex += 1

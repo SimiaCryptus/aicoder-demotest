@@ -187,13 +187,13 @@ class PlanAheadActionTest : DemoTestBase() {
               log.info("Reached maximum plan iterations")
               break
             }
-            
+
             val duration = Duration.ofSeconds(if (planIndex == 1) 300 else 60)
             val wait = WebDriverWait(driver, duration)
             log.debug("Waiting $duration for plan iteration $planIndex")
             try {
               clickElement(driver, wait, "div.task-tabs.tabs-container > div.tabs > .tab-button:nth-child($planIndex)")
-              val planButtonText = runElement(wait, "div.task-tabs.tabs-container > div.tabs > .tab-button:nth-child($planIndex)") { it.text}
+              val planButtonText = runElement(wait, "div.task-tabs.tabs-container > div.tabs > .tab-button:nth-child($planIndex)") { it.text }
               if (planButtonText.contains("Summary", ignoreCase = true)) {
                 log.info("Reached summary tab - execution complete")
                 break

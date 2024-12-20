@@ -41,6 +41,7 @@ abstract class DemoTestBase : ScreenRec() {
   protected lateinit var testProjectDir: Path
   private var isServerRunning = false
   private val messageBuffer = ConcurrentLinkedQueue<String>()
+  private var udpSocket: DatagramSocket? = null
 
   protected var driverInitialized = false
   protected val driver: WebDriver by lazy { initializeWebDriver() }
@@ -225,27 +226,48 @@ abstract class DemoTestBase : ScreenRec() {
     isServerRunning = true
     thread(isDaemon = true) {
       try {
-        val socket = DatagramSocket(Companion.UDP_PORT)
+        udpSocket = DatagramSocket(UDP_PORT)
         val buffer = ByteArray(1024)
         log.info("UDP server started on port ${Companion.UDP_PORT}")
         while (isServerRunning) {
           val packet = DatagramPacket(buffer, buffer.size)
-          socket.receive(packet)
+          udpSocket?.receive(packet)
           val received = String(packet.data, 0, packet.length)
           log.info("Received UDP message: $received")
           messageBuffer.offer(received)
         }
-        socket.close()
       } catch (e: Exception) {
         log.error("Error in UDP server", e)
       } finally {
         isServerRunning = false
+        try {
+          udpSocket?.let { socket ->
+            if (!socket.isClosed) {
+              socket.close()
+              log.info("UDP socket closed successfully")
+            }
+          }
+          udpSocket = null
+        } catch (e: Exception) {
+          log.error("Error closing UDP socket", e)
+        }
       }
     }
   }
 
   fun stopUdpServer() {
     isServerRunning = false
+    try {
+      udpSocket?.let { socket ->
+        if (!socket.isClosed) {
+          socket.close()
+          log.info("UDP socket closed successfully")
+        }
+      }
+      udpSocket = null
+    } catch (e: Exception) {
+      log.error("Error closing UDP socket", e)
+    }
   }
 
   fun getReceivedMessages(): List<String> {

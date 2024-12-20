@@ -1,4 +1,4 @@
-package com.simiacryptus.aicoder.demotest
+package com.simiacryptus.aicoder.util
 
 import com.simiacryptus.jopenai.OpenAIClient
 import com.simiacryptus.jopenai.models.ApiModel
@@ -28,21 +28,21 @@ object PresentationAudioInjector {
         val htmlFileName = File(htmlFilePath).nameWithoutExtension
 
         val sections = document.select("section")
-        runBlocking {
-            sections.mapIndexed { index, section ->
-                async(Dispatchers.IO) {
-                    val notes = section.select("aside.notes").text()
-                    log.debug("Processing section {}: notes={}", index, notes)
-                    if (notes.isNotBlank()) {
-                        val mp3name = "${htmlFileName}_narration_$index.mp3"
-                        val mp3FilePath = "$outputDir/$mp3name"
-                        log.info("Generating audio file: {}", mp3FilePath)
-                        generateAudioFile(notes, mp3FilePath)
-                        injectAudioToSection(section, mp3name)
-                    }
-                }
-            }.awaitAll()
-        }
+      runBlocking {
+        sections.mapIndexed { index, section ->
+          async(Dispatchers.IO) {
+            val notes = section.select("aside.notes").text()
+            log.debug("Processing section {}: notes={}", index, notes)
+            if (notes.isNotBlank()) {
+              val mp3name = "${htmlFileName}_narration_$index.mp3"
+              val mp3FilePath = "$outputDir/$mp3name"
+              log.info("Generating audio file: {}", mp3FilePath)
+              generateAudioFile(notes, mp3FilePath)
+              injectAudioToSection(section, mp3name)
+            }
+          }
+        }.awaitAll()
+      }
         log.info("Writing updated HTML content back to file: {}", htmlFilePath)
 
         File(htmlFilePath).writeText(document.html())
@@ -51,13 +51,13 @@ object PresentationAudioInjector {
     private fun generateAudioFile(text: String, filePath: String) {
         log.debug("Generating audio for text: {}", text)
         val mp3Bytes = OpenAIClient().createSpeech(
-            ApiModel.SpeechRequest(
-                input = text,
-                model = AudioModels.TTS.modelName,
-                voice = "shimmer",
-                speed = 1.0,
-                response_format = "mp3"
-            )
+          ApiModel.SpeechRequest(
+            input = text,
+            model = AudioModels.TTS.modelName,
+            voice = "shimmer",
+            speed = 1.0,
+            response_format = "mp3"
+          )
         ) ?: throw RuntimeException("No response")
         log.info("Audio generated successfully, writing to file: {}", filePath)
         FileOutputStream(filePath).use { it.write(mp3Bytes) }

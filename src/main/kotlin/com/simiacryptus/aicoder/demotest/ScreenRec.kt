@@ -46,19 +46,61 @@ open class ScreenRec {
       }
     }
   }
-
-  protected open fun splashPage() = """
+protected open fun splashPage() = """
                             <html>
-                            <body style='margin:0; padding:20px; background-color:white; display:flex; align-items:center; justify-content:center; height:100vh; text-align:center;'>
-                                <div>
-                                    <h1 style='font-size:48px; color:#333;'>Test Recording</h1>
-                                    <h2 style='font-size:36px; color:#666;'>${testName}</h2>
-                                    <p style='font-size:24px; color:#999;'>${SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date())}</p>
+                            <head>
+                                <style>
+                                    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+                                    body {
+                                        margin: 0;
+                                        padding: 20px;
+                                        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        height: 100vh;
+                                        text-align: center;
+                                        font-family: 'Roboto', sans-serif;
+                                    }
+                                    .container {
+                                        background: white;
+                                        padding: 40px 60px;
+                                        border-radius: 20px;
+                                        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                                        animation: fadeIn 1s ease-in;
+                                    }
+                                    h1 {
+                                        font-size: 48px;
+                                        color: #2c3e50;
+                                        margin-bottom: 20px;
+                                        font-weight: 700;
+                                    }
+                                    h2 {
+                                        font-size: 36px;
+                                        color: #34495e;
+                                        margin-bottom: 30px;
+                                        font-weight: 400;
+                                    }
+                                    p {
+                                        font-size: 24px;
+                                        color: #7f8c8d;
+                                        font-weight: 300;
+                                    }
+                                    @keyframes fadeIn {
+                                        from { opacity: 0; transform: translateY(20px); }
+                                        to { opacity: 1; transform: translateY(0); }
+                                    }
+                                </style>
+                            </head>
+                            <body>
+                                <div class="container">
+                                    <h1>Test Recording</h1>
+                                    <h2>${testName}</h2>
+                                    <p>${SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date())}</p>
                                 </div>
                             </body>
                             </html>
                         """.trimIndent()
-
   protected open fun hideSplashScreen() {
     SwingUtilities.invokeLater {
       splashFrame?.dispose()

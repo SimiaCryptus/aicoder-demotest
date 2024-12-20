@@ -19,9 +19,8 @@ import java.lang.Thread.sleep
 import java.time.Duration
 import kotlin.io.path.name
 
-
 /**
- * Tests the Code Chat functionality of the AI Coder plugin.
+ * Tests the Diff Chat functionality of the AI Coder plugin.
  *
  * Prerequisites:
  * - IntelliJ IDEA must be running with the AI Coder plugin installed
@@ -39,26 +38,23 @@ import kotlin.io.path.name
  * 2. Navigates to and opens the Person.kt file
  * 3. Selects all code in the editor
  * 4. Opens the context menu via right-click
- * 5. Navigates through the AI Coder menu to select Code Chat
+ * 5. Navigates through the AI Coder menu to select Patch Chat
  * 6. Waits for the chat interface to open in a browser
- * 7. Types a request for creating a user manual
+ * 7. Types a request for code improvements
  * 8. Submits the request and waits for AI response
- * 9. Switches to Markdown view of the response
- * 10. Verifies the response and closes the browser
- *
- * Note: This test includes voice feedback for demonstration purposes
- * and includes appropriate waits between actions to ensure stability.
+ * 9. Reviews the suggested patches
+ * 10. Applies a patch and verifies the changes
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class CodeChatActionTest : DemoTestBase() {
+class DiffChatActionTest : DemoTestBase() {
   override fun getTemplateProjectPath(): String {
     return "demo_projects/TestProject"
   }
 
   @Test
-  fun testCodeChatAction() = with(remoteRobot) {
-    speak("Welcome to the AI Coder demo. We'll explore the Code Chat feature, which enables AI interaction for code-related queries and assistance.")
-    log.info("Starting testCodeChatAction")
+  fun testDiffChatAction() = with(remoteRobot) {
+    speak("Welcome to the AI Coder demo. We'll explore the Patch Chat feature, which enables AI-assisted code modifications.")
+    log.info("Starting testDiffChatAction")
     sleep(2000)
 
     step("Open project view") {
@@ -69,18 +65,14 @@ class CodeChatActionTest : DemoTestBase() {
       } catch (e: Exception) {
         log.warn("Failed to provide audio feedback: ${e.message}")
       }
-
       sleep(2000)
     }
 
     val projectName = testProjectDir.fileName.name
     step("Open a Kotlin file") {
-      speak("Opening a Kotlin file for the Code Chat demonstration.")
-      val path = arrayOf(projectName, "src", "main", "kotlin", "Main.kt")
+      speak("Opening a Kotlin file for the Patch Chat demonstration.")
+      val path = arrayOf(projectName, "src", "main", "kotlin", "Person")
       val tree = remoteRobot.find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
-      for (i in (0 until path.size - 1)) {
-        waitFor(Duration.ofSeconds(10)) { tree.isPathExists(*path.sliceArray(0..i), fullMatch = false) }
-      }
       waitFor(Duration.ofSeconds(10)) { tree.doubleClickPath(*path, fullMatch = false); true }
       log.info("Kotlin file opened")
       sleep(2000)
@@ -113,19 +105,16 @@ class CodeChatActionTest : DemoTestBase() {
       sleep(2000)
     }
 
-    step("Click 'Code Chat' action") {
-      speak("Initiating the 'Code Chat' feature for an interactive dialogue with AI about our code.")
+    step("Click 'Patch Chat' action") {
+      speak("Initiating the 'Patch Chat' feature for AI-suggested code improvements.")
       waitFor(Duration.ofSeconds(15)) {
         try {
-          findAll(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'AI Editor')]"))
+          findAll(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Patch Chat')]"))
             .firstOrNull()?.click()
-          sleep(1000)
-          findAll(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Code Chat')]"))
-            .firstOrNull()?.click()
-          log.info("'Code Chat' action clicked")
+          log.info("'Patch Chat' action clicked")
           true
         } catch (e: Exception) {
-          log.warn("Failed to find 'Code Chat' action: ${e.message}")
+          log.warn("Failed to find 'Patch Chat' action: ${e.message}")
           false
         }
       }
@@ -134,7 +123,7 @@ class CodeChatActionTest : DemoTestBase() {
 
     step("Get URL from UDP messages") {
       var url: String? = null
-      log.debug("Starting Code Chat interface interaction")
+      log.debug("Starting Patch Chat interface interaction")
       waitFor(Duration.ofSeconds(90)) {
         val messages = getReceivedMessages()
         url = messages.firstOrNull { it.startsWith("http") } ?: ""
@@ -143,29 +132,23 @@ class CodeChatActionTest : DemoTestBase() {
       }
 
       if (url != null) {
-        log.info("Retrieved Code Chat interface URL: $url")
-        speak("Code Chat web interface opened.")
+        log.info("Retrieved Patch Chat interface URL: $url")
+        speak("Patch Chat web interface opened.")
         log.debug("Initializing web driver")
         driver.get(url)
         log.debug("Setting up WebDriverWait with 90 second timeout")
         val wait = WebDriverWait(driver, Duration.ofSeconds(90))
 
         try {
-          // Get chat input element
           val chatInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("chat-input")))
           log.info("Chat interface loaded successfully")
           speak("Interface loaded. Submitting request.")
           sleep(1000)
 
-          val tabsById = driver.findElements(By.cssSelector("div.tabs-container")).toList().associateBy { it.getDomAttribute("id") }.toMutableMap()
-          tabsById.forEach { (id, element) ->
-            element.findElements(By.cssSelector(":scope > tabs > .tab-button")).firstOrNull { it.text == "Hide" }?.click()
-          }
-
           log.debug("Submitting request to chat interface")
           chatInput.click()
-          speak("Entering a request for the AI to create a user manual for our class.")
-          chatInput.sendKeys("Create a user manual for this class")
+          speak("Requesting code improvements and optimizations.")
+          chatInput.sendKeys("Suggest improvements to optimize this code")
           sleep(1000)
 
           wait.until(ExpectedConditions.elementToBeClickable(By.id("send-message-button"))).click()
@@ -173,40 +156,44 @@ class CodeChatActionTest : DemoTestBase() {
           speak("Request submitted. Waiting for AI response.")
           sleep(2000)
 
-          driver.findElements(By.cssSelector("div.tabs-container")).toList().associateBy { it.getDomAttribute("id") }.filterNot { tabsById.containsKey(it.key) }
-            .forEach {
-              log.info("New tab id: ${it.key}")
-              tabsById[it.key] = it.value
-            }
-
-          speak("AI response received and displayed.")
+          // Wait for and handle the response
+          wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".message-container")))
+          speak("AI has generated suggested improvements. Reviewing patches.")
           sleep(3000)
-          log.info("Code Chat interaction completed successfully")
-          speak("We've successfully demonstrated the Code Chat feature.")
+
+          // Look for and click any "Apply" buttons
+          val applyButtons = driver.findElements(By.cssSelector("a.href-link"))
+            .filter { it.text.contains("Apply", ignoreCase = true) }
+
+          if (applyButtons.isNotEmpty()) {
+            speak("Applying a suggested improvement.")
+            applyButtons.first().click()
+            sleep(2000)
+          }
+
+          speak("Patch Chat demonstration completed successfully.")
+          log.info("Patch Chat interaction completed successfully")
         } catch (e: Exception) {
-          log.error("Error during Code Chat interaction: ${e.message}", e)
-          speak("Encountered an error during Code Chat interaction. Please check the logs for details.")
+          log.error("Error during Patch Chat interaction: ${e.message}", e)
+          speak("Encountered an error during Patch Chat interaction. Please check the logs for details.")
         } finally {
           log.debug("Cleaning up web driver resources")
           driver.quit()
           log.info("Web driver cleanup completed")
         }
-
       } else {
-        log.error("Failed to retrieve Code Chat interface URL from UDP messages")
+        log.error("Failed to retrieve Patch Chat interface URL from UDP messages")
         speak("Error: Unable to retrieve the necessary URL.")
       }
       log.debug("Clearing message buffer")
       clearMessageBuffer()
     }
 
-    speak("Demo concluded. We've demonstrated initiating a Code Chat session, submitting a query, and receiving an AI-generated response.")
-    sleep(5000) // Final sleep of 5 seconds
+    speak("Demo concluded. We've demonstrated initiating a Patch Chat session, requesting improvements, and applying AI-suggested code changes.")
+    sleep(5000)
   }
 
   companion object {
-    val log = LoggerFactory.getLogger(CodeChatActionTest::class.java)
+    val log = LoggerFactory.getLogger(DiffChatActionTest::class.java)
   }
-
-
 }
