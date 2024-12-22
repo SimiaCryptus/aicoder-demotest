@@ -111,10 +111,7 @@ class GenericChatActionTest : DemoTestBase(
         try {
           val toolsMenu = find(CommonContainerFixture::class.java, byXpath("//div[@text='Tools']"))
           toolsMenu.click()
-          val aiCoderMenu = toolsMenu.find(
-            CommonContainerFixture::class.java,
-            byXpath("//div[@text='AI Coder']")
-          )
+          val aiCoderMenu = toolsMenu.find(CommonContainerFixture::class.java, byXpath("//div[@text='AI Coder']"))
           robot.mouseMove(toolsMenu.locationOnScreen.x + 10, aiCoderMenu.locationOnScreen.y)
           aiCoderMenu.click()
           val chatMenu = aiCoderMenu.find(

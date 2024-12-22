@@ -23,10 +23,10 @@ import javax.swing.SwingUtilities
 data class RecordingConfig(
   val outputFolder: File = File("test-recordings"),
   val captureSize: Rectangle = defaultResolution(),
-  val frameRate: Rational = Rational(15, 1),
-  val videoQuality: Float = 1.0f,
+  val frameRate: Rational = Rational(30, 1),
+  val videoQuality: Float = 0.8f,
   val videoDepth: Int = 24,
-  val keyFrameInterval: Int = 15 * 60,
+  val keyFrameInterval: Int = 5 * 60,
   val sampleRate: Double = 44100.0,
   val sampleSize: Int = 16,
   val audioChannels: Int = 2,
@@ -35,6 +35,8 @@ data class RecordingConfig(
   val splashScreenDelay: Long = 1000,
   val fileFormat: String = FormatKeys.MIME_AVI,
   val videoEncoding: String = VideoFormatKeys.ENCODING_AVI_TECHSMITH_SCREEN_CAPTURE,
+//  val fileFormat: String = FormatKeys.MIME_QUICKTIME,
+//  val videoEncoding: String = VideoFormatKeys.ENCODING_QUICKTIME_ANIMATION,
   val mousePointerColor: String = "black",
   val outputFileNamePattern: String = "%s.%s.avi",
   val dateFormat: String = "yyyyMMddHHmmss",
@@ -43,7 +45,7 @@ data class RecordingConfig(
 )
 
 fun defaultResolution() = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
-  .bounds.let { bounds -> Rectangle(bounds.width, bounds.height) }
+  .bounds.let { bounds -> Rectangle(/* width = */ bounds.width, /* height = */ bounds.height) }
 
 open class ScreenRec(
   protected val recordingConfig: RecordingConfig = RecordingConfig(),

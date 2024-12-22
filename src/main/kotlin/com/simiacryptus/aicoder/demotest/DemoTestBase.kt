@@ -223,9 +223,8 @@ abstract class DemoTestBase(
     return aiCoderMenu
   }
 
-  private val silent = false
   fun speak(text: String, voice: String = "shimmer") {
-    if (silent) return
+    if (!recordingConfig.enableAudio) return
     log.info("Speaking: $text")
     val speechWavBytes = OpenAIClient().createSpeech(
       ApiModel.SpeechRequest(
