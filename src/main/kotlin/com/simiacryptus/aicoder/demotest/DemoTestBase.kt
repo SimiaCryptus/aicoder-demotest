@@ -6,9 +6,6 @@ import com.intellij.remoterobot.fixtures.JTreeFixture
 import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
-import com.simiacryptus.aicoder.demotest.DemoTestBase.Companion
-import com.simiacryptus.aicoder.demotest.DemoTestBase.Companion.UDP_PORT
-import com.simiacryptus.aicoder.demotest.DemoTestBase.Companion.log
 import com.simiacryptus.jopenai.OpenAIClient
 import com.simiacryptus.jopenai.models.ApiModel
 import com.simiacryptus.jopenai.models.AudioModels
@@ -23,86 +20,24 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
 import java.lang.Thread.sleep
-import java.net.DatagramPacket
-import java.net.DatagramSocket
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.Duration
 import java.time.LocalDateTime
-import java.util.concurrent.ConcurrentLinkedQueue
 import javax.sound.sampled.AudioInputStream
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.Clip
-import kotlin.concurrent.thread
 
 
-object UDPClient {
-
-  val log = LoggerFactory.getLogger(UDPClient::class.java)
-  var udpSocket: DatagramSocket? = null
-  var isServerRunning = false
-  private val messageBuffer = ConcurrentLinkedQueue<String>()
-  fun startUdpServer() {
-    if (isServerRunning) return
-    isServerRunning = true
-    thread(isDaemon = true) {
-      try {
-        udpSocket = DatagramSocket(UDP_PORT)
-        val buffer = ByteArray(1024)
-        log.info("UDP server started on port ${DemoTestBase.UDP_PORT}")
-        while (isServerRunning) {
-          val packet = DatagramPacket(buffer, buffer.size)
-          udpSocket?.receive(packet)
-          val received = String(packet.data, 0, packet.length)
-          log.info("Received UDP message: $received")
-          messageBuffer.offer(received)
-        }
-      } catch (e: Exception) {
-        log.error("Error in UDP server", e)
-      } finally {
-        isServerRunning = false
-        try {
-          udpSocket?.let { socket ->
-            if (!socket.isClosed) {
-              socket.close()
-              log.info("UDP socket closed successfully")
-            }
-          }
-          udpSocket = null
-        } catch (e: Exception) {
-          log.error("Error closing UDP socket", e)
-        }
-      }
-    }
-  }
-
-  fun stopUdpServer() {
-    isServerRunning = false
-    try {
-      udpSocket?.let { socket ->
-        if (!socket.isClosed) {
-          socket.close()
-          log.info("UDP socket closed successfully")
-        }
-      }
-      udpSocket = null
-    } catch (e: Exception) {
-      log.error("Error closing UDP socket", e)
-    }
-  }
-
-  fun getReceivedMessages(): List<String> {
-    return messageBuffer.toList()
-  }
-
-  fun clearMessageBuffer() {
-    messageBuffer.clear()
-  }
-
-}
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-abstract class DemoTestBase : ScreenRec() {
+abstract class DemoTestBase(
+  recordingConfig: RecordingConfig = RecordingConfig(),
+  splashScreenConfig: SplashScreenConfig = SplashScreenConfig()
+) : ScreenRec(
+  recordingConfig = recordingConfig,
+  splashScreenConfig = splashScreenConfig
+) {
   protected lateinit var remoteRobot: RemoteRobot
   protected val robot: java.awt.Robot = java.awt.Robot()
   protected var testStartTime: LocalDateTime? = null
@@ -234,7 +169,7 @@ abstract class DemoTestBase : ScreenRec() {
 
   private fun cleanupTestProject() {
     if (::testProjectDir.isInitialized) {
-//      testProjectDir.toFile().deleteRecursively()
+      testProjectDir.toFile().deleteRecursively()
       log.info("Cleaned up test project directory")
     }
   }
@@ -288,7 +223,7 @@ abstract class DemoTestBase : ScreenRec() {
     return aiCoderMenu
   }
 
-  private val silent = true
+  private val silent = false
   fun speak(text: String, voice: String = "shimmer") {
     if (silent) return
     log.info("Speaking: $text")

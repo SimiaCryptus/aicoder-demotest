@@ -6,6 +6,7 @@ import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.stepsProcessing.step
 import com.intellij.remoterobot.utils.waitFor
 import com.simiacryptus.aicoder.demotest.DemoTestBase
+import com.simiacryptus.aicoder.demotest.SplashScreenConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.openqa.selenium.By
@@ -33,7 +34,51 @@ import java.time.Duration
  * 6. Verifies outline generation and expansion
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class OutlineActionTest : DemoTestBase() {
+class OutlineActionTest : DemoTestBase(
+  splashScreenConfig = SplashScreenConfig(
+    fontFamily = "JetBrains Mono",
+    titleColor = "#1a73e8",
+    subtitleColor = "#202124",
+    timestampColor = "#5f6368",
+    titleText = "Outline Tool Demo",
+    containerStyle = """
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      padding: 40px 60px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(26, 115, 232, 0.15);
+      border-left: 4px solid #1a73e8;
+      animation: slideIn 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+    """.trimIndent(),
+    bodyStyle = """
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e8eaed 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      position: relative;
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: repeating-linear-gradient(
+          45deg,
+          transparent,
+          transparent 10px,
+          rgba(26, 115, 232, 0.03) 10px,
+          rgba(26, 115, 232, 0.03) 20px
+        );
+      }
+    """.trimIndent()
+  )
+) {
 
   companion object {
     private val log = LoggerFactory.getLogger(OutlineActionTest::class.java)

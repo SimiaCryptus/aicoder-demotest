@@ -6,6 +6,7 @@ import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.stepsProcessing.step
 import com.intellij.remoterobot.utils.waitFor
 import com.simiacryptus.aicoder.demotest.DemoTestBase
+import com.simiacryptus.aicoder.demotest.SplashScreenConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.openqa.selenium.By
@@ -37,7 +38,39 @@ import java.time.Duration
  * - All UI interactions should be smooth and error-free
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class ShellCommandActionTest : DemoTestBase() {
+class ShellCommandActionTest : DemoTestBase(
+  splashScreenConfig = SplashScreenConfig(
+    fontFamily = "Source Code Pro",
+    titleColor = "#4AF626",
+    subtitleColor = "#00ff00",
+    timestampColor = "#33ff33",
+    titleText = "Shell Command Test",
+    containerStyle = """
+      background: rgba(0, 0, 0, 0.85);
+      padding: 30px 50px;
+      border-radius: 8px;
+      border: 2px solid #4AF626;
+      box-shadow: 0 0 30px rgba(74, 246, 38, 0.3);
+      position: relative;
+      animation: terminalGlow 2s infinite ease-in-out;
+    """.trimIndent(),
+    bodyStyle = """
+      margin: 0;
+      padding: 20px;
+      background: #000000;
+      background-image: 
+        linear-gradient(rgba(0, 30, 0, 0.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 30, 0, 0.3) 1px, transparent 1px);
+      background-size: 20px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      font-family: 'Source Code Pro', monospace;
+    """.trimIndent(),
+  )
+) {
 
   companion object {
     private val log = LoggerFactory.getLogger(ShellCommandActionTest::class.java)

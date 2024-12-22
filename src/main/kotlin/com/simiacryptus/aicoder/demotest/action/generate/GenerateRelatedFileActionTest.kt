@@ -9,6 +9,7 @@ import com.intellij.remoterobot.stepsProcessing.step
 import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
 import com.simiacryptus.aicoder.demotest.DemoTestBase
+import com.simiacryptus.aicoder.demotest.SplashScreenConfig
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -41,7 +42,51 @@ import kotlin.io.path.name
  */
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class GenerateRelatedFileActionTest : DemoTestBase() {
+class GenerateRelatedFileActionTest : DemoTestBase(
+  splashScreenConfig = SplashScreenConfig(
+    fontFamily = "JetBrains Mono",
+    titleColor = "#00BCD4",
+    subtitleColor = "#4CAF50",
+    timestampColor = "#9E9E9E",
+    titleText = "Generate Related File Demo",
+    containerStyle = """
+      background: linear-gradient(45deg, #1a1a1a, #2d2d2d);
+      padding: 40px 60px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      position: relative;
+      overflow: hidden;
+      animation: pulse 2s infinite;
+      border: 2px solid #00BCD4;
+    """.trimIndent(),
+    bodyStyle = """
+      margin: 0;
+      padding: 20px;
+      background: #121212;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      position: relative;
+      &::before {
+        content: '⚡';
+        position: absolute;
+        font-size: 200px;
+        opacity: 0.1;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #00BCD4;
+        animation: rotate 10s linear infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+      }
+    """.trimIndent()
+  )
+) {
 
   override fun getTemplateProjectPath(): String {
     return "demo_projects/TestProject"

@@ -8,6 +8,7 @@ import com.intellij.remoterobot.stepsProcessing.step
 import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
 import com.simiacryptus.aicoder.demotest.DemoTestBase
+import com.simiacryptus.aicoder.demotest.SplashScreenConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.slf4j.LoggerFactory
@@ -39,7 +40,47 @@ import kotlin.io.path.name
  * - All UI interactions should complete without errors
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class CustomEditActionTest : DemoTestBase() {
+class CustomEditActionTest : DemoTestBase(
+  splashScreenConfig = SplashScreenConfig(
+    fontFamily = "JetBrains Mono",
+    titleColor = "#00ACC1",
+    subtitleColor = "#78909C",
+    timestampColor = "#B0BEC5",
+    titleText = "Custom Edit Demo",
+    containerStyle = """
+      background: #1E1E1E;
+      padding: 40px 60px;
+      border-radius: 8px;
+      box-shadow: 0 0 30px rgba(0,172,193,0.2);
+      animation: glow 2s ease-in-out infinite alternate;
+      border: 1px solid #00ACC1;
+      position: relative;
+      overflow: hidden;
+    """.trimIndent(),
+    bodyStyle = """
+      margin: 0;
+      padding: 20px;
+      background: #2B2B2B;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      position: relative;
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, #00ACC1 0%, transparent 100%);
+        opacity: 0.05;
+        z-index: 0;
+      }
+    """.trimIndent()
+  )
+) {
   companion object {
     private val log = LoggerFactory.getLogger(CustomEditActionTest::class.java)
   }

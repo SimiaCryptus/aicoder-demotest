@@ -6,6 +6,7 @@ import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.stepsProcessing.step
 import com.intellij.remoterobot.utils.waitFor
 import com.simiacryptus.aicoder.demotest.DemoTestBase
+import com.simiacryptus.aicoder.demotest.SplashScreenConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.openqa.selenium.By
@@ -47,7 +48,48 @@ import kotlin.io.path.name
  */
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class MultiDiffChatActionTest : DemoTestBase() {
+class MultiDiffChatActionTest : DemoTestBase(
+  splashScreenConfig = SplashScreenConfig(
+    fontFamily = "JetBrains Mono",
+    titleColor = "#2B2B2B",
+    subtitleColor = "#6C6C6C",
+    timestampColor = "#087EA4",
+    titleText = "Multi-Diff Chat Demo",
+    containerStyle = """
+        background: linear-gradient(135deg, #F5F5F5 0%, #FFFFFF 100%);
+        padding: 50px 70px;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        border-left: 6px solid #087EA4;
+        animation: slideIn 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        overflow: hidden;
+    """.trimIndent(),
+    bodyStyle = """
+        margin: 0;
+        padding: 30px;
+        background: #2B2B2B;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        text-align: center;
+        font-family: 'JetBrains Mono', monospace;
+        position: relative;
+        &::before {
+          content: '{ }';
+          position: absolute;
+          top: 20%;
+          right: 15%;
+          font-size: 180px;
+          opacity: 0.05;
+          font-family: 'JetBrains Mono', monospace;
+          color: #087EA4;
+          transform: rotate(-15deg);
+        }
+    """.trimIndent()
+  )
+) {
   override fun getTemplateProjectPath(): String {
     return "demo_projects/TestProject"
   }

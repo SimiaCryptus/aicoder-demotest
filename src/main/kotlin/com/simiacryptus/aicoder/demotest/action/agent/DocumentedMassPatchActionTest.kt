@@ -9,6 +9,7 @@ import com.intellij.remoterobot.stepsProcessing.step
 import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
 import com.simiacryptus.aicoder.demotest.DemoTestBase
+import com.simiacryptus.aicoder.demotest.SplashScreenConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.openqa.selenium.By
@@ -38,7 +39,50 @@ import kotlin.io.path.name
  * 7. Verifies successful patch application
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class DocumentedMassPatchActionTest : DemoTestBase() {
+class DocumentedMassPatchActionTest : DemoTestBase(
+  splashScreenConfig = SplashScreenConfig(
+    fontFamily = "JetBrains Mono",
+    titleColor = "#00C853",
+    subtitleColor = "#64DD17",
+    timestampColor = "#76FF03",
+    titleText = "Documentated Mass Patcher",
+    containerStyle = """
+        background: #1E1E1E;
+        padding: 50px 70px;
+        border-radius: 15px;
+        border: 2px solid #00C853;
+        box-shadow: 0 0 30px rgba(0,200,83,0.3);
+        animation: glow 2s ease-in-out infinite alternate;
+    """.trimIndent(),
+    bodyStyle = """
+        margin: 0;
+        padding: 20px;
+        background: linear-gradient(135deg, #121212 0%, #1E1E1E 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: repeating-linear-gradient(
+            0deg,
+            transparent,
+            rgba(0, 200, 83, 0.1) 2px,
+            transparent 4px
+          );
+          pointer-events: none;
+        }
+    """.trimIndent()
+  )
+) {
 
   companion object {
     private val log = LoggerFactory.getLogger(DocumentedMassPatchActionTest::class.java)

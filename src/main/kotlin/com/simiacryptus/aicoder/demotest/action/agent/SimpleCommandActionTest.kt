@@ -6,6 +6,7 @@ import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.stepsProcessing.step
 import com.intellij.remoterobot.utils.waitFor
 import com.simiacryptus.aicoder.demotest.DemoTestBase
+import com.simiacryptus.aicoder.demotest.SplashScreenConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.openqa.selenium.By
@@ -34,7 +35,48 @@ import java.time.Duration
  *    - Review and apply generated changes
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class SimpleCommandActionTest : DemoTestBase() {
+class SimpleCommandActionTest : DemoTestBase(
+  splashScreenConfig = SplashScreenConfig(
+    fontFamily = "JetBrains Mono",
+    titleColor = "#00ACC1",
+    subtitleColor = "#78909C",
+    timestampColor = "#B0BEC5",
+    titleText = "Simple Command Demo",
+    containerStyle = """
+      background: linear-gradient(145deg, #1E272E, #2C3E50);
+      padding: 40px 60px;
+      border-radius: 15px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+      position: relative;
+      overflow: hidden;
+      animation: pulse 2s infinite;
+      border: 1px solid rgba(0,172,193,0.3);
+    """.trimIndent(),
+    bodyStyle = """
+      margin: 0;
+      padding: 20px;
+      background: #121212;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      position: relative;
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+          radial-gradient(circle at 20% 30%, rgba(0,172,193,0.15) 0%, transparent 50%),
+          radial-gradient(circle at 80% 70%, rgba(0,172,193,0.1) 0%, transparent 50%);
+        pointer-events: none;
+      }
+    """.trimIndent()
+  )
+) {
 
   companion object {
     val log = LoggerFactory.getLogger(SimpleCommandActionTest::class.java)

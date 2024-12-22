@@ -7,6 +7,7 @@ import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.stepsProcessing.step
 import com.intellij.remoterobot.utils.waitFor
 import com.simiacryptus.aicoder.demotest.DemoTestBase
+import com.simiacryptus.aicoder.demotest.SplashScreenConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.openqa.selenium.By
@@ -36,7 +37,50 @@ import kotlin.io.path.name
  *    - View results
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class AutoPlanActionTest : DemoTestBase() {
+class AutoPlanActionTest : DemoTestBase(
+  splashScreenConfig = SplashScreenConfig(
+    fontFamily = "JetBrains Mono",
+    titleColor = "#00BCD4",
+    subtitleColor = "#4DD0E1",
+    timestampColor = "#80DEEA",
+    titleText = "Auto-Plan Demo",
+    containerStyle = """
+      background: linear-gradient(45deg, #263238 0%, #37474F 100%);
+      padding: 40px 60px;
+      border-radius: 15px;
+      border: 2px solid #00BCD4;
+      box-shadow: 0 0 30px rgba(0,188,212,0.3);
+      animation: pulse 2s infinite;
+      position: relative;
+      overflow: hidden;""".trimIndent(),
+    bodyStyle = """
+      margin: 0;
+      padding: 25px;
+      background: #1B2329;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      position: relative;""".trimIndent() + """
+      @keyframes pulse {
+        0% { box-shadow: 0 0 30px rgba(0,188,212,0.3); }
+        50% { box-shadow: 0 0 50px rgba(0,188,212,0.5); }
+        100% { box-shadow: 0 0 30px rgba(0,188,212,0.3); }
+      }
+      .container::before {
+        content: '{ }';
+        position: absolute;
+        font-size: 200px;
+        opacity: 0.05;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #00BCD4;
+      }""".trimIndent()
+  )
+) {
 
   override fun getTemplateProjectPath(): String {
     return "demo_projects/DataGnome"

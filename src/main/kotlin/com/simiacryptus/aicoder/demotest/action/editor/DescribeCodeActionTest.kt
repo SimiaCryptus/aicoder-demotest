@@ -8,6 +8,7 @@ import com.intellij.remoterobot.stepsProcessing.step
 import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
 import com.simiacryptus.aicoder.demotest.DemoTestBase
+import com.simiacryptus.aicoder.demotest.SplashScreenConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.slf4j.LoggerFactory
@@ -24,7 +25,47 @@ import kotlin.io.path.name
  * - The IDE should be in its default layout
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class DescribeCodeActionTest : DemoTestBase() {
+class DescribeCodeActionTest : DemoTestBase(
+  splashScreenConfig = SplashScreenConfig(
+    fontFamily = "Roboto",
+    titleColor = "#00ACC1",
+    subtitleColor = "#78909C",
+    timestampColor = "#B0BEC5",
+    titleText = "Describe Code Demo",
+    containerStyle = """
+      background: #1E1E1E;
+      padding: 40px 60px;
+      border-radius: 8px;
+      box-shadow: 0 0 30px rgba(0,172,193,0.2);
+      border: 1px solid #00ACC1;
+      animation: glow 2s ease-in-out infinite alternate;
+      position: relative;
+    """.trimIndent(),
+    bodyStyle = """
+      margin: 0;
+      padding: 20px;
+      background: #2B2B2B;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      @keyframes glow {
+        from {
+          box-shadow: 0 0 20px rgba(0,172,193,0.2);
+        }
+        to {
+          box-shadow: 0 0 30px rgba(0,172,193,0.6);
+        }
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+    """.trimIndent()
+  )
+) {
   companion object {
     private val log = LoggerFactory.getLogger(DescribeCodeActionTest::class.java)
   }

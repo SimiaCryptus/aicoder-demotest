@@ -33,6 +33,7 @@ import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.stepsProcessing.step
 import com.intellij.remoterobot.utils.waitFor
 import com.simiacryptus.aicoder.demotest.DemoTestBase
+import com.simiacryptus.aicoder.demotest.SplashScreenConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.openqa.selenium.By
@@ -45,7 +46,52 @@ import java.time.Duration
 import kotlin.io.path.name
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class MultiCodeChatActionTest : DemoTestBase() {
+class MultiCodeChatActionTest : DemoTestBase(
+  splashScreenConfig = SplashScreenConfig(
+    fontFamily = "JetBrains Mono",
+    titleColor = "#00B4E7", // IntelliJ-inspired blue
+    subtitleColor = "#6B7C93",
+    timestampColor = "#A9B7C6", // IntelliJ editor text color
+    titleText = "Multi-Code Chat Demo",
+    containerStyle = """
+      background: linear-gradient(145deg, #2B2B2B 0%, #3C3F41 100%);
+      padding: 40px 60px;
+      border-radius: 12px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      border: 1px solid #4D4D4D;
+      animation: slideIn 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+    """.trimIndent(),
+    bodyStyle = """
+      margin: 0;
+      padding: 20px;
+      background: #1E1E1E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      &::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: repeating-linear-gradient(
+          45deg,
+          #2B2B2B 0%,
+          #2B2B2B 10%,
+          #1E1E1E 10%,
+          #1E1E1E 20%
+        );
+        opacity: 0.1;
+        animation: backgroundMove 20s linear infinite;
+      }
+    """.trimIndent()
+  )
+) {
   override fun getTemplateProjectPath(): String {
     return "demo_projects/TestProject"
   }

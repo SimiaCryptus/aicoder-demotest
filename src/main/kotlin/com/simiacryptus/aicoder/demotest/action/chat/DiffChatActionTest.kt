@@ -8,6 +8,7 @@ import com.intellij.remoterobot.stepsProcessing.step
 import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
 import com.simiacryptus.aicoder.demotest.DemoTestBase
+import com.simiacryptus.aicoder.demotest.SplashScreenConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.openqa.selenium.By
@@ -46,7 +47,58 @@ import kotlin.io.path.name
  * 10. Applies a patch and verifies the changes
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class DiffChatActionTest : DemoTestBase() {
+class DiffChatActionTest : DemoTestBase(
+  splashScreenConfig = SplashScreenConfig(
+    fontFamily = "JetBrains Mono",
+    titleColor = "#00ff00",
+    subtitleColor = "#32CD32",
+    timestampColor = "#98FB98",
+    titleText = "Patch Chat Demo",
+    containerStyle = """
+        background: #1e1e1e;
+        padding: 40px 60px;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0,255,0,0.2);
+        border: 1px solid #00ff00;
+        animation: glow 2s ease-in-out infinite;
+        position: relative;
+        overflow: hidden;
+    """.trimIndent(),
+    bodyStyle = """
+        margin: 0;
+        padding: 20px;
+        background: #000000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        text-align: center;
+        position: relative;
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(45deg, transparent 49%, #00ff00 49%, #00ff00 51%, transparent 51%),
+                linear-gradient(-45deg, transparent 49%, #00ff00 49%, #00ff00 51%, transparent 51%);
+            background-size: 30px 30px;
+            opacity: 0.1;
+            animation: moveBackground 20s linear infinite;
+        }
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(0,255,0,0.2); }
+            50% { box-shadow: 0 0 40px rgba(0,255,0,0.4); }
+        }
+        @keyframes moveBackground {
+            from { background-position: 0 0; }
+            to { background-position: 60px 60px; }
+        }
+    """.trimIndent()
+  )
+) {
   override fun getTemplateProjectPath(): String {
     return "demo_projects/TestProject"
   }

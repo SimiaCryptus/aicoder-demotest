@@ -8,6 +8,7 @@ import com.intellij.remoterobot.stepsProcessing.step
 import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
 import com.simiacryptus.aicoder.demotest.DemoTestBase
+import com.simiacryptus.aicoder.demotest.SplashScreenConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.slf4j.LoggerFactory
@@ -43,7 +44,39 @@ import kotlin.io.path.name
  */
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class GenerateDocumentationActionTest : DemoTestBase() {
+class GenerateDocumentationActionTest : DemoTestBase(
+  splashScreenConfig = SplashScreenConfig(
+    fontFamily = "Fira Code",
+    titleColor = "#007ACC", // IntelliJ-like blue
+    subtitleColor = "#6F42C1", // Purple for AI emphasis
+    timestampColor = "#28A745", // Success green
+    titleText = "Documentation Generator Demo",
+    containerStyle = """
+      background: linear-gradient(135deg, #1E1E1E 0%, #2D2D2D 100%);
+      padding: 50px 70px;
+      border-radius: 15px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      border: 1px solid #3C3C3C;
+      animation: pulse 2s infinite;
+    """.trimIndent(),
+    bodyStyle = """
+      margin: 0;
+      padding: 25px;
+      background-color: #1E1E1E;
+      background-image: 
+        radial-gradient(circle at 25px 25px, #333 2%, transparent 0%),
+        radial-gradient(circle at 75px 75px, #333 2%, transparent 0%);
+      background-size: 100px 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: 'Fira Code', monospace;
+      position: relative;
+      overflow: hidden;
+    """.trimIndent(),
+  )
+) {
 
   companion object {
     val log = LoggerFactory.getLogger(GenerateDocumentationActionTest::class.java)

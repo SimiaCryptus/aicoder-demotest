@@ -7,11 +7,11 @@ import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.stepsProcessing.step
 import com.intellij.remoterobot.utils.waitFor
 import com.simiacryptus.aicoder.demotest.DemoTestBase
+import com.simiacryptus.aicoder.demotest.SplashScreenConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.openqa.selenium.By
 import org.openqa.selenium.JavascriptExecutor
-import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
 import org.slf4j.LoggerFactory
 import java.lang.Thread.sleep
@@ -44,7 +44,45 @@ import kotlin.io.path.name
  */
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class CommandAutofixActionTest : DemoTestBase() {
+class CommandAutofixActionTest : DemoTestBase(
+  splashScreenConfig = SplashScreenConfig(
+    fontFamily = "JetBrains Mono",
+    titleColor = "#00ACC1",
+    subtitleColor = "#78909C",
+    timestampColor = "#B0BEC5",
+    titleText = "Command Autofix Demo",
+    containerStyle = """
+        background: #1E1E1E;
+        padding: 40px 60px;
+        border-radius: 8px;
+        box-shadow: 0 0 30px rgba(0,172,193,0.2);
+        border: 1px solid #00ACC1;
+        animation: pulse 2s infinite;
+        position: relative;
+        overflow: hidden;
+    """.trimIndent(),
+    bodyStyle = """
+        margin: 0;
+        padding: 20px;
+        background: #2B2B2B;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        text-align: center;
+        position: relative;
+        @keyframes pulse {
+          0% { box-shadow: 0 0 30px rgba(0,172,193,0.2); }
+          50% { box-shadow: 0 0 30px rgba(0,172,193,0.5); }
+          100% { box-shadow: 0 0 30px rgba(0,172,193,0.2); }
+        }
+        @keyframes typing {
+          from { width: 0 }
+          to { width: 100% }
+        }
+    """.trimIndent()
+  )
+) {
   override fun getTemplateProjectPath(): String {
     return "demo_projects/DataGnome"
   }

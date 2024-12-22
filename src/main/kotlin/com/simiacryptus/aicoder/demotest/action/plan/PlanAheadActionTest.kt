@@ -7,6 +7,7 @@ import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.stepsProcessing.step
 import com.intellij.remoterobot.utils.waitFor
 import com.simiacryptus.aicoder.demotest.DemoTestBase
+import com.simiacryptus.aicoder.demotest.SplashScreenConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.openqa.selenium.By
@@ -46,7 +47,50 @@ import kotlin.io.path.name
  * for educational/demo scenarios. These can be adjusted or removed for production testing.
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class PlanAheadActionTest : DemoTestBase() {
+class PlanAheadActionTest : DemoTestBase(
+  splashScreenConfig = SplashScreenConfig(
+    fontFamily = "JetBrains Mono",
+    titleColor = "#00BFA5",
+    subtitleColor = "#26A69A",
+    timestampColor = "#4DB6AC",
+    titleText = "Task Planning Demo",
+    containerStyle = """
+        background: linear-gradient(135deg, #263238 0%, #37474F 100%);
+        padding: 50px 70px;
+        border-radius: 15px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        animation: slideIn 1.5s ease-out;
+        border: 2px solid #00BFA5;
+        position: relative;
+        overflow: hidden;
+    """.trimIndent(),
+    bodyStyle = """
+        margin: 0;
+        padding: 30px;
+        background: #1E272C;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        text-align: center;
+        font-family: 'JetBrains Mono', monospace;
+        position: relative;
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: 
+            linear-gradient(45deg, transparent 48%, #00BFA5 49%, #00BFA5 51%, transparent 52%),
+            linear-gradient(-45deg, transparent 48%, #00BFA5 49%, #00BFA5 51%, transparent 52%);
+          background-size: 60px 60px;
+          opacity: 0.1;
+        }
+    """.trimIndent()
+  )
+) {
 
   override fun getTemplateProjectPath(): String {
     return "demo_projects/TestProject"

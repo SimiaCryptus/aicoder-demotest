@@ -9,6 +9,7 @@ import com.intellij.remoterobot.stepsProcessing.step
 import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
 import com.simiacryptus.aicoder.demotest.DemoTestBase
+import com.simiacryptus.aicoder.demotest.SplashScreenConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.slf4j.LoggerFactory
@@ -41,7 +42,43 @@ import kotlin.io.path.name
  * Note: This test includes voice narration for demonstration purposes
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class CreateFileFromDescriptionActionTest : DemoTestBase() {
+class CreateFileFromDescriptionActionTest : DemoTestBase(
+  splashScreenConfig = SplashScreenConfig(
+    fontFamily = "JetBrains Mono",  // Using JetBrains Mono for a coding-focused look
+    titleColor = "#00BFA5",  // Vibrant teal color
+    subtitleColor = "#26A69A",  // Complementary teal
+    timestampColor = "#4DB6AC",  // Lighter teal
+    titleText = "Code Generator Demo",
+    containerStyle = """
+      background: linear-gradient(165deg, #263238 0%, #37474F 100%);
+      padding: 40px 60px;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      border: 1px solid rgba(0, 191, 165, 0.2);
+      animation: pulse 2s infinite ease-in-out;
+    """.trimIndent(),
+    bodyStyle = """
+      margin: 0;
+      padding: 30px;
+      background: linear-gradient(135deg, #1A237E 0%, #0D47A1 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+        100% { transform: scale(1); }
+      }
+      @keyframes typing {
+        from { width: 0 }
+        to { width: 100% }
+      }
+    """.trimIndent()
+  )
+) {
   override fun getTemplateProjectPath(): String {
     return "demo_projects/TestProject"
   }

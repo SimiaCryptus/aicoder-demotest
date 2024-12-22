@@ -8,6 +8,7 @@ import com.intellij.remoterobot.stepsProcessing.step
 import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
 import com.simiacryptus.aicoder.demotest.DemoTestBase
+import com.simiacryptus.aicoder.demotest.SplashScreenConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.openqa.selenium.By
@@ -50,7 +51,54 @@ import kotlin.io.path.name
  * and includes appropriate waits between actions to ensure stability.
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class CodeChatActionTest : DemoTestBase() {
+class CodeChatActionTest : DemoTestBase(
+  splashScreenConfig = SplashScreenConfig(
+    fontFamily = "JetBrains Mono",
+    titleColor = "#00BCD4", // Cyan - representing chat/communication
+    subtitleColor = "#546E7A", // Blue grey
+    timestampColor = "#78909C", // Lighter blue grey
+    titleText = "Code Chat Demo",
+    containerStyle = """
+        background: linear-gradient(135deg, #263238 0%, #37474F 100%);
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+        animation: slideIn 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+        max-width: 800px;
+        position: relative;
+        border: 1px solid rgba(0, 188, 212, 0.3);
+        overflow: hidden;
+    """.trimIndent(),
+    bodyStyle = """
+        margin: 0;
+        padding: 30px;
+        background: #1A1A1A;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        text-align: center;
+        font-family: 'JetBrains Mono', monospace;
+        position: relative;
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(0, 188, 212, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(0, 188, 212, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        @keyframes slideIn {
+            0% { transform: translateY(30px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+    """.trimIndent()
+  )
+) {
   override fun getTemplateProjectPath(): String {
     return "demo_projects/TestProject"
   }

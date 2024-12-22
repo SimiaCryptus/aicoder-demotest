@@ -7,6 +7,7 @@ import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.stepsProcessing.step
 import com.intellij.remoterobot.utils.waitFor
 import com.simiacryptus.aicoder.demotest.DemoTestBase
+import com.simiacryptus.aicoder.demotest.SplashScreenConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.slf4j.LoggerFactory
@@ -24,7 +25,46 @@ import kotlin.io.path.name
  * - The IDE should be in its default layout
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class SmartPasteActionTest : DemoTestBase() {
+class SmartPasteActionTest : DemoTestBase(
+  splashScreenConfig = SplashScreenConfig(
+    fontFamily = "JetBrains Mono",
+    titleColor = "#00BCD4",
+    subtitleColor = "#4CAF50",
+    timestampColor = "#9E9E9E",
+    titleText = "Smart Paste Demo",
+    containerStyle = """
+        background: #1E1E1E;
+        padding: 40px 60px;
+        border-radius: 15px;
+        box-shadow: 0 0 30px rgba(0,188,212,0.3);
+        position: relative;
+        animation: slideIn 1.5s ease-out;
+        border: 2px solid #00BCD4;
+    """.trimIndent(),
+    bodyStyle = """
+        margin: 0;
+        padding: 20px;
+        background: linear-gradient(135deg, #2B2B2B 0%, #1E1E1E 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,188,212,0.05) 10px, rgba(0,188,212,0.05) 20px);
+            animation: backgroundScroll 20s linear infinite;
+        }
+    """.trimIndent()
+  )
+) {
   companion object {
     private val log = LoggerFactory.getLogger(SmartPasteActionTest::class.java)
   }

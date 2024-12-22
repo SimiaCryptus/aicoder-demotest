@@ -7,6 +7,7 @@ import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.stepsProcessing.step
 import com.intellij.remoterobot.utils.waitFor
 import com.simiacryptus.aicoder.demotest.DemoTestBase
+import com.simiacryptus.aicoder.demotest.SplashScreenConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.openqa.selenium.By
@@ -36,7 +37,46 @@ import java.time.Duration
  *    - View results
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class SingleTaskActionTest : DemoTestBase() {
+class SingleTaskActionTest : DemoTestBase(
+  splashScreenConfig = SplashScreenConfig(
+    fontFamily = "JetBrains Mono",
+    titleColor = "#00BCD4",
+    subtitleColor = "#4CAF50",
+    timestampColor = "#9E9E9E",
+    titleText = "Single Task Demo",
+    containerStyle = """
+        background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
+        padding: 50px 70px;
+        border-radius: 15px;
+        box-shadow: 0 15px 35px rgba(0,188,212,0.2);
+        border: 1px solid rgba(0,188,212,0.1);
+        animation: pulse 2s infinite;
+        position: relative;
+        overflow: hidden;
+    """.trimIndent(),
+    bodyStyle = """
+        margin: 0;
+        padding: 20px;
+        background: #121212;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        text-align: center;
+        position: relative;
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(0,188,212,0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+    """.trimIndent()
+  )
+) {
 
   override fun getTemplateProjectPath(): String {
     return "demo_projects/TestProject"

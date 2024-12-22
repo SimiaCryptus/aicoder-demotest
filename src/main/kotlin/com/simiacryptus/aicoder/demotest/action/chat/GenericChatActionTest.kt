@@ -5,6 +5,7 @@ import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.stepsProcessing.step
 import com.intellij.remoterobot.utils.waitFor
 import com.simiacryptus.aicoder.demotest.DemoTestBase
+import com.simiacryptus.aicoder.demotest.SplashScreenConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.openqa.selenium.By
@@ -37,7 +38,47 @@ import java.time.Duration
  * - All UI interactions should be smooth and functional
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class GenericChatActionTest : DemoTestBase() {
+class GenericChatActionTest : DemoTestBase(
+  splashScreenConfig = SplashScreenConfig(
+    fontFamily = "Poppins",
+    titleColor = "#1a73e8",
+    subtitleColor = "#4285f4",
+    timestampColor = "#5f6368",
+    titleText = "Generic Chat Demo",
+    containerStyle = """
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        padding: 40px 60px;
+        border-radius: 24px;
+        box-shadow: 0 12px 40px rgba(26, 115, 232, 0.15);
+        position: relative;
+        animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        border: 2px solid rgba(26, 115, 232, 0.1);
+        backdrop-filter: blur(10px);
+    """.trimIndent(),
+    bodyStyle = """
+        margin: 0;
+        padding: 20px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e8f0fe 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        &::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(26, 115, 232, 0.05) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+    """.trimIndent()
+  )
+) {
   companion object {
     val log = LoggerFactory.getLogger(GenericChatActionTest::class.java)
   }

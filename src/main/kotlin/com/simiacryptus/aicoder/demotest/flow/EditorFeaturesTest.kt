@@ -8,6 +8,7 @@ import com.intellij.remoterobot.stepsProcessing.step
 import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
 import com.simiacryptus.aicoder.demotest.DemoTestBase
+import com.simiacryptus.aicoder.demotest.SplashScreenConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.slf4j.LoggerFactory
@@ -35,7 +36,34 @@ import kotlin.io.path.name
  * 6. Documentation generation
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class EditorFeaturesTest : DemoTestBase() {
+class EditorFeaturesTest : DemoTestBase(
+  splashScreenConfig = SplashScreenConfig(
+    fontFamily = "JetBrains Mono",
+    titleColor = "#087EA4",
+    subtitleColor = "#4CAF50",
+    timestampColor = "#FF5722",
+    titleText = "Editor Features Demo",
+    containerStyle = """
+      background: linear-gradient(145deg, #1e1e1e, #2d2d2d);
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+      border: 1px solid #3c3c3c;
+      animation: slideIn 1.5s ease-out;
+  """.trimIndent(),
+    bodyStyle = """
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      background-color: #1a1a1a;
+      color: #ffffff;
+  """.trimIndent()
+  )
+) {
   private fun setClipboardContent(text: String) {
     log.debug("Setting clipboard content: {}", text)
     val selection = StringSelection(text)

@@ -8,6 +8,7 @@ import com.intellij.remoterobot.stepsProcessing.step
 import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
 import com.simiacryptus.aicoder.demotest.DemoTestBase
+import com.simiacryptus.aicoder.demotest.SplashScreenConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.slf4j.LoggerFactory
@@ -38,7 +39,47 @@ import kotlin.io.path.name
  * - The image should represent the selected code's structure or functionality
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class CreateImageActionTest : DemoTestBase() {
+class CreateImageActionTest : DemoTestBase(
+  splashScreenConfig = SplashScreenConfig(
+    fontFamily = "Poppins",
+    titleColor = "#FF6B6B",
+    subtitleColor = "#4ECDC4",
+    timestampColor = "#45B7D1",
+    titleText = "Image Generation Demo",
+    containerStyle = """
+      background: rgba(255, 255, 255, 0.95);
+      padding: 40px 60px;
+      border-radius: 25px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+      animation: slideIn 1.2s ease-out;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid #4ECDC4;
+    """.trimIndent(),
+    bodyStyle = """
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #1A2980 0%, #26D0CE 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      position: relative;
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMyIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIi8+PC9zdmc+');
+        opacity: 0.1;
+        z-index: 1;
+      }
+    """.trimIndent()
+  )
+) {
   companion object {
     private val log = LoggerFactory.getLogger(CreateImageActionTest::class.java)
   }

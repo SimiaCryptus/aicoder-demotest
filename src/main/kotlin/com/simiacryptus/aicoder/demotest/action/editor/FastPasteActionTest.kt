@@ -7,6 +7,7 @@ import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.stepsProcessing.step
 import com.intellij.remoterobot.utils.waitFor
 import com.simiacryptus.aicoder.demotest.DemoTestBase
+import com.simiacryptus.aicoder.demotest.SplashScreenConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.slf4j.LoggerFactory
@@ -24,7 +25,52 @@ import kotlin.io.path.name
  * - The IDE should be in its default layout
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class FastPasteActionTest : DemoTestBase() {
+class FastPasteActionTest : DemoTestBase(
+  splashScreenConfig = SplashScreenConfig(
+    fontFamily = "Roboto",
+    titleColor = "#1a73e8",
+    subtitleColor = "#4285f4",
+    timestampColor = "#34a853",
+    titleText = "Fast Paste Demo",
+    containerStyle = """
+      background: linear-gradient(120deg, #ffffff 0%, #f8f9fa 100%);
+      padding: 40px 60px;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+      position: relative;
+      overflow: hidden;
+      animation: slideIn 1.2s ease-out;
+      border: 2px solid #e8f0fe;
+    """.trimIndent(),
+    bodyStyle = """
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e8f0fe 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      position: relative;
+      &::before {
+        content: '{ }';
+        position: absolute;
+        font-size: 200px;
+        color: rgba(66, 133, 244, 0.05);
+        z-index: 0;
+        transform: rotate(-15deg);
+      }
+      &::after {
+        content: '< />';
+        position: absolute;
+        font-size: 180px;
+        color: rgba(52, 168, 83, 0.05);
+        z-index: 0;
+        transform: rotate(15deg);
+      }
+    """.trimIndent()
+  )
+) {
   companion object {
     private val log = LoggerFactory.getLogger(FastPasteActionTest::class.java)
   }
