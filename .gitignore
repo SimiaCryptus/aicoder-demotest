@@ -2,3 +2,5 @@
 build/
 test-recordings/
 test-screenshots/
+.kotlin
+.idea

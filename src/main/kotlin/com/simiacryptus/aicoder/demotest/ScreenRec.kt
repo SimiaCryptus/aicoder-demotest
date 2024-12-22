@@ -32,16 +32,15 @@ data class RecordingConfig(
   val audioChannels: Int = 2,
   val enableAudio: Boolean = true,
   val splashScreenDuration: Long = 5000,
-  val splashScreenDelay: Long = 1000,
+  val splashScreenDelay: Long = 10000,
   val fileFormat: String = FormatKeys.MIME_AVI,
   val videoEncoding: String = VideoFormatKeys.ENCODING_AVI_TECHSMITH_SCREEN_CAPTURE,
-//  val fileFormat: String = FormatKeys.MIME_QUICKTIME,
-//  val videoEncoding: String = VideoFormatKeys.ENCODING_QUICKTIME_ANIMATION,
   val mousePointerColor: String = "black",
   val outputFileNamePattern: String = "%s.%s.avi",
   val dateFormat: String = "yyyyMMddHHmmss",
   val waitForFileTimeout: Long = 10000,
-  val waitForFileInterval: Long = 100
+  val waitForFileInterval: Long = 100,
+  val splashNarration : String = "",
 )
 
 fun defaultResolution() = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.defaultConfiguration
@@ -78,7 +77,7 @@ open class ScreenRec(
         SwingUtilities.invokeLater {
           this.splashFrame = splashScreenConfig.toSplashDialog(splashPage())
         }
-        Thread.sleep(recordingConfig.splashScreenDelay)
+        sleepForSplash()
 
         val gd = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
         val outputFolder = recordingConfig.outputFolder
@@ -146,6 +145,10 @@ open class ScreenRec(
         throw e
       }
     }
+  }
+
+  protected open fun sleepForSplash() {
+    Thread.sleep(recordingConfig.splashScreenDelay)
   }
 
   protected open fun splashPage() = splashScreenConfig.splashPage()

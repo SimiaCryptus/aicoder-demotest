@@ -98,6 +98,13 @@ abstract class DemoTestBase(
     log.info("Test setup completed successfully")
   }
 
+  override fun sleepForSplash() {
+    val startTime = System.currentTimeMillis()
+    if (super.recordingConfig.splashNarration.isNotBlank()) speak(super.recordingConfig.splashNarration)
+    val sleep = super.recordingConfig.splashScreenDelay - (System.currentTimeMillis() - startTime)
+    if(sleep > 0) sleep(sleep)
+  }
+
   @AfterAll
   fun tearDown() {
     //UDPClient.stopUdpServer()
@@ -189,7 +196,7 @@ abstract class DemoTestBase(
   }
 
   protected fun openProjectView() {
-    waitFor(SHORT_TIMEOUT) {
+    waitFor(LONG_TIMEOUT) {
       try {
         remoteRobot.find(CommonContainerFixture::class.java, byXpath(PROJECT_TREE_XPATH)).click()
         log.info("Project view opened")
@@ -204,7 +211,7 @@ abstract class DemoTestBase(
   protected fun selectAICoderMenu(): CommonContainerFixture {
     lateinit var aiCoderMenu: CommonContainerFixture
     log.debug("Attempting to find and select AI Coder menu")
-    waitFor(SHORT_TIMEOUT) {
+    waitFor(LONG_TIMEOUT) {
       try {
         aiCoderMenu = remoteRobot.find(CommonContainerFixture::class.java, byXpath(AI_CODER_MENU_XPATH)).apply {
           log.debug("Found AI Coder menu, waiting for visibility")
@@ -223,16 +230,16 @@ abstract class DemoTestBase(
     return aiCoderMenu
   }
 
-  fun speak(text: String, voice: String = "shimmer") {
+  fun speak(text: String, voice: String = "shimmer", speed : Double = 1.0) {
     if (!recordingConfig.enableAudio) return
     log.info("Speaking: $text")
+    val startTime = System.currentTimeMillis()
     val speechWavBytes = OpenAIClient().createSpeech(
-      ApiModel.SpeechRequest(
-        input = text, model = AudioModels.TTS.modelName, voice = voice, speed = 1.0, response_format = "wav"
-      )
+      ApiModel.SpeechRequest(input = text, model = AudioModels.TTS.modelName, voice = voice, speed = speed, response_format = "wav")
     ) ?: throw RuntimeException("No response")
     // Play the speech
     val byteInputStream = ByteArrayInputStream(speechWavBytes)
+    log.info("Received speech response in ${System.currentTimeMillis() - startTime} ms")
     AudioSystem.getAudioInputStream(byteInputStream).use { originalAudioInputStream ->
       val format = originalAudioInputStream.format
       val frameSize = format.frameSize
@@ -264,6 +271,7 @@ abstract class DemoTestBase(
     const val PROJECT_TREE_XPATH: String = "//div[@class='ProjectViewTree']"
     const val AI_CODER_MENU_XPATH: String = "//div[contains(@class, 'ActionMenu') and contains(@text, 'AI Coder')]"
     val SHORT_TIMEOUT = Duration.ofSeconds(10)
+    val LONG_TIMEOUT = Duration.ofSeconds(300)
 
     fun clickElement(driver: WebDriver, wait: WebDriverWait, selector: String) = runElement(
       driver, wait, selector, """
@@ -306,7 +314,7 @@ abstract class DemoTestBase(
       }
     }
 
-    val UDP_PORT = 41390
+    const val UDP_PORT = 41390
   }
 
 }
