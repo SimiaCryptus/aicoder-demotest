@@ -91,7 +91,7 @@ class CustomEditActionTest : DemoTestBase() {
       waitFor(Duration.ofSeconds(10)) {
         try {
           val dialog = find(CommonContainerFixture::class.java, byXpath("//div[@class='JDialog' and @title='Edit Code']"))
-          val textField = dialog.find(CommonContainerFixture::class.java, byXpath("//div[@class='JTextField']"))
+          val textField = dialog.find(CommonContainerFixture::class.java, byXpath("//div[@class='MultiplexingTextField']"))
           textField.click()
           keyboard {
             enterText("Add error handling")

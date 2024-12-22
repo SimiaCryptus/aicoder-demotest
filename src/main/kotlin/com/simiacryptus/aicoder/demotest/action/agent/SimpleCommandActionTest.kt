@@ -71,10 +71,10 @@ class SimpleCommandActionTest : DemoTestBase() {
       speak("Selecting the 'Do Something' action.")
       waitFor(Duration.ofSeconds(10)) {
         try {
-          findAll(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Agents')]"))
+          findAll(CommonContainerFixture::class.java, byXpath("//div[@text='AI Coder']//div[@text='\uD83E\uDD16 Agents']"))
             .firstOrNull()?.click()
           sleep(1000)
-          findAll(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Do Something')]"))
+          findAll(CommonContainerFixture::class.java, byXpath("//div[@text='AI Coder']//div[@text='✨ Do Something']"))
             .firstOrNull()?.click()
           log.info("'Do Something' action clicked")
           true

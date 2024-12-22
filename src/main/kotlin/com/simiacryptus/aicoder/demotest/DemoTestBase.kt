@@ -6,6 +6,9 @@ import com.intellij.remoterobot.fixtures.JTreeFixture
 import com.intellij.remoterobot.search.locators.byXpath
 import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
+import com.simiacryptus.aicoder.demotest.DemoTestBase.Companion
+import com.simiacryptus.aicoder.demotest.DemoTestBase.Companion.UDP_PORT
+import com.simiacryptus.aicoder.demotest.DemoTestBase.Companion.log
 import com.simiacryptus.jopenai.OpenAIClient
 import com.simiacryptus.jopenai.models.ApiModel
 import com.simiacryptus.jopenai.models.AudioModels
@@ -33,16 +36,77 @@ import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.Clip
 import kotlin.concurrent.thread
 
+
+object UDPClient {
+
+  val log = LoggerFactory.getLogger(UDPClient::class.java)
+  var udpSocket: DatagramSocket? = null
+  var isServerRunning = false
+  private val messageBuffer = ConcurrentLinkedQueue<String>()
+  fun startUdpServer() {
+    if (isServerRunning) return
+    isServerRunning = true
+    thread(isDaemon = true) {
+      try {
+        udpSocket = DatagramSocket(UDP_PORT)
+        val buffer = ByteArray(1024)
+        log.info("UDP server started on port ${DemoTestBase.UDP_PORT}")
+        while (isServerRunning) {
+          val packet = DatagramPacket(buffer, buffer.size)
+          udpSocket?.receive(packet)
+          val received = String(packet.data, 0, packet.length)
+          log.info("Received UDP message: $received")
+          messageBuffer.offer(received)
+        }
+      } catch (e: Exception) {
+        log.error("Error in UDP server", e)
+      } finally {
+        isServerRunning = false
+        try {
+          udpSocket?.let { socket ->
+            if (!socket.isClosed) {
+              socket.close()
+              log.info("UDP socket closed successfully")
+            }
+          }
+          udpSocket = null
+        } catch (e: Exception) {
+          log.error("Error closing UDP socket", e)
+        }
+      }
+    }
+  }
+
+  fun stopUdpServer() {
+    isServerRunning = false
+    try {
+      udpSocket?.let { socket ->
+        if (!socket.isClosed) {
+          socket.close()
+          log.info("UDP socket closed successfully")
+        }
+      }
+      udpSocket = null
+    } catch (e: Exception) {
+      log.error("Error closing UDP socket", e)
+    }
+  }
+
+  fun getReceivedMessages(): List<String> {
+    return messageBuffer.toList()
+  }
+
+  fun clearMessageBuffer() {
+    messageBuffer.clear()
+  }
+
+}
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 abstract class DemoTestBase : ScreenRec() {
   protected lateinit var remoteRobot: RemoteRobot
   protected val robot: java.awt.Robot = java.awt.Robot()
   protected var testStartTime: LocalDateTime? = null
   protected lateinit var testProjectDir: Path
-  private var isServerRunning = false
-  private val messageBuffer = ConcurrentLinkedQueue<String>()
-  private var udpSocket: DatagramSocket? = null
-
   protected var driverInitialized = false
   protected val driver: WebDriver by lazy { initializeWebDriver() }
   private fun initializeWebDriver(): ChromeDriver {
@@ -84,7 +148,7 @@ abstract class DemoTestBase : ScreenRec() {
     log.info("Starting test setup")
     remoteRobot = RemoteRobot("http://127.0.0.1:8082")
     log.info("RemoteRobot initialized with endpoint http://127.0.0.1:8082")
-    startUdpServer()
+    UDPClient.startUdpServer()
     log.info("Setting Chrome driver system property")
     System.setProperty("webdriver.chrome.driver", "/usr/bin/chromedriver")
     try {
@@ -101,14 +165,17 @@ abstract class DemoTestBase : ScreenRec() {
 
   @AfterAll
   fun tearDown() {
-    stopUdpServer()
+    //UDPClient.stopUdpServer()
     if (driverInitialized) {
       driver.quit()
     }
     stopScreenRecording()
-    clearMessageBuffer()
+    UDPClient.clearMessageBuffer()
     cleanupTestProject()
   }
+
+  fun getReceivedMessages() = UDPClient.getReceivedMessages()
+  fun clearMessageBuffer() = UDPClient.clearMessageBuffer()
 
   protected open fun getTemplateProjectPath(): String {
     return "demo_projects/TestProject"
@@ -168,7 +235,7 @@ abstract class DemoTestBase : ScreenRec() {
   private fun cleanupTestProject() {
     if (::testProjectDir.isInitialized) {
 //      testProjectDir.toFile().deleteRecursively()
-//      log.info("Cleaned up test project directory")
+      log.info("Cleaned up test project directory")
     }
   }
 
@@ -219,63 +286,6 @@ abstract class DemoTestBase : ScreenRec() {
       }
     }
     return aiCoderMenu
-  }
-
-  fun startUdpServer() {
-    if (isServerRunning) return
-    isServerRunning = true
-    thread(isDaemon = true) {
-      try {
-        udpSocket = DatagramSocket(UDP_PORT)
-        val buffer = ByteArray(1024)
-        log.info("UDP server started on port ${Companion.UDP_PORT}")
-        while (isServerRunning) {
-          val packet = DatagramPacket(buffer, buffer.size)
-          udpSocket?.receive(packet)
-          val received = String(packet.data, 0, packet.length)
-          log.info("Received UDP message: $received")
-          messageBuffer.offer(received)
-        }
-      } catch (e: Exception) {
-        log.error("Error in UDP server", e)
-      } finally {
-        isServerRunning = false
-        try {
-          udpSocket?.let { socket ->
-            if (!socket.isClosed) {
-              socket.close()
-              log.info("UDP socket closed successfully")
-            }
-          }
-          udpSocket = null
-        } catch (e: Exception) {
-          log.error("Error closing UDP socket", e)
-        }
-      }
-    }
-  }
-
-  fun stopUdpServer() {
-    isServerRunning = false
-    try {
-      udpSocket?.let { socket ->
-        if (!socket.isClosed) {
-          socket.close()
-          log.info("UDP socket closed successfully")
-        }
-      }
-      udpSocket = null
-    } catch (e: Exception) {
-      log.error("Error closing UDP socket", e)
-    }
-  }
-
-  fun getReceivedMessages(): List<String> {
-    return messageBuffer.toList()
-  }
-
-  fun clearMessageBuffer() {
-    messageBuffer.clear()
   }
 
   private val silent = true

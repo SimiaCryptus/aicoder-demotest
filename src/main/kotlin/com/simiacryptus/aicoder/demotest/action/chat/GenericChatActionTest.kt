@@ -50,18 +50,39 @@ class GenericChatActionTest : DemoTestBase() {
 
     step("Open Tools menu") {
       speak("Opening the Tools menu to access AI Coder features.")
-      findAll(CommonContainerFixture::class.java, byXpath("//div[@class='MenuBar']"))
-        .firstOrNull()?.findText("Tools")?.click()
-      log.info("Tools menu opened")
-      sleep(2000)
+      waitFor(Duration.ofSeconds(10)) {
+        try {
+          log.debug("Attempting to find and click main menu")
+          find(CommonContainerFixture::class.java, byXpath("//div[@tooltiptext='Main Menu']")).click()
+          sleep(500)
+          log.info("Tools menu opened successfully")
+          true
+        } catch (e: Exception) {
+          log.warn("Failed to open Tools menu: ${e.message}")
+          false
+        }
+      }
     }
 
     step("Click 'AI Assistant Chat' action") {
       speak("Selecting the AI Assistant Chat option.")
       waitFor(Duration.ofSeconds(15)) {
         try {
-          findAll(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'AI Assistant Chat')]"))
-            .firstOrNull()?.click()
+          val toolsMenu = find(CommonContainerFixture::class.java, byXpath("//div[@text='Tools']"))
+          toolsMenu.click()
+          val aiCoderMenu = toolsMenu.find(
+            CommonContainerFixture::class.java,
+            byXpath("//div[@text='AI Coder']")
+          )
+          robot.mouseMove(toolsMenu.locationOnScreen.x + 10, aiCoderMenu.locationOnScreen.y)
+          aiCoderMenu.click()
+          val chatMenu = aiCoderMenu.find(
+            CommonContainerFixture::class.java,
+            byXpath("//div[contains(@class, 'MenuItem') and contains(@text, 'AI Assistant Chat')]")
+          )
+          robot.mouseMove(chatMenu.locationOnScreen.x + 10, aiCoderMenu.locationOnScreen.y)
+          chatMenu.click()
+
           log.info("'AI Assistant Chat' action clicked")
           true
         } catch (e: Exception) {

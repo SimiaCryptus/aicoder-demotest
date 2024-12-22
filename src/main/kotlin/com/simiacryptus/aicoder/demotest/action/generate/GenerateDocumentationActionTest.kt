@@ -76,11 +76,10 @@ class GenerateDocumentationActionTest : DemoTestBase() {
 
       step("Navigate to files utility package") {
         speak("Navigating to the files utility package for documentation generation.")
-        val projectTree = find(JTreeFixture::class.java, byXpath("//div[@class='ProjectViewTree']"))
-        val path = arrayOf(testProjectDir.name, "src", "main", "kotlin", "com.simiacryptus.util.files")
+        //val path = arrayOf(testProjectDir.name, "src", "main", "kotlin", "com.simiacryptus.util.files")
+        val path = arrayOf(testProjectDir.name, "src", "main", "kotlin", "com", "simiacryptus", "util", "files")
         val tree = remoteRobot.find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
-        waitFor(Duration.ofSeconds(10)) { tree.clickPath(*path, fullMatch = false); true }
-        projectTree.rightClickPath(*arrayOf(testProjectDir.name, "src", "main", "kotlin", "com.simiacryptus.util.files"), fullMatch = false)
+        waitFor(Duration.ofSeconds(10)) { tree.rightClickPath(*path, fullMatch = false); true }
         log.info("Files utility package selected")
         sleep(2000)
       }

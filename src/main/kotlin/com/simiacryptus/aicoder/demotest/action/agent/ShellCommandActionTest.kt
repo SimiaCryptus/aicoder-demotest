@@ -58,7 +58,7 @@ class ShellCommandActionTest : DemoTestBase() {
 
     step("Select project root") {
       speak("Selecting the project root directory.")
-      val path = arrayOf(testProjectDir.toFile().name)
+      val path = arrayOf(testProjectDir.toFile().name, "src", "main", "kotlin")
       val tree = find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
       waitFor(Duration.ofSeconds(10)) {
         tree.rightClickPath(*path, fullMatch = false)
@@ -68,34 +68,38 @@ class ShellCommandActionTest : DemoTestBase() {
       Thread.sleep(2000)
     }
 
-    step("Select 'AI Coder' menu") {
-      speak("Opening the AI Coder menu.")
-      selectAICoderMenu()
-      Thread.sleep(2000)
-    }
-
     step("Navigate to Shell Agent") {
       speak("Navigating to the Shell Agent feature.")
       waitFor(Duration.ofSeconds(10)) {
         try {
-          // Click Agents submenu
-          findAll(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Agents')]"))
-            .firstOrNull()?.click()
-          Thread.sleep(1000)
+          val aiCoderMenu = selectAICoderMenu()
+          Thread.sleep(200)
+          val agentsMenu = aiCoderMenu.findAll(
+            CommonContainerFixture::class.java,
+            byXpath("//div[contains(@class, 'Menu') and contains(@text,'Agents')]")
+          )
+            .firstOrNull() ?: throw Exception("Agents menu not found")
+          // Move mouse and wait briefly for submenu to appear
+          robot.mouseMove(agentsMenu.locationOnScreen.x + 5, aiCoderMenu.locationOnScreen.y + 5)
+          agentsMenu.click()
+          Thread.sleep(100)
 
-          // Click Shell Agent option
-          findAll(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Shell Agent')]"))
-            .firstOrNull()?.click()
+          // Find and click Shell Agent menu item
+          val shellAgentMenu = agentsMenu.findAll(
+            CommonContainerFixture::class.java,
+            byXpath("//div[contains(@class, 'MenuItem') and contains(@text,'Shell Agent')]")
+          ).firstOrNull() ?: throw Exception("Shell Agent menu item not found")
+          robot.mouseMove(shellAgentMenu.locationOnScreen.x + 5, agentsMenu.locationOnScreen.y + 5)
+          shellAgentMenu.click()
           log.info("Shell Agent menu item clicked")
           true
         } catch (e: Exception) {
-          log.warn("Failed to find Shell Agent menu item: ${e.message}")
+          log.warn("Failed to navigate to Shell Agent: ${e.message}")
           false
         }
       }
       Thread.sleep(2000)
     }
-
     step("Interact with Shell Command interface") {
       var url: String? = null
       log.debug("Starting Shell Command interface interaction")

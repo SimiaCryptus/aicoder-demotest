@@ -76,7 +76,7 @@ class MultiCodeChatActionTest : DemoTestBase() {
     step("Select multiple Kotlin files") {
       try {
         speak("Selecting a Kotlin file in the project structure.")
-        val path = arrayOf(projectName, "src", "main", "kotlin", "Person")
+        val path = arrayOf(projectName, "src", "main", "kotlin", "Main.kt")
         val tree = remoteRobot.find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
         waitFor(Duration.ofSeconds(10)) { tree.rightClickPath(*path, fullMatch = false); true }
         log.info("Kotlin file selected")
