@@ -83,12 +83,13 @@ class FastPasteActionTest : DemoTestBase(
 
   @Test
   fun testFastPaste() = with(remoteRobot) {
-    speak("Welcome to the AI Coder Fast Paste demo.")
+    speak("Welcome to Fast Paste, a powerful feature that instantly converts code between different programming languages while preserving functionality.")
     log.info("Starting Fast Paste test")
     Thread.sleep(2000)
 
     step("Open project view and file") {
       log.info("Opening project view and navigating to test file")
+      speak("Let's start by opening a Kotlin file where we'll demonstrate the conversion capabilities.")
       openProjectView()
       val path = arrayOf(testProjectDir.name, "src", "main", "kotlin", "Main.kt")
       log.debug("Navigating to file path: {}", path.joinToString("/"))
@@ -99,7 +100,7 @@ class FastPasteActionTest : DemoTestBase(
 
     step("Test Fast Paste") {
       log.info("Starting Fast Paste operation")
-      speak("Demonstrating the Fast Paste feature for quick code conversion.")
+      speak("I have some Java code in HTML format on the clipboard. Watch how Fast Paste intelligently handles both the HTML cleanup and Java to Kotlin conversion in one step.")
 
       setClipboardContent(
         """
@@ -126,11 +127,11 @@ class FastPasteActionTest : DemoTestBase(
       ).firstOrNull()?.click()
 
       log.debug("Fast Paste operation triggered")
-      speak("Fast Paste will now convert the Java code to Kotlin syntax.")
+      speak("Notice how Fast Paste automatically removes the HTML tags and converts the Java code to idiomatic Kotlin, using features like the main function shorthand and println extension function.")
       Thread.sleep(3000)
     }
 
-    speak("Fast Paste demonstration completed.")
+    speak("With Fast Paste, you can quickly convert code snippets from documentation, web pages, or other sources into your target language, saving time and maintaining code quality.")
     log.info("Fast Paste test completed successfully")
     Thread.sleep(2000)
   }

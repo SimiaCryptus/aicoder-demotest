@@ -89,7 +89,7 @@ class CreateFileFromDescriptionActionTest : DemoTestBase(
 
   @Test
   fun testCreateFileFromDescription() = with(remoteRobot) {
-    speak("Welcome to the AI Coder demo. We'll explore the 'Create File from Description' feature, which generates Kotlin files from natural language instructions.")
+    speak("Welcome to the AI Coder demo. Today we'll explore how to generate complete code files using natural language descriptions - a powerful feature that helps developers quickly create new code files with proper structure and formatting.")
     log.info("Starting testCreateFileFromDescription")
     sleep(2000)
 
@@ -98,11 +98,11 @@ class CreateFileFromDescriptionActionTest : DemoTestBase(
     }
 
     step("Open context menu") {
-      speak("Navigating to the Kotlin source directory.")
+      speak("Let's start by navigating to our project's Kotlin source directory where we'll create our new file.")
       val projectTree = find(JTreeFixture::class.java, byXpath("//div[@class='ProjectViewTree']"))
       val path = arrayOf(testProjectDir.name, "src", "main", "kotlin")
       projectTree.expandAll(path)
-      speak("Opening the context menu to access AI Coder features.")
+      speak("Now we'll access the AI Coder features through the context menu. Notice how it integrates seamlessly with the IDE's standard interface.")
       projectTree.rightClickPath(*path, fullMatch = false)
       log.info("Context menu opened")
       sleep(2000)
@@ -110,12 +110,12 @@ class CreateFileFromDescriptionActionTest : DemoTestBase(
     sleep(3000)
 
     step("Select 'AI Coder' menu") {
-      speak("Selecting the 'AI Coder' option from the context menu.")
+      speak("Under the AI Coder menu, you'll find various code generation and analysis tools. We'll focus on file creation today.")
       selectAICoderMenu()
     }
 
     step("Click 'Create File from Description' action") {
-      speak("Selecting 'Create File from Description' action.")
+      speak("The Create File from Description action lets us generate complete code files using natural language. It's particularly useful for creating data models, interfaces, and other standard code structures.")
       waitFor(Duration.ofSeconds(15)) {
         try {
           // Find and hover over Generate menu
@@ -138,7 +138,7 @@ class CreateFileFromDescriptionActionTest : DemoTestBase(
     }
 
     step("Enter file description") {
-      speak("Entering a natural language description for a new Kotlin data class.")
+      speak("Let's create a simple Person data class. Watch how we can describe our requirements in plain English, and the AI will handle the proper Kotlin syntax and conventions.")
       waitFor(Duration.ofSeconds(10)) {
         try {
           val textField = find(JTextAreaFixture::class.java, byXpath("//div[@class='JTextArea']"))
@@ -149,7 +149,7 @@ class CreateFileFromDescriptionActionTest : DemoTestBase(
             }
             enterText("Create a Kotlin data class named Person with properties: name (String), age (Int), and email (String)")
           }
-          speak("Description entered: Create a Kotlin data class named Person with properties: name (String), age (Int), and email (String).")
+          speak("I've entered a description requesting a Person class with name, age, and email properties. The AI will determine appropriate types and generate a properly formatted Kotlin data class.")
           log.info("File description entered")
           sleep(2000)
           val okButton = find(CommonContainerFixture::class.java, byXpath("//div[@class='JButton' and @text='Generate']"))
@@ -165,14 +165,14 @@ class CreateFileFromDescriptionActionTest : DemoTestBase(
     }
 
     step("Verify file creation") {
-      speak("Verifying file creation in the project structure.")
+      speak("The AI has processed our request and created a new file. Let's verify it appears in our project structure with the correct name and location.")
       val path = arrayOf(testProjectDir.name, "src", "main", "kotlin")
       waitFor(Duration.ofSeconds(20)) {
         remoteRobot.find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
         val rows = find(JTreeFixture::class.java, byXpath("//div[@class='ProjectViewTree']")).collectRows()
         val fileCreated = rows.any { it.contains("Person") }
         if (fileCreated) {
-          speak("Person file successfully created.")
+          speak("Perfect! The Person.kt file has been created in our source directory, following Kotlin naming conventions.")
         } else {
           log.info(
             """Current rows: ${
@@ -189,7 +189,7 @@ class CreateFileFromDescriptionActionTest : DemoTestBase(
     }
 
     step("Open created file") {
-      speak("Opening the created file to examine its contents.")
+      speak("Now let's examine the generated code to see how the AI has implemented our requirements.")
       find(JTreeFixture::class.java, byXpath("//div[@class='ProjectViewTree']")).doubleClickPath(
         *arrayOf(
           testProjectDir.name,
@@ -203,20 +203,20 @@ class CreateFileFromDescriptionActionTest : DemoTestBase(
     }
 
     step("Verify file content") {
-      speak("Verifying the content of the generated file.")
+      speak("Let's review the generated code. Notice how the AI has created a proper Kotlin data class with all the requested properties and appropriate type annotations.")
       val editor = find(EditorFixture::class.java, byXpath("//div[@class='EditorComponentImpl']"))
       waitFor(Duration.ofSeconds(5)) {
         val txt = editor.findAllText().joinToString("") { it.text }.replace("\n", "")
         val contentCorrect =
           txt.contains("data class Person(") && txt.contains("val name: String,") && txt.contains("val age: Int,") && txt.contains("val email: String")
         if (contentCorrect) {
-          speak("File content verified: Person data class with specified properties created successfully.")
+          speak("The code is perfectly formatted, following Kotlin conventions. All our requested properties are present with correct types, and the data class syntax is properly implemented.")
         }
         contentCorrect
       }
       sleep(2000)
     }
-    speak("Demo concluded. The 'Create File from Description' feature successfully generated a Kotlin file from natural language input, demonstrating its potential to streamline development processes.")
+    speak("And that's how easy it is to generate code files using natural language! This feature saves time, ensures consistent code structure, and helps maintain proper conventions in your project. Try it with more complex requirements like interfaces, service classes, or custom data structures.")
     sleep(5000)
   }
 

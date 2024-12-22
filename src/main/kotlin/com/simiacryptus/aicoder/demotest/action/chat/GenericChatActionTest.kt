@@ -85,12 +85,12 @@ class GenericChatActionTest : DemoTestBase(
 
   @Test
   fun testGenericChatAction() = with(remoteRobot) {
-    speak("Welcome to the AI Coder Generic Chat demo.")
+    speak("Welcome to the AI Assistant Chat demonstration. This powerful feature provides an interactive AI coding assistant that can help with any programming questions or challenges.")
     log.info("Starting testGenericChatAction")
     sleep(2000)
 
     step("Open Tools menu") {
-      speak("Opening the Tools menu to access AI Coder features.")
+      speak("Let's start by accessing the AI Assistant Chat through the Tools menu. This feature is conveniently integrated into the IDE's interface.")
       waitFor(Duration.ofSeconds(10)) {
         try {
           log.debug("Attempting to find and click main menu")
@@ -106,7 +106,7 @@ class GenericChatActionTest : DemoTestBase(
     }
 
     step("Click 'AI Assistant Chat' action") {
-      speak("Selecting the AI Assistant Chat option.")
+      speak("Now we'll navigate through the AI Coder menu to launch our AI Assistant. This will open a dedicated chat interface in your default browser.")
       waitFor(Duration.ofSeconds(15)) {
         try {
           val toolsMenu = find(CommonContainerFixture::class.java, byXpath("//div[@text='Tools']"))
@@ -143,30 +143,30 @@ class GenericChatActionTest : DemoTestBase(
 
       if (url != null) {
         log.info("Retrieved chat interface URL: $url")
-        speak("Chat interface opened in browser.")
+        speak("The chat interface has launched successfully. Notice the clean, intuitive design that makes interaction with the AI natural and efficient.")
         driver.get(url)
         val wait = WebDriverWait(driver, Duration.ofSeconds(90))
 
         try {
           val chatInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("chat-input")))
           log.info("Chat interface loaded successfully")
-          speak("Interface loaded. Submitting a coding question.")
+          speak("Let's ask the AI about Kotlin error handling best practices. This is a great example of how the assistant can provide detailed technical guidance.")
           sleep(1000)
 
           log.debug("Submitting question to chat interface")
           chatInput.click()
-          speak("Asking about best practices for error handling in Kotlin.")
+          speak("Watch as we type our question. You can ask about any programming concept, debug issues, or get code suggestions.")
           chatInput.sendKeys("What are the best practices for error handling in Kotlin?")
           sleep(1000)
 
           wait.until(ExpectedConditions.elementToBeClickable(By.id("send-message-button"))).click()
           log.info("Question submitted successfully")
-          speak("Question submitted. Waiting for AI response.")
+          speak("The question is submitted, and the AI is analyzing it to provide comprehensive guidance on Kotlin error handling patterns.")
           sleep(2000)
 
           // Wait for response
           wait.until(ExpectedConditions.presenceOfElementLocated(By.className("response-message")))
-          speak("AI response received and displayed.")
+          speak("The AI has provided a detailed response, including code examples and best practices. Notice how the response is well-structured and specifically tailored to Kotlin development.")
           sleep(3000)
 
           log.info("Chat interaction completed successfully")
@@ -187,7 +187,7 @@ class GenericChatActionTest : DemoTestBase(
       clearMessageBuffer()
     }
 
-    speak("Demo concluded. The Generic Chat feature provides a flexible interface for discussing coding concepts and getting AI assistance.")
+    speak("This concludes our demonstration of the AI Assistant Chat. As you've seen, it provides instant access to AI expertise for any programming questions, making it an invaluable tool for developers. The assistant can help with everything from language-specific questions to complex architectural decisions, all within your IDE environment.")
     sleep(5000)
   }
 }

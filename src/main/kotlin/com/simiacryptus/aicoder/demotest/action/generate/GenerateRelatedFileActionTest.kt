@@ -98,18 +98,18 @@ class GenerateRelatedFileActionTest : DemoTestBase(
 
   @Test
   fun testGenerateRelatedFile() = with(remoteRobot) {
-    speak("This demo showcases the Generate Related File feature, converting a README.md to a reveal.js HTML presentation.")
+    speak("Welcome to the Generate Related File feature demonstration. This powerful tool helps you create related files from existing content using AI assistance.")
     log.info("Starting testGenerateRelatedFile")
     sleep(3000)
 
     step("Open project view") {
-      speak("Opening the project view.")
+      speak("Let's start by accessing our project structure in the Project View panel.")
       openProjectView()
       sleep(2000)
     }
 
     step("Select README.md file") {
-      speak("Selecting the README.md file.")
+      speak("We'll use this README.md file as our source. The AI will analyze its content to generate a related file.")
       val path = arrayOf(testProjectDir.name, "README.md")
       val tree = remoteRobot.find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
       waitFor(Duration.ofSeconds(10)) { tree.clickPath(*path, fullMatch = false); true }
@@ -117,7 +117,7 @@ class GenerateRelatedFileActionTest : DemoTestBase(
     }
 
     step("Open context menu") {
-      speak("Opening the context menu.")
+      speak("Now we'll access the AI Coder's features through the context menu. Right-click on the file to see available options.")
       val projectTree = find(JTreeFixture::class.java, byXpath("//div[@class='ProjectViewTree']"))
       projectTree.rightClick()
       log.info("Context menu opened via right-click")
@@ -125,12 +125,12 @@ class GenerateRelatedFileActionTest : DemoTestBase(
     }
 
     step("Select 'AI Coder' menu") {
-      speak("Selecting the AI Coder menu.")
+      speak("Navigate to the AI Coder menu, where you'll find various AI-powered code generation tools.")
       selectAICoderMenu()
     }
 
     step("Click 'Generate Related File' action") {
-      speak("Selecting 'Generate Related File' action.")
+      speak("Select 'Generate Related File' to create a new file based on our README's content. This feature intelligently generates related files while maintaining context.")
       waitFor(Duration.ofSeconds(15)) {
         try {
           // Find and hover over Generate menu
@@ -156,7 +156,7 @@ class GenerateRelatedFileActionTest : DemoTestBase(
 
     step("Enter file generation directive") {
       val DIRECTIVE = "Convert this README.md into a reveal.js HTML presentation"
-      speak("Entering the file generation directive.")
+      speak("Now we'll provide instructions for the AI. Let's convert our README into an interactive HTML presentation using reveal.js. Watch how the AI understands and transforms the content.")
       waitFor(Duration.ofSeconds(30)) {
         try {
           val textField = find(JTextAreaFixture::class.java, byXpath("//div[@class='JTextArea']"))
@@ -176,7 +176,7 @@ class GenerateRelatedFileActionTest : DemoTestBase(
           )
           okButton.click()
           log.info("Generate button clicked")
-          speak("Generation process initiated.")
+          speak("The AI is now analyzing the README content and generating a presentation that maintains the original structure while adding interactive elements.")
           true
         } catch (e: Exception) {
           log.error("Failed to enter directive or click generate button", e)
@@ -187,12 +187,12 @@ class GenerateRelatedFileActionTest : DemoTestBase(
     }
 
     step("Verify file creation") {
-      speak("Verifying file creation.")
+      speak("Let's examine the generated presentation file. Notice how the AI has preserved the content hierarchy while adding reveal.js presentation features.")
       waitFor(Duration.ofSeconds(600)) {
         try {
           find(ComponentFixture::class.java, byXpath("//div[@class='EditorCompositePanel']"), Duration.ofSeconds(600))
           log.info("Presentation.html file created successfully")
-          speak("File generation completed successfully.")
+          speak("The presentation has been created successfully. You can now use this HTML file for interactive presentations of your documentation.")
           true
         } catch (e: Exception) {
           false
@@ -201,7 +201,7 @@ class GenerateRelatedFileActionTest : DemoTestBase(
       sleep(3000)
     }
 
-    speak("Demo concluded. The Generate Related File feature has converted README.md to a reveal.js HTML presentation.")
+    speak("This demonstrates how the Generate Related File feature can transform existing content into different formats while preserving meaning and structure. Try it with other file types and transformations to enhance your development workflow.")
   }
 
   @AfterAll

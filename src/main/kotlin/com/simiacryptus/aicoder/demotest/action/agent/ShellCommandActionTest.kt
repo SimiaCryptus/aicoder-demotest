@@ -78,19 +78,19 @@ class ShellCommandActionTest : DemoTestBase(
 
   @Test
   fun testShellCommand() = with(remoteRobot) {
-    speak("Welcome to the AI Coder Shell Command demo.")
+    speak("Welcome to the Shell Command feature demonstration. This powerful tool combines AI assistance with shell command execution to help you manage your project more effectively.")
     log.info("Starting Shell Command test")
     Thread.sleep(2000)
 
     step("Open project view") {
-      speak("Opening the project view to access the project structure.")
+      speak("Let's begin by accessing our project structure. The Shell Command feature works best when we have a clear context of our working directory.")
       openProjectView()
       log.info("Project view opened")
       Thread.sleep(2000)
     }
 
     step("Select project root") {
-      speak("Selecting the project root directory.")
+      speak("We'll select our project's source directory, which will become our working directory for command execution. This ensures our commands operate in the right context.")
       val path = arrayOf(testProjectDir.toFile().name, "src", "main", "kotlin")
       val tree = find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
       waitFor(Duration.ofSeconds(10)) {
@@ -102,7 +102,7 @@ class ShellCommandActionTest : DemoTestBase(
     }
 
     step("Navigate to Shell Agent") {
-      speak("Navigating to the Shell Agent feature.")
+      speak("Now we'll access the Shell Agent through the AI Coder menu. This intelligent agent combines shell command execution with AI assistance to help you accomplish tasks more efficiently.")
       waitFor(Duration.ofSeconds(10)) {
         try {
           val aiCoderMenu = selectAICoderMenu()
@@ -144,14 +144,14 @@ class ShellCommandActionTest : DemoTestBase(
 
       if (url != null) {
         log.info("Retrieved Shell Command interface URL: $url")
-        speak("Shell Command interface opened.")
+        speak("The Shell Command interface opens in your browser, providing a chat-like experience where you can interact with both the AI assistant and your system's shell.")
         driver.get(url)
         val wait = WebDriverWait(driver, Duration.ofSeconds(90))
 
         try {
           val chatInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("chat-input")))
           log.info("Chat interface loaded")
-          speak("Interface loaded. Submitting command.")
+          speak("Let's try a simple directory listing command. The AI assistant will help interpret the output and suggest relevant follow-up actions.")
           Thread.sleep(1000)
 
           // Enter command
@@ -166,17 +166,17 @@ class ShellCommandActionTest : DemoTestBase(
           // Submit command
           wait.until(ExpectedConditions.elementToBeClickable(By.id("send-message-button"))).click()
           log.info("Command submitted")
-          speak("Command submitted. Waiting for execution.")
+          speak("Watch as the command executes and the AI analyzes its output in real-time.")
           Thread.sleep(2000)
 
           // Wait for response
           wait.until(ExpectedConditions.presenceOfElementLocated(By.className("response-message")))
-          speak("Command executed. Output displayed.")
+          speak("The command has completed. Notice how the AI provides context and explanations for the output, making it easier to understand your project's structure.")
           Thread.sleep(3000)
 
         } catch (e: Exception) {
           log.error("Error during Shell Command interaction: ${e.message}", e)
-          speak("Error encountered during command execution.")
+          speak("We've encountered an issue. In a real scenario, the AI would help diagnose the problem and suggest potential solutions.")
         } finally {
           driver.quit()
           log.info("Browser session closed")
@@ -188,7 +188,7 @@ class ShellCommandActionTest : DemoTestBase(
       clearMessageBuffer()
     }
 
-    speak("Shell Command demonstration completed. This feature enables AI-assisted shell command execution within your project directory.")
+    speak("That concludes our demonstration of the Shell Command feature. You've seen how it combines the power of your system's shell with AI assistance to make command-line operations more intuitive and productive. Try it with more complex commands to see how the AI can help interpret outputs and suggest next steps.")
     Thread.sleep(5000)
   }
 }

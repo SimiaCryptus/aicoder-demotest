@@ -86,12 +86,12 @@ class OutlineActionTest : DemoTestBase(
 
   @Test
   fun testOutlineTool() = with(remoteRobot) {
-    speak("Welcome to the AI Coder Outline Tool demo.")
+    speak("Welcome to the AI Coder Outline Tool - a powerful feature that helps you create structured content with AI assistance. Let's explore how it can streamline your documentation process.")
     log.info("Starting Outline Tool test")
     sleep(2000)
 
     step("Open Tools menu") {
-      speak("Opening the Tools menu to access the Outline Tool.")
+      speak("First, we'll access the Outline Tool through the IDE's main menu. You can find it under Tools > AI Coder.")
       waitFor(Duration.ofSeconds(10)) {
         try {
           log.debug("Attempting to find and click main menu")
@@ -107,7 +107,7 @@ class OutlineActionTest : DemoTestBase(
     }
 
     step("Select AI Coder > Outline Tool") {
-      speak("Selecting the Outline Tool from the AI Coder menu.")
+      speak("The Outline Tool is one of several AI-powered features available in the AI Coder menu. Let's select it to begin our content structuring process.")
       // Use more specific selectors and handle each click separately
       waitFor(Duration.ofSeconds(15)) {
         try {
@@ -139,13 +139,13 @@ class OutlineActionTest : DemoTestBase(
     }
 
     step("Configure Outline Tool") {
-      speak("Configuring Outline Tool settings.")
+      speak("Before we start, let's configure the tool for optimal results. We'll enable the Projector visualization for better structure overview, and the Final Essay option to generate complete content.")
       waitFor(Duration.ofSeconds(10)) {
         val dialog = find(CommonContainerFixture::class.java, byXpath("//div[@class='MyDialog' and @title='Configure Outline Tool']"))
         if (dialog.isShowing) {
           dialog.find(JCheckboxFixture::class.java, byXpath("//div[@class='JBCheckBox' and @text='Show Projector']")).select()
           dialog.find(JCheckboxFixture::class.java, byXpath("//div[@class='JBCheckBox' and @text='Write Final Essay']")).select()
-          speak("Settings configured for optimal outline generation.")
+          speak("These settings will help us create a comprehensive outline with visual relationships between sections.")
           val okButton = dialog.find(CommonContainerFixture::class.java, byXpath("//div[@class='JButton' and @text='OK']"))
           okButton.click()
           log.info("Outline Tool configured and started")
@@ -168,25 +168,25 @@ class OutlineActionTest : DemoTestBase(
 
       if (url != null) {
         log.info("Retrieved Outline interface URL: $url")
-        speak("Outline web interface opened.")
+        speak("The Outline Tool opens in your browser, providing an intuitive interface for content structuring. Notice the clean, modern design optimized for productivity.")
         driver.get(url)
         val wait = WebDriverWait(driver, Duration.ofSeconds(90))
 
         try {
           val chatInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("chat-input")))
           log.info("Outline interface loaded successfully")
-          speak("Interface loaded. Submitting outline topic.")
+          speak("Now, let's create an outline for a technical article. Watch how the AI understands our topic and generates a logical structure.")
           sleep(1000)
 
           chatInput.sendKeys("Create an outline for a technical article about AI-assisted coding")
           wait.until(ExpectedConditions.elementToBeClickable(By.id("send-message-button"))).click()
           log.info("Outline request submitted")
-          speak("Outline request submitted. Waiting for AI to generate the structure.")
+          speak("I've requested an outline about AI-assisted coding. The AI will analyze the topic and create a hierarchical structure with main sections and subsections.")
           sleep(5000)
 
           // Wait for outline generation and expansion
           wait.until(ExpectedConditions.presenceOfElementLocated(By.className("outline-container")))
-          speak("Outline generated successfully. You can now expand sections for detailed content.")
+          speak("Look at how the AI has organized the topic into logical sections. You can click any section to expand it and add more detail. The Projector visualization helps you understand relationships between different parts of your content.")
           sleep(3000)
 
           log.info("Outline Tool interaction completed successfully")
@@ -199,12 +199,12 @@ class OutlineActionTest : DemoTestBase(
         }
       } else {
         log.error("Failed to retrieve Outline interface URL")
-        speak("Error: Unable to retrieve the Outline Tool interface URL.")
+        speak("We've encountered an issue connecting to the Outline Tool. In a real scenario, you would check your internet connection and IDE settings, then try again.")
       }
       clearMessageBuffer()
     }
 
-    speak("Outline Tool demonstration completed. This feature helps create structured content with AI assistance.")
+    speak("That concludes our demonstration of the Outline Tool. As you've seen, it combines AI intelligence with an intuitive interface to help you create well-structured content quickly and efficiently. Try it with your own documentation needs to experience the productivity boost firsthand.")
     sleep(5000)
   }
 }

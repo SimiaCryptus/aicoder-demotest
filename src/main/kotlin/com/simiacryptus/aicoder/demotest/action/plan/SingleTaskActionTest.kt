@@ -88,18 +88,18 @@ class SingleTaskActionTest : DemoTestBase(
 
   @Test
   fun testSingleTaskAction() = with(remoteRobot) {
-    speak("Welcome to the AI Coder Single Task demonstration. This feature enables quick execution of simple coding tasks.")
+    speak("Welcome to the Single Task feature demonstration. This powerful tool lets you leverage AI assistance for quick, focused coding tasks without switching context.")
     log.info("Starting Single Task test")
     sleep(3000)
 
     step("Open project view") {
-      speak("Opening the project view to access files.")
+      speak("Let's start by accessing our project files. The Single Task feature works best with proper project context.")
       openProjectView()
       sleep(2000)
     }
 
     step("Select source directory") {
-      speak("Selecting the source directory.")
+      speak("We'll select our source directory where we want to perform our coding task. The AI will analyze this context to provide more relevant assistance.")
       val path = arrayOf(testProjectDir.toFile().name, "src", "main", "kotlin")
       val tree = find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
       waitFor(Duration.ofSeconds(10)) { tree.rightClickPath(*path, fullMatch = false); true }
@@ -108,13 +108,13 @@ class SingleTaskActionTest : DemoTestBase(
     }
 
     step("Select 'AI Coder' menu") {
-      speak("Opening the AI Coder menu.")
+      speak("Now we'll access the AI Coder menu. This contains all our AI-powered development tools.")
       selectAICoderMenu()
       sleep(2000)
     }
 
     step("Click 'Single Task' action") {
-      speak("Selecting the Single Task feature.")
+      speak("Under Task Plans, we'll find the Single Task feature. This is perfect for quick, focused coding tasks like implementing a specific function or fixing a bug.")
       waitFor(Duration.ofSeconds(10)) {
         try {
           // Navigate to Task Plans submenu
@@ -135,14 +135,14 @@ class SingleTaskActionTest : DemoTestBase(
     }
 
     step("Configure Single Task") {
-      speak("Configuring Single Task settings.")
+      speak("Let's configure our task settings. For this demo, we'll enable auto-apply fixes to streamline the process. You can customize these settings based on your preferences.")
       waitFor(Duration.ofSeconds(10)) {
         val dialog = find(CommonContainerFixture::class.java, byXpath("//div[@class='MyDialog']"))
         if (dialog.isShowing) {
           dialog.find(JCheckboxFixture::class.java, byXpath("//div[@text='Auto-apply fixes']")).apply {
             if (!isSelected()) {
               click()
-              speak("Enabled auto-apply fixes option.")
+              speak("With auto-apply enabled, the AI will automatically implement suggested changes after your approval.")
             }
           }
           val okButton = dialog.find(CommonContainerFixture::class.java, byXpath("//div[@class='JButton' and @text='OK']"))
@@ -165,39 +165,39 @@ class SingleTaskActionTest : DemoTestBase(
 
       if (url != null) {
         log.info("Retrieved URL: $url")
-        speak("Opening the Single Task interface.")
+        speak("The AI Coder opens a dedicated web interface for our task. This provides a clean, focused environment for interacting with the AI assistant.")
         driver.get(url)
         val wait = WebDriverWait(driver, Duration.ofSeconds(90))
 
         try {
           val chatInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("chat-input")))
-          speak("Submitting a simple task request.")
+          speak("Let's try a common programming task - implementing a factorial function. Watch how the AI understands the requirement and generates appropriate code.")
           chatInput.sendKeys("Create a function to calculate the factorial of a number")
           sleep(1000)
 
           val submitButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("send-message-button")))
           submitButton.click()
-          speak("Request submitted. Waiting for AI response.")
+          speak("The AI is now analyzing our request and the project context to generate an optimal implementation.")
           sleep(5000)
 
           // Wait for response
           wait.until(ExpectedConditions.presenceOfElementLocated(By.className("response-message")))
-          speak("AI has provided a response with the implementation.")
+          speak("Notice how the AI provides not just the implementation, but also includes documentation and usage examples. You can now review and apply these changes directly to your code.")
           sleep(3000)
         } catch (e: Exception) {
           log.error("Error during Single Task interaction: ${e.message}", e)
-          speak("Encountered an error during task execution.")
+          speak("In case of any issues, the AI Coder provides clear error messages and recovery options.")
         } finally {
           driver.quit()
         }
       } else {
         log.error("Failed to retrieve interface URL")
-        speak("Error retrieving the interface URL.")
+        speak("If you encounter connection issues, verify your network settings and API configuration.")
       }
       clearMessageBuffer()
     }
 
-    speak("Single Task demonstration completed. This feature provides a streamlined way to execute simple coding tasks.")
+    speak("That concludes our Single Task demonstration. As you've seen, this feature combines the power of AI with a focused interface to help you quickly implement code changes while maintaining high quality and proper documentation.")
     sleep(5000)
   }
 }

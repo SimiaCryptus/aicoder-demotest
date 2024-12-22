@@ -105,7 +105,7 @@ class CodeChatActionTest : DemoTestBase(
 
   @Test
   fun testCodeChatAction() = with(remoteRobot) {
-    speak("Welcome to the AI Coder demo. We'll explore the Code Chat feature, which enables AI interaction for code-related queries and assistance.")
+    speak("Welcome to the Code Chat feature demonstration. This powerful tool enables real-time AI assistance while you code, helping you understand, modify, and improve your codebase through natural language interaction.")
     log.info("Starting testCodeChatAction")
     sleep(2000)
 
@@ -113,7 +113,7 @@ class CodeChatActionTest : DemoTestBase(
       openProjectView()
       log.info("Project view opened")
       try {
-        speak("Opening the project view to access files.")
+        speak("Let's start by accessing our project files. The Code Chat feature works with any file in your project, providing context-aware assistance.")
       } catch (e: Exception) {
         log.warn("Failed to provide audio feedback: ${e.message}")
       }
@@ -123,7 +123,7 @@ class CodeChatActionTest : DemoTestBase(
 
     val projectName = testProjectDir.fileName.name
     step("Open a Kotlin file") {
-      speak("Opening a Kotlin file for the Code Chat demonstration.")
+      speak("We'll open a Kotlin source file that contains code we want to analyze. Code Chat works with any programming language supported by your IDE.")
       val path = arrayOf(projectName, "src", "main", "kotlin", "Main.kt")
       val tree = remoteRobot.find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
       for (i in (0 until path.size - 1)) {
@@ -135,7 +135,7 @@ class CodeChatActionTest : DemoTestBase(
     }
 
     step("Select code") {
-      speak("Selecting code to provide context for the AI.")
+      speak("Now we'll select the code we want to discuss. The AI will analyze this selection to provide relevant insights and suggestions. You can select specific sections or entire files.")
       val editor = find(EditorFixture::class.java, byXpath("//div[@class='EditorComponentImpl']"))
       editor.click()
       keyboard {
@@ -148,7 +148,7 @@ class CodeChatActionTest : DemoTestBase(
     }
 
     step("Open context menu") {
-      speak("Opening the context menu to access AI Coder features.")
+      speak("To start a Code Chat session, we'll use the context menu. This is one of several ways to access the AI Coder's features.")
       val editor = find(EditorFixture::class.java, byXpath("//div[@class='EditorComponentImpl']"))
       editor.rightClick()
       log.info("Context menu opened via right-click")
@@ -156,13 +156,13 @@ class CodeChatActionTest : DemoTestBase(
     }
 
     step("Select 'AI Coder' menu") {
-      speak("Selecting the 'AI Coder' option from the context menu.")
+      speak("Under the AI Coder menu, you'll find various AI-powered development tools. We're interested in the Code Chat feature for this demonstration.")
       selectAICoderMenu()
       sleep(2000)
     }
 
     step("Click 'Code Chat' action") {
-      speak("Initiating the 'Code Chat' feature for an interactive dialogue with AI about our code.")
+      speak("When we select Code Chat, the plugin will analyze our code selection and open an interactive chat interface in your default browser. This provides a comfortable environment for detailed code discussions.")
       waitFor(Duration.ofSeconds(15)) {
         try {
           findAll(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'AI Editor')]"))
@@ -192,7 +192,7 @@ class CodeChatActionTest : DemoTestBase(
 
       if (url != null) {
         log.info("Retrieved Code Chat interface URL: $url")
-        speak("Code Chat web interface opened.")
+        speak("The chat interface has opened in your browser. Notice how it displays your code selection for reference during the conversation.")
         log.debug("Initializing web driver")
         driver.get(url)
         log.debug("Setting up WebDriverWait with 90 second timeout")
@@ -202,7 +202,7 @@ class CodeChatActionTest : DemoTestBase(
           // Get chat input element
           val chatInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("chat-input")))
           log.info("Chat interface loaded successfully")
-          speak("Interface loaded. Submitting request.")
+          speak("The interface is ready for interaction. You can ask questions about the code, request improvements, or seek explanations - all in natural language.")
           sleep(1000)
 
           val tabsById = driver.findElements(By.cssSelector("div.tabs-container")).toList().associateBy { it.getDomAttribute("id") }.toMutableMap()
@@ -212,13 +212,13 @@ class CodeChatActionTest : DemoTestBase(
 
           log.debug("Submitting request to chat interface")
           chatInput.click()
-          speak("Entering a request for the AI to create a user manual for our class.")
+          speak("Let's ask the AI to create a user manual for our class. This demonstrates how Code Chat can help with documentation tasks while maintaining full context of the code.")
           chatInput.sendKeys("Create a user manual for this class")
           sleep(1000)
 
           wait.until(ExpectedConditions.elementToBeClickable(By.id("send-message-button"))).click()
           log.info("Request submitted successfully")
-          speak("Request submitted. Waiting for AI response.")
+          speak("The request is being processed. The AI analyzes both the code structure and your request to generate comprehensive, contextually relevant responses.")
           sleep(2000)
 
           driver.findElements(By.cssSelector("div.tabs-container")).toList().associateBy { it.getDomAttribute("id") }.filterNot { tabsById.containsKey(it.key) }
@@ -227,10 +227,10 @@ class CodeChatActionTest : DemoTestBase(
               tabsById[it.key] = it.value
             }
 
-          speak("AI response received and displayed.")
+          speak("The AI has provided a detailed response. Notice how it structures the documentation based on the actual code implementation while following best practices.")
           sleep(3000)
           log.info("Code Chat interaction completed successfully")
-          speak("We've successfully demonstrated the Code Chat feature.")
+          speak("The Code Chat feature makes it easy to have meaningful discussions about your code, whether you're seeking explanations, improvements, or documentation help.")
         } catch (e: Exception) {
           log.error("Error during Code Chat interaction: ${e.message}", e)
           speak("Encountered an error during Code Chat interaction. Please check the logs for details.")
@@ -248,7 +248,7 @@ class CodeChatActionTest : DemoTestBase(
       clearMessageBuffer()
     }
 
-    speak("Demo concluded. We've demonstrated initiating a Code Chat session, submitting a query, and receiving an AI-generated response.")
+    speak("This concludes our Code Chat demonstration. We've seen how it provides an intuitive interface for AI-powered code discussions, helping you better understand and document your code. Try experimenting with different types of queries to explore its full capabilities.")
     sleep(5000) // Final sleep of 5 seconds
   }
 

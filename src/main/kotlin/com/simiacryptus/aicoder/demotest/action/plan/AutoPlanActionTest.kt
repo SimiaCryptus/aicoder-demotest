@@ -94,13 +94,13 @@ class AutoPlanActionTest : DemoTestBase(
   @Test
   fun testAutoPlanAction() = with(remoteRobot) {
     log.debug("Initializing Auto-Plan test execution")
-    speak("Welcome to the AI Coder Auto-Plan demonstration. This feature provides automated planning and execution of coding tasks.")
+    speak("Welcome to the AI Coder Auto-Plan feature. Let's explore how it can break down complex coding tasks into manageable steps and execute them automatically.")
     log.info("Starting Auto-Plan demonstration test")
     sleep(3000)
 
     step("Open project view") {
       log.debug("Attempting to open project view")
-      speak("Opening the project view to access the file structure.")
+      speak("First, we'll open the project view to select our target directory for the new code generation.")
       openProjectView()
       log.info("Project view opened successfully")
       sleep(2000)
@@ -108,7 +108,7 @@ class AutoPlanActionTest : DemoTestBase(
 
     step("Select source directory") {
       log.debug("Starting source directory selection")
-      speak("Navigating to the source directory.")
+      speak("We'll navigate to the main source directory where our new utility class will be created. Notice how Auto-Plan maintains proper project structure.")
       val path = arrayOf(testProjectDir.name, "src", "main", "kotlin")
       log.debug("Attempting to locate project tree with path: ${path.joinToString("/")}")
       val tree = find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
@@ -121,16 +121,15 @@ class AutoPlanActionTest : DemoTestBase(
     lateinit var aiCoderMenu: CommonContainerFixture
     step("Open AI Coder menu") {
       log.debug("Attempting to open AI Coder menu")
-      speak("Opening the AI Coder menu.")
+      speak("From the context menu, we'll access AI Coder's powerful features through its dedicated menu.")
       aiCoderMenu = selectAICoderMenu()
       log.info("AI Coder menu opened successfully")
-      speak("AI Coder menu opened.")
       sleep(3000)
     }
 
     step("Select Auto-Plan action") {
       log.debug("Starting Auto-Plan action selection")
-      speak("Selecting the Auto-Plan feature.")
+      speak("Let's select the Auto-Plan feature, which will help us create a well-structured utility class with proper documentation and test coverage.")
       waitFor(Duration.ofSeconds(10)) {
         try {
           val taskMenu = find(CommonContainerFixture::class.java, byXpath("//div[@text='AI Coder']//div[@text='\uD83D\uDCCB Task Plans']"))
@@ -146,7 +145,7 @@ class AutoPlanActionTest : DemoTestBase(
               click()
             }
           log.info("Auto-Plan action found and clicked successfully")
-          speak("Auto-Plan feature initiated.")
+          speak("The Auto-Plan feature is now initializing. It will guide us through the entire development process step by step.")
           true
         } catch (e: Exception) {
           log.warn("Failed to find Auto-Plan action. Error: ${e.message}", e)
@@ -159,7 +158,7 @@ class AutoPlanActionTest : DemoTestBase(
 
     step("Configure Task Runner") {
       log.debug("Starting Task Runner configuration")
-      speak("Configuring Task Runner settings.")
+      speak("Before we begin, let's configure the Task Runner for optimal automation. We can customize how Auto-Plan handles code changes and user interactions.")
       waitFor(Duration.ofSeconds(10)) {
         val dialog = find(CommonContainerFixture::class.java, byXpath("//div[@class='MyDialog']"))
         if (dialog.isShowing) {
@@ -168,14 +167,14 @@ class AutoPlanActionTest : DemoTestBase(
             if (!isSelected()) {
               click()
               log.info("Auto-apply fixes checkbox toggled to selected state")
-              speak("Enabled 'auto-apply fixes'; automatically apply suggested code changes.")
+              speak("We'll enable automatic code changes to streamline the development process, allowing Auto-Plan to implement its suggestions directly.")
             }
           }
           dialog.find(JCheckboxFixture::class.java, byXpath("//div[@text='Allow blocking']")).apply {
             if (isSelected()) {
               click()
               log.info("Allow blocking checkbox toggled to deselected state")
-              speak("Disabled 'blocking'; do not wait for user input.")
+              speak("By disabling blocking mode, Auto-Plan will execute tasks continuously without requiring manual confirmation at each step.")
             }
           }
           sleep(3000)
@@ -184,7 +183,7 @@ class AutoPlanActionTest : DemoTestBase(
           val okButton = dialog.find(CommonContainerFixture::class.java, byXpath("//div[@class='JButton' and @text='OK']"))
           okButton.click()
           log.info("Task Runner configuration completed and dialog closed")
-          speak("Task Runner configured and started.")
+          speak("With these optimal settings configured, Auto-Plan can now work efficiently to complete our development task.")
           true
         } else {
           log.warn("Configuration dialog not found or not visible")
@@ -205,7 +204,7 @@ class AutoPlanActionTest : DemoTestBase(
 
       if (url != null) {
         log.info("Retrieved Auto-Plan interface URL: $url")
-        speak("Auto-Plan web interface opened.")
+        speak("The Auto-Plan interface provides a clear view of the development process, showing each step and decision made by the AI.")
         log.debug("Initializing web driver")
         driver.get(url)
         log.debug("Setting up WebDriverWait with 90 second timeout")
@@ -213,14 +212,14 @@ class AutoPlanActionTest : DemoTestBase(
         val wait = WebDriverWait(driver, Duration.ofSeconds(90))
         val chatInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("chat-input")))
         log.info("Chat interface loaded successfully")
-        speak("Interface loaded. Submitting task description.")
+        speak("Now we can describe our task in natural language. Auto-Plan will understand the requirements and create a detailed implementation plan.")
         sleep(1000)
 
         try {
           // Submit task description
           log.debug("Submitting task description to chat interface")
           chatInput.sendKeys("Create a new utility class for string manipulation with methods for common operations")
-          speak("Submitting task: Create a new utility class for string manipulation.")
+          speak("We're requesting a new utility class for string manipulation. Watch how Auto-Plan breaks this down into specific implementation tasks.")
 
           clickElement(driver, wait, "#send-message-button")
           log.info("Task description submitted successfully")
@@ -254,7 +253,7 @@ class AutoPlanActionTest : DemoTestBase(
               break
             } else {
               log.debug("Processing agent iteration ${planIndex - 2}: ${planButton.text}")
-              speak("Agent iteration ${planIndex - 2} in progress.")
+              speak("In iteration ${planIndex - 2}, Auto-Plan is analyzing the code structure and planning the next implementation steps.")
             }
 
             var taskIndex = 2
@@ -296,7 +295,7 @@ class AutoPlanActionTest : DemoTestBase(
       clearMessageBuffer()
     }
     log.info("Auto-Plan demonstration test completed successfully")
-    speak("Auto-Plan demonstration completed. This feature automates the planning and execution of coding tasks, improving development efficiency.")
+    speak("We've seen how Auto-Plan can transform a simple request into a fully implemented feature, complete with proper structure, documentation, and tests. This AI-powered automation significantly accelerates the development process while maintaining high code quality.")
   }
 
 }

@@ -92,13 +92,13 @@ class GenerateDocumentationActionTest : DemoTestBase(
 
   @Test
   fun testGenerateDocumentation() = with(remoteRobot) {
-    speak("This demo showcases the AI Coder's Generate Documentation feature for automatic API documentation creation.")
+    speak("Welcome to the AI Coder's Documentation Generator demo. This powerful feature automatically creates comprehensive API documentation by analyzing your code with AI assistance.")
     try {
       log.info("Starting testGenerateDocumentation")
       sleep(3000)
 
       step("Open project view") {
-        speak("Opening the project view to access files.")
+        speak("Let's start by opening the project view where we'll select our target code for documentation.")
         openProjectView()
       }
       step("Navigate to files utility package") {
@@ -113,18 +113,19 @@ class GenerateDocumentationActionTest : DemoTestBase(
         val path = arrayOf(testProjectDir.name, "src", "main", "kotlin", "com", "simiacryptus", "util", "files")
         val tree = remoteRobot.find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
         waitFor(Duration.ofSeconds(10)) { tree.rightClickPath(*path, fullMatch = false); true }
+        speak("We'll navigate to the files utility package - a perfect example of code that would benefit from detailed documentation.")
         log.info("Files utility package selected")
         sleep(2000)
       }
 
       step("Select 'AI Coder' menu") {
-        speak("Selecting the AI Coder option from the context menu.")
+        speak("Now we'll access the AI Coder menu, which contains our documentation generation tools.")
         selectAICoderMenu()
         sleep(2000)
       }
 
       step("Click 'Generate Documentation' action") {
-        speak("Initiating the 'Generate Documentation' action.")
+        speak("Let's select 'Generate Documentation' to begin the AI-powered documentation process.")
         waitFor(Duration.ofSeconds(15)) {
           try {
             // Find and hover over Generate menu
@@ -151,7 +152,7 @@ class GenerateDocumentationActionTest : DemoTestBase(
 
       step("Configure documentation generation") {
         val DIALOG_TITLE = "Compile Documentation"
-        speak("Configuring documentation generation settings.")
+        speak("Here we can customize how the AI generates our documentation. Let's provide specific instructions to ensure we get exactly what we need.")
         waitFor(Duration.ofSeconds(10)) {
           val dialog = find(CommonContainerFixture::class.java, byXpath("//div[@class='MyDialog' and @title='$DIALOG_TITLE']"))
           dialog.isShowing
@@ -174,24 +175,23 @@ class GenerateDocumentationActionTest : DemoTestBase(
           val generateButton = find(CommonContainerFixture::class.java, byXpath("//div[@class='JButton' and @text='OK']"))
           generateButton.click()
           log.info("Documentation generation configured and started")
-          speak("Documentation generation initiated with custom instructions.")
+          speak("With our instructions set, the AI will now analyze the code and generate appropriate documentation following best practices.")
           true
         } catch (e: Exception) {
           log.warn("Failed to configure documentation generation: ${e.message}")
           false
         }
       }
-      speak("AI is processing the request. This process typically takes a few seconds, depending on package size and complexity.")
+      speak("Watch as the AI analyzes the code structure, relationships, and patterns to create meaningful documentation. This typically takes a few moments depending on the codebase size.")
       sleep(5000)
 
-      step("Verify documentation creation")
-      {
-        speak("Verifying documentation creation and editor display.")
+      step("Verify documentation creation") {
+        speak("The AI has completed its analysis. Let's examine the generated documentation.")
         waitFor(Duration.ofSeconds(600)) {
           try {
             val editor = find(CommonContainerFixture::class.java, byXpath("//div[@class='EditorCompositePanel']"))
             if (editor.isShowing) {
-              speak("Documentation successfully generated and displayed in the editor.")
+              speak("Notice how the generated documentation includes detailed descriptions, parameter explanations, and usage examples - all automatically created while maintaining your project's documentation style.")
               true
             } else {
               false
@@ -202,8 +202,11 @@ class GenerateDocumentationActionTest : DemoTestBase(
           }
         }
         sleep(3000)
-        speak("Demo complete. The Generate Documentation feature has created comprehensive API documentation for the files utility package, demonstrating its efficiency in automating documentation tasks.")
+        speak("And that's how easy it is to generate comprehensive documentation with AI Coder! This feature saves hours of manual documentation work while ensuring consistency and completeness across your codebase.")
       }
+    } catch (e: Exception) {
+      log.error("Error during documentation generation test", e)
+      throw e
     } finally {
       clearMessageBuffer()
     }

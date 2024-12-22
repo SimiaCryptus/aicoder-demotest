@@ -94,19 +94,19 @@ class DocumentedMassPatchActionTest : DemoTestBase(
 
   @Test
   fun testDocumentedMassPatch() = with(remoteRobot) {
-    speak("Welcome to the AI Coder Documented Mass Patch demo.")
+    speak("Welcome to the Documented Mass Patch feature demonstration. This powerful tool helps ensure your code stays aligned with documentation standards by automatically analyzing and updating multiple files.")
     log.info("Starting Documented Mass Patch test")
     Thread.sleep(2000)
 
     step("Open project view") {
       log.info("Opening project view")
       openProjectView()
-      speak("Opening the project view to access files.")
+      speak("First, let's open the project view where we can select both our documentation and code files that need to be synchronized.")
       Thread.sleep(2000)
     }
 
     step("Select project files") {
-      speak("Selecting project files for mass patch operation.")
+      speak("We'll select our source code directory which contains multiple files that need to be updated. The AI will analyze both the documentation standards and the code to suggest appropriate changes.")
       val path = arrayOf(testProjectDir.name, "src", "main", "kotlin")
       val tree = find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
       waitFor(Duration.ofSeconds(10)) { tree.rightClickPath(*path, fullMatch = false); true }
@@ -115,13 +115,13 @@ class DocumentedMassPatchActionTest : DemoTestBase(
     }
 
     step("Open AI Coder menu") {
-      speak("Opening the AI Coder menu.")
+      speak("Now we'll access the AI Coder menu, which contains our powerful code transformation tools.")
       selectAICoderMenu()
       Thread.sleep(2000)
     }
 
     step("Select Mass Patch action") {
-      speak("Initiating the Documented Mass Patch action.")
+      speak("Let's select the Documented Mass Patch action. This will start our automated documentation compliance process.")
       waitFor(Duration.ofSeconds(10)) {
         try {
           findAll(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Mass Patch')]"))
@@ -137,7 +137,7 @@ class DocumentedMassPatchActionTest : DemoTestBase(
     }
 
     step("Configure patch settings") {
-      speak("Configuring patch settings.")
+      speak("In the settings dialog, we can customize how the AI analyzes and updates our code. We'll enter specific instructions for documentation compliance and enable automatic application of changes for efficiency.")
       waitFor(Duration.ofSeconds(10)) {
         val dialog = find(CommonContainerFixture::class.java, byXpath("//div[@class='MyDialog']"))
         if (dialog.isShowing) {
@@ -155,7 +155,7 @@ class DocumentedMassPatchActionTest : DemoTestBase(
           dialog.find(JCheckboxFixture::class.java, byXpath("//div[@text='Auto Apply Changes']"))
             .apply { if (!isSelected()) click() }
 
-          speak("Settings configured with auto-apply enabled.")
+          speak("We've enabled auto-apply to streamline the process, allowing the AI to automatically implement approved changes across all selected files.")
           val okButton = dialog.find(CommonContainerFixture::class.java, byXpath("//div[@class='JButton' and @text='OK']"))
           okButton.click()
           log.info("Patch settings configured")
@@ -166,7 +166,7 @@ class DocumentedMassPatchActionTest : DemoTestBase(
     }
 
     step("Process patches") {
-      speak("Processing patches through web interface.")
+      speak("Now we'll see the AI in action as it analyzes our documentation and code files. The web interface provides a clear view of all suggested changes and their implementation status.")
       val messages = getReceivedMessages()
       val url = messages.firstOrNull { it.startsWith("http") }
       if (url != null) {
@@ -177,14 +177,14 @@ class DocumentedMassPatchActionTest : DemoTestBase(
         try {
           // Wait for interface to load
           wait.until(ExpectedConditions.elementToBeClickable(By.id("chat-input")))
-          speak("Web interface loaded. Reviewing patches.")
+          speak("The interface has loaded, showing us a detailed breakdown of all proposed changes. Each modification is carefully aligned with our documentation standards.")
 
           // Wait for patches to be generated and applied
           wait.until { driver ->
             val elements = driver.findElements(By.cssSelector(".message-container"))
             elements.any { it.isDisplayed }
           }
-          speak("Patches generated and being applied automatically.")
+          speak("Watch as the AI automatically applies the changes, ensuring consistent documentation compliance across all files. Each change is logged for review and version control.")
           Thread.sleep(5000)
 
           // Review results
@@ -196,18 +196,18 @@ class DocumentedMassPatchActionTest : DemoTestBase(
 
         } catch (e: Exception) {
           log.error("Error during patch processing", e)
-          speak("Encountered an error during patch processing.")
+          speak("In case of any issues during the process, the system provides clear error messages and allows for manual intervention if needed.")
         } finally {
           driver.quit()
         }
       } else {
         log.error("No URL found in messages")
-        speak("Failed to retrieve web interface URL.")
+        speak("If the web interface fails to load, you can always restart the process or use the IDE's built-in diff viewer for manual review.")
       }
       clearMessageBuffer()
     }
 
-    speak("Documented Mass Patch demo completed. The feature allows automated code updates based on documentation standards.")
+    speak("And that concludes our demonstration of the Documented Mass Patch feature. As you've seen, it dramatically simplifies the process of maintaining consistency between your documentation and code, saving time while ensuring high-quality standards across your entire project.")
     Thread.sleep(5000)
   }
 }

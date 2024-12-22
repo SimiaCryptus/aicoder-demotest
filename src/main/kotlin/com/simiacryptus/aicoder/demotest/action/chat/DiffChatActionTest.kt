@@ -105,7 +105,7 @@ class DiffChatActionTest : DemoTestBase(
 
   @Test
   fun testDiffChatAction() = with(remoteRobot) {
-    speak("Welcome to the AI Coder demo. We'll explore the Patch Chat feature, which enables AI-assisted code modifications.")
+    speak("Welcome to the Patch Chat feature demonstration. This powerful tool enables real-time AI assistance for code improvements and refactoring, with immediate visual feedback and easy patch application.")
     log.info("Starting testDiffChatAction")
     sleep(2000)
 
@@ -113,7 +113,7 @@ class DiffChatActionTest : DemoTestBase(
       openProjectView()
       log.info("Project view opened")
       try {
-        speak("Opening the project view to access files.")
+        speak("Let's start by accessing our project files. The Patch Chat feature works with any code file in your project.")
       } catch (e: Exception) {
         log.warn("Failed to provide audio feedback: ${e.message}")
       }
@@ -122,7 +122,7 @@ class DiffChatActionTest : DemoTestBase(
 
     val projectName = testProjectDir.fileName.name
     step("Open a Kotlin file") {
-      speak("Opening a Kotlin file for the Patch Chat demonstration.")
+      speak("We'll open a Kotlin file that could benefit from some improvements. Patch Chat works with any programming language the IDE supports.")
       val path = arrayOf(projectName, "src", "main", "kotlin", "Main.kt")
       val tree = remoteRobot.find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
       waitFor(Duration.ofSeconds(10)) { tree.doubleClickPath(*path, fullMatch = false); true }
@@ -131,7 +131,7 @@ class DiffChatActionTest : DemoTestBase(
     }
 
     step("Select code") {
-      speak("Selecting code to provide context for the AI.")
+      speak("Now we'll select the code we want to improve. The AI analyzes both the selected code and its context to provide relevant suggestions.")
       val editor = find(EditorFixture::class.java, byXpath("//div[@class='EditorComponentImpl']"))
       editor.click()
       keyboard {
@@ -144,7 +144,7 @@ class DiffChatActionTest : DemoTestBase(
     }
 
     step("Open context menu") {
-      speak("Opening the context menu to access AI Coder features.")
+      speak("The Patch Chat feature is easily accessible through the context menu. You can also configure keyboard shortcuts for quicker access.")
       val editor = find(EditorFixture::class.java, byXpath("//div[@class='EditorComponentImpl']"))
       editor.rightClick()
       log.info("Context menu opened via right-click")
@@ -152,13 +152,13 @@ class DiffChatActionTest : DemoTestBase(
     }
 
     step("Select 'AI Coder' menu") {
-      speak("Selecting the 'AI Coder' option from the context menu.")
+      speak("Under the AI Coder menu, you'll find various AI-powered features. Each one is designed for specific development tasks.")
       selectAICoderMenu()
       sleep(2000)
     }
 
     step("Click 'Patch Chat' action") {
-      speak("Initiating the 'Patch Chat' feature for AI-suggested code improvements.")
+      speak("Let's launch Patch Chat. This will open an interactive interface where we can discuss code improvements with the AI assistant.")
       waitFor(Duration.ofSeconds(15)) {
         try {
           findAll(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Patch Chat')]"))
@@ -194,23 +194,23 @@ class DiffChatActionTest : DemoTestBase(
         try {
           val chatInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("chat-input")))
           log.info("Chat interface loaded successfully")
-          speak("Interface loaded. Submitting request.")
+          speak("The chat interface is now ready. Watch how we can request code improvements using natural language.")
           sleep(1000)
 
           log.debug("Submitting request to chat interface")
           chatInput.click()
-          speak("Requesting code improvements and optimizations.")
+          speak("We'll ask the AI to suggest optimizations. You can be as specific or general as needed - for example, requesting performance improvements, better error handling, or cleaner code structure.")
           chatInput.sendKeys("Suggest improvements to optimize this code")
           sleep(1000)
 
           wait.until(ExpectedConditions.elementToBeClickable(By.id("send-message-button"))).click()
           log.info("Request submitted successfully")
-          speak("Request submitted. Waiting for AI response.")
+          speak("The AI is analyzing our code and generating improvement suggestions. Each suggestion will come with a detailed explanation and ready-to-apply patches.")
           sleep(2000)
 
           // Wait for and handle the response
           wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".message-container")))
-          speak("AI has generated suggested improvements. Reviewing patches.")
+          speak("Let's review the AI's suggestions. Notice how each patch comes with an explanation of the changes and their benefits. You can apply patches directly from this interface.")
           sleep(3000)
 
           // Look for and click any "Apply" buttons
@@ -218,12 +218,12 @@ class DiffChatActionTest : DemoTestBase(
             .filter { it.text.contains("Apply", ignoreCase = true) }
 
           if (applyButtons.isNotEmpty()) {
-            speak("Applying a suggested improvement.")
+            speak("We'll apply one of the suggested improvements. The patch will be automatically applied to your code while maintaining proper formatting and structure.")
             applyButtons.first().click()
             sleep(2000)
           }
 
-          speak("Patch Chat demonstration completed successfully.")
+          speak("And that's how easy it is to improve your code with Patch Chat! You can continue the conversation to refine the changes or request additional improvements.")
           log.info("Patch Chat interaction completed successfully")
         } catch (e: Exception) {
           log.error("Error during Patch Chat interaction: ${e.message}", e)
@@ -241,7 +241,7 @@ class DiffChatActionTest : DemoTestBase(
       clearMessageBuffer()
     }
 
-    speak("Demo concluded. We've demonstrated initiating a Patch Chat session, requesting improvements, and applying AI-suggested code changes.")
+    speak("This concludes our Patch Chat demonstration. We've seen how it streamlines code improvement by combining AI analysis, interactive discussion, and automated patch application. Try it with your own code to experience the benefits of AI-assisted development!")
     sleep(5000)
   }
 

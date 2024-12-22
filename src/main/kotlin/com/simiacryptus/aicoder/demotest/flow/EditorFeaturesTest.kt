@@ -84,12 +84,13 @@ class EditorFeaturesTest : DemoTestBase(
 
   @Test
   fun testEditorFeatures() = with(remoteRobot) {
-    speak("Welcome to the AI Coder Editor Features demo.")
+    speak("Welcome to the AI Coder Editor Features demonstration, where we'll explore powerful tools that enhance your coding workflow.")
     log.info("Starting editor features test suite")
     Thread.sleep(2000)
 
     step("Open project view and file") {
       log.info("Opening project view and navigating to test file")
+      speak("Let's start by opening a sample Kotlin file where we'll demonstrate these features.")
       openProjectView()
       val path = arrayOf(testProjectDir.name, "src", "main", "kotlin", "Main.kt")
       log.debug("Navigating to file path: {}", path.joinToString("/"))
@@ -108,7 +109,8 @@ class EditorFeaturesTest : DemoTestBase(
 
     step("Test Smart Paste") {
       log.info("Starting Smart Paste test")
-      speak("Demonstrating the Smart Paste feature.")
+      speak("First, let's look at Smart Paste, which intelligently converts code between different programming languages.")
+      speak("I'll copy a JavaScript function to the clipboard, and we'll convert it to Kotlin.")
       // Set sample code in clipboard
       setClipboardContent(
         """
@@ -128,12 +130,14 @@ class EditorFeaturesTest : DemoTestBase(
       )
         .firstOrNull()?.click()
       log.debug("Smart Paste operation triggered")
+      speak("Notice how Smart Paste automatically converts the JavaScript syntax to idiomatic Kotlin code.")
       Thread.sleep(3000) // Wait for AI processing
     }
 
     step("Test Fast Paste") {
       log.info("Starting Fast Paste test")
-      speak("Now testing the Fast Paste feature for quick code conversion.")
+      speak("Next, we'll try Fast Paste, which is optimized for quick conversions of simpler code snippets.")
+      speak("This time, we'll convert a Java class that's wrapped in HTML markup.")
       // Set HTML content in clipboard
       setClipboardContent(
         """
@@ -156,12 +160,14 @@ class EditorFeaturesTest : DemoTestBase(
         byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Fast Paste')]")
       ).firstOrNull()?.click()
       log.debug("Fast Paste operation triggered")
+      speak("Fast Paste quickly strips the HTML formatting and converts the Java code to Kotlin.")
       Thread.sleep(3000) // Wait for AI processing
     }
 
     step("Test Code Description") {
       log.info("Starting Code Description test")
-      speak("Adding documentation comments to the code.")
+      speak("Finally, let's use the Describe Code feature to automatically generate documentation.")
+      speak("We'll select all the code and let the AI analyze it to create meaningful comments.")
       selectAllText(editor)
       openEditorContextMenu()
       selectAICoderMenu()
@@ -171,10 +177,11 @@ class EditorFeaturesTest : DemoTestBase(
         byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Describe Code')]")
       ).firstOrNull()?.click()
       log.debug("Code Description operation triggered")
+      speak("The AI analyzes the code structure and purpose to generate comprehensive documentation comments.")
       Thread.sleep(3000) // Wait for AI processing
     }
 
-    speak("Editor features demonstration completed.")
+    speak("That concludes our demonstration of AI Coder's editor features. These tools help streamline your coding workflow by automating common tasks and maintaining consistent code quality.")
     log.info("Editor features test suite completed successfully")
     Thread.sleep(2000)
   }

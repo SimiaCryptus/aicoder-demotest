@@ -103,18 +103,18 @@ class PlanAheadActionTest : DemoTestBase(
 
   @Test
   fun testPlanAheadAction() = with(remoteRobot) {
-    speak("Welcome to the AI Coder demo. We'll explore the Task Runner feature, which automates complex tasks to enhance coding workflow.")
+    speak("Welcome to the Task Runner feature demonstration. This powerful tool helps break down complex development tasks into manageable steps and executes them automatically.")
     log.info("Starting testPlanAheadAction")
     sleep(3000)
     step("Open project view") {
-      speak("Opening the project view to access the file structure.")
+      speak("Let's start by opening the project view where we'll select our target directory for task execution.")
       openProjectView()
       sleep(2000)
     }
 
     step("Select source directory") {
       log.debug("Starting source directory selection")
-      speak("Selecting a directory to initiate the Task Runner operation.")
+      speak("We'll select the main source directory to demonstrate how Task Runner analyzes project structure and context.")
       val path = arrayOf(testProjectDir.name, "src", "main", "kotlin")
       log.debug("Attempting to locate project tree with path: ${path.joinToString("/")}")
       val tree = remoteRobot.find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
@@ -126,16 +126,15 @@ class PlanAheadActionTest : DemoTestBase(
 
     step("Select 'AI Coder' menu") {
       log.debug("Attempting to open AI Coder menu")
-      speak("Selecting the AI Coder option from the context menu.")
+      speak("Now we'll access the AI Coder menu, which contains our intelligent development tools.")
       selectAICoderMenu()
       log.info("AI Coder menu opened successfully")
-      speak("AI Coder menu opened.")
       sleep(3000)
     }
 
     step("Click 'Task Runner' action") {
       log.debug("Starting Task Runner action selection")
-      speak("Selecting the 'Task Runner' action.")
+      speak("Let's launch the Task Runner. This tool will help us plan and execute complex development tasks with AI assistance.")
       waitFor(Duration.ofSeconds(10)) {
         try {
           // First navigate to Task Plans submenu 
@@ -146,11 +145,11 @@ class PlanAheadActionTest : DemoTestBase(
           findAll(CommonContainerFixture::class.java, byXpath(TASK_RUNNER_XPATH))
             .firstOrNull()?.click()
           log.info("Task Runner action found and clicked successfully")
-          speak("Task Runner initiated.")
+          speak("Task Runner is now initializing. We'll configure it to automatically implement our requested changes.")
           true
         } catch (e: Exception) {
           log.warn("Failed to find 'Task Runner' action. Error: ${e.message}", e)
-          speak("Failed to find Task Runner action. Retrying...")
+          speak("Just a moment while we locate the Task Runner option...")
           false
         }
       }
@@ -159,7 +158,7 @@ class PlanAheadActionTest : DemoTestBase(
 
     step("Configure Task Runner") {
       log.debug("Starting Task Runner configuration")
-      speak("Configuring Task Runner settings.")
+      speak("Let's configure the Task Runner for optimal performance. We'll enable automatic fix application and disable blocking for seamless execution.")
       waitFor(Duration.ofSeconds(10)) {
         val dialog = find(CommonContainerFixture::class.java, byXpath("//div[@class='MyDialog' and @title='Configure Planning and Tasks']"))
         if (dialog.isShowing) {
@@ -184,7 +183,7 @@ class PlanAheadActionTest : DemoTestBase(
           val okButton = dialog.find(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'JButton') and contains(@text, 'OK')]"))
           okButton.click()
           log.info("Task Runner configuration completed and dialog closed")
-          speak("Task Runner configured and started.")
+          speak("Configuration complete. The Task Runner is now optimized for automated task execution with AI assistance.")
           true
         } else {
           log.warn("Configuration dialog not found or not visible")
@@ -204,14 +203,14 @@ class PlanAheadActionTest : DemoTestBase(
       }
       if (url != null) {
         log.info("Retrieved Task Runner interface URL: $url")
-        speak("Task Runner web interface opened.")
+        speak("The Task Runner interface is now ready. We'll use it to create a new utility class with AI assistance.")
         log.debug("Initializing web driver")
         driver.get(url)
         log.debug("Setting up WebDriverWait with 90 second timeout")
         val wait = WebDriverWait(this@PlanAheadActionTest.driver, Duration.ofSeconds(90))
         val chatInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("chat-input")))
         log.info("Chat interface loaded successfully")
-        speak("Interface loaded. Interacting with Task Runner.")
+        speak("Watch as the AI analyzes our request and breaks it down into manageable development steps.")
         sleep(1000)
 
         try {
@@ -219,7 +218,7 @@ class PlanAheadActionTest : DemoTestBase(
           chatInput.sendKeys("Create a new data validation utility class with methods for common validation operations")
           clickElement(driver, wait, "#send-message-button")
           log.info("Task submitted successfully")
-          speak("Submitting task: Create a new data validation utility class.")
+          speak("We're requesting the creation of a data validation utility class. The AI will plan and implement this feature step by step.")
 
           log.debug("Beginning execution progress monitoring")
           speak("Task Runner is analyzing the task and creating an execution plan.")
@@ -275,7 +274,7 @@ class PlanAheadActionTest : DemoTestBase(
     }
     log.info("Task Runner demonstration test completed successfully")
 
-    speak("Task Runner demonstration completed. This feature automates the planning and execution of coding tasks, improving development efficiency.")
+    speak("And there you have it! The Task Runner has successfully planned and implemented our requested feature. This powerful tool streamlines development by breaking down complex tasks and executing them automatically with AI assistance.")
     sleep(10000)
   }
 

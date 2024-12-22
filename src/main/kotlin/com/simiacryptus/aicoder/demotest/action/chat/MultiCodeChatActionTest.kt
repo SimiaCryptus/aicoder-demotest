@@ -103,7 +103,7 @@ class MultiCodeChatActionTest : DemoTestBase(
 
   @Test
   fun testMultiCodeChatAction() = with(remoteRobot) {
-    speak("This demo showcases the Multi-Code Chat feature, which enables simultaneous analysis of multiple code files.")
+    speak("Welcome to the Multi-Code Chat feature demonstration. This powerful tool allows you to analyze multiple code files simultaneously using AI assistance.")
     log.info("Starting testMultiCodeChatAction")
     sleep(2000)
 
@@ -111,7 +111,7 @@ class MultiCodeChatActionTest : DemoTestBase(
       openProjectView()
       log.info("Project view opened")
       try {
-        speak("Opening the project view to access files.")
+        speak("Let's start by accessing our project files. The Multi-Code Chat feature works best when analyzing related code files together.")
       } catch (e: Exception) {
         log.warn("Failed to provide audio feedback: ${e.message}")
       }
@@ -121,26 +121,26 @@ class MultiCodeChatActionTest : DemoTestBase(
 
     step("Select multiple Kotlin files") {
       try {
-        speak("Selecting a Kotlin file in the project structure.")
+        speak("We'll select our main Kotlin file. In practice, you can select multiple files to analyze their relationships and interactions.")
         val path = arrayOf(projectName, "src", "main", "kotlin", "Main.kt")
         val tree = remoteRobot.find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
         waitFor(Duration.ofSeconds(10)) { tree.rightClickPath(*path, fullMatch = false); true }
         log.info("Kotlin file selected")
       } catch (e: Exception) {
         log.error("Failed to select Kotlin files", e)
-        speak("Error selecting Kotlin files. Please check the project structure.")
+        speak("If you encounter issues selecting files, ensure they are accessible and you have proper permissions.")
       }
       sleep(2000)
     }
 
     step("Select 'AI Coder' menu") {
-      speak("Selecting the AI Coder option from the context menu.")
+      speak("Now we'll access the AI Coder menu. This contains all our AI-powered development tools.")
       selectAICoderMenu()
       sleep(2000)
     }
 
     step("Click 'Multi-Code Chat' action") {
-      speak("Initiating the Multi-Code Chat action.")
+      speak("Let's launch the Multi-Code Chat interface. This will open a dedicated chat window for code analysis and discussion.")
       waitFor(Duration.ofSeconds(15)) {
         try {
           findAll(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Code Chat')]"))
@@ -171,18 +171,18 @@ class MultiCodeChatActionTest : DemoTestBase(
           sleep(3000)
         } else {
           log.info("Retrieved URL: $url")
-          speak("Launching the Multi-Code Chat interface in a new browser window.")
+          speak("The chat interface is opening in your default browser. This provides a familiar environment for interacting with the AI assistant.")
           driver.get(url)
           val wait = WebDriverWait(driver, Duration.ofSeconds(90))
           log.debug("Setting up WebDriverWait with 90 second timeout")
 
           val chatInput = wait.until<WebElement>(ExpectedConditions.elementToBeClickable(By.id("chat-input")))
           log.info("Chat interface loaded successfully")
-          speak("Interface loaded. Submitting request.")
+          speak("The interface has loaded successfully. Notice the clean, intuitive design that makes code discussions natural and efficient.")
           chatInput.click()
           sleep(1000)
 
-          speak("Entering a request to analyze the selected code.")
+          speak("Let's ask the AI to analyze our code. You can request anything from basic code review to complex architectural analysis.")
           val request = "Analyze this class"
           request.forEach { char ->
             chatInput.sendKeys(char.toString())
@@ -191,17 +191,17 @@ class MultiCodeChatActionTest : DemoTestBase(
           sleep(1000)
 
           val submitButton = wait.until<WebElement>(ExpectedConditions.elementToBeClickable(By.xpath("//button[@type='submit']")))
-          speak("Submitting the request for AI analysis.")
+          speak("Sending our request to the AI. The assistant will analyze the code context and provide detailed insights.")
           log.info("Submitting request to AI")
           submitButton.click()
-          speak("AI is analyzing the code. This process typically takes a few seconds.")
+          speak("Watch as the AI processes our request. It's examining the code structure, patterns, and potential improvements.")
           sleep(2000)
 
           try {
             val markdownTab =
               wait.until(ExpectedConditions.elementToBeClickable(By.xpath("(//button[contains(@class, 'tab-button') and contains(text(), 'Markdown')])[3]")))
             sleep(2000)
-            speak("Viewing the AI's response in Markdown format for better readability.")
+            speak("The AI's response is formatted in Markdown, making it easy to read and understand. You can copy code snippets, follow links, and navigate through the analysis.")
             markdownTab.click()
             sleep(3000)
           } catch (e: Exception) {
@@ -211,7 +211,7 @@ class MultiCodeChatActionTest : DemoTestBase(
           }
 
           sleep(3000)
-          speak("Demonstration of Multi-Code Chat interface complete.")
+          speak("We've now seen how Multi-Code Chat streamlines code review and analysis. This tool is particularly valuable for understanding complex codebases and ensuring consistent code quality.")
           log.info("Multi-Code Chat interaction completed successfully")
         }
       } finally {
@@ -223,7 +223,7 @@ class MultiCodeChatActionTest : DemoTestBase(
       }
     }
 
-    speak("Demo concluded. Multi-Code Chat enables efficient code analysis and review.")
+    speak("That concludes our demonstration of Multi-Code Chat. Remember, you can use this tool for everything from quick code reviews to deep architectural discussions. The AI assistant helps you understand and improve your code more efficiently than ever.")
     sleep(5000)
   }
 }

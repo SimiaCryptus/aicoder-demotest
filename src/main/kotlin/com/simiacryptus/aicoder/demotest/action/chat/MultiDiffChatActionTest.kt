@@ -101,7 +101,7 @@ class MultiDiffChatActionTest : DemoTestBase(
 
   @Test
   fun testMultiDiffChatAction() = with(remoteRobot) {
-    speak("This demo showcases the Multi-Code Chat feature, which enables simultaneous analysis of multiple code files.")
+    speak("Welcome to the Multi-Code Chat demonstration. This powerful feature allows you to analyze and modify multiple code files simultaneously using AI assistance.")
     log.info("Starting testMultiDiffChatAction")
     sleep(2000)
 
@@ -109,7 +109,7 @@ class MultiDiffChatActionTest : DemoTestBase(
       openProjectView()
       log.info("Project view opened")
       try {
-        speak("Opening the project view to access files.")
+        speak("Let's start by accessing our project files. The Multi-Code Chat can analyze any number of files you select.")
       } catch (e: Exception) {
         log.warn("Failed to provide audio feedback: ${e.message}")
       }
@@ -119,26 +119,26 @@ class MultiDiffChatActionTest : DemoTestBase(
 
     step("Select multiple Kotlin files") {
       try {
-        speak("Selecting a Kotlin file in the project structure.")
+        speak("We'll select a Kotlin file for this demonstration. In practice, you can select multiple files across different languages for comprehensive analysis.")
         val path = arrayOf(projectName, "src", "main", "kotlin", "Main.kt")
         val tree = remoteRobot.find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
         waitFor(Duration.ofSeconds(10)) { tree.rightClickPath(*path, fullMatch = false); true }
         log.info("Kotlin file selected")
       } catch (e: Exception) {
         log.error("Failed to select Kotlin files", e)
-        speak("Error selecting Kotlin files. Please check the project structure.")
+        speak("We've encountered an issue selecting the files. In a real scenario, ensure your files are accessible and try again.")
       }
       sleep(2000)
     }
 
     step("Select 'AI Coder' menu") {
-      speak("Selecting the AI Coder option from the context menu.")
+      speak("Now we'll access the AI Coder menu. This menu contains various AI-powered features for code analysis and modification.")
       selectAICoderMenu()
       sleep(2000)
     }
 
     step("Click 'Multi-Code Chat' action") {
-      speak("Initiating the Multi-Code Chat action.")
+      speak("Let's launch the Multi-Code Chat. This will open an interactive interface where we can discuss and analyze our code with AI assistance.")
       waitFor(Duration.ofSeconds(15)) {
         try {
           findAll(CommonContainerFixture::class.java, byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Modify Files')]"))
@@ -169,18 +169,18 @@ class MultiDiffChatActionTest : DemoTestBase(
           sleep(3000)
         } else {
           log.info("Retrieved URL: $url")
-          speak("Launching the web interface in a new browser window.")
+          speak("The AI Coder is opening a dedicated chat interface in your browser. This provides a comfortable environment for code discussion and analysis.")
           driver.get(url)
           val wait = WebDriverWait(driver, Duration.ofSeconds(90))
           log.debug("Setting up WebDriverWait with 90 second timeout")
 
           val chatInput = wait.until<WebElement>(ExpectedConditions.elementToBeClickable(By.id("chat-input")))
           log.info("Chat interface loaded successfully")
-          speak("Interface loaded. Submitting request.")
+          speak("The interface is ready. Notice how it displays your selected files and provides a chat input area for natural language interaction.")
           chatInput.click()
           sleep(1000)
 
-          speak("Entering a request to analyze the selected code.")
+          speak("Let's ask the AI to analyze our code. You can request anything from code review to specific modifications.")
           val request = "Analyze this class"
           request.forEach { char ->
             chatInput.sendKeys(char.toString())
@@ -189,27 +189,27 @@ class MultiDiffChatActionTest : DemoTestBase(
           sleep(1000)
 
           val submitButton = wait.until<WebElement>(ExpectedConditions.elementToBeClickable(By.xpath("//button[@type='submit']")))
-          speak("Submitting the request for AI analysis.")
+          speak("Sending our request to the AI. The system will analyze the code context and provide detailed insights.")
           log.info("Submitting request to AI")
           submitButton.click()
-          speak("AI is analyzing the code. This process typically takes a few seconds.")
+          speak("Watch as the AI examines the code structure, patterns, and potential improvements. This comprehensive analysis ensures thorough understanding of your codebase.")
           sleep(2000)
 
           try {
             val markdownTab =
               wait.until(ExpectedConditions.elementToBeClickable(By.xpath("(//button[contains(@class, 'tab-button') and contains(text(), 'Markdown')])[3]")))
             sleep(2000)
-            speak("Viewing the AI's response in Markdown format for better readability.")
+            speak("The AI's response is formatted in Markdown for clarity. You can easily read the analysis and copy any suggested code changes.")
             markdownTab.click()
             sleep(3000)
           } catch (e: Exception) {
             log.warn("Copy button not found within the expected time. Skipping copy action.", e)
-            speak("AI response is delayed. In a real scenario, consider refreshing or checking network connection.")
+            speak("If you experience delays, the system provides clear feedback. You can refresh the page or check your connection without losing context.")
             sleep(3000)
           }
 
           sleep(3000)
-          speak("Demonstration of Diff Chat interface complete.")
+          speak("We've now seen how Multi-Code Chat provides intelligent code analysis across multiple files. This tool is invaluable for code review, refactoring, and understanding complex codebases.")
           log.info("interaction completed successfully")
         }
       } finally {
@@ -221,7 +221,7 @@ class MultiDiffChatActionTest : DemoTestBase(
       }
     }
 
-    speak("Demo concluded. Diff Chat enables efficient code analysis and review.")
+    speak("Thank you for exploring the Multi-Code Chat feature. Remember, you can use this tool for everything from quick code reviews to complex refactoring projects across your entire codebase.")
     sleep(5000)
   }
 }

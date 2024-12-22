@@ -98,12 +98,13 @@ class CustomEditActionTest : DemoTestBase(
 
   @Test
   fun testCustomEdit() = with(remoteRobot) {
-    speak("Welcome to the AI Coder Custom Edit demo.")
+    speak("Welcome to the Custom Edit feature demonstration. This powerful tool helps you modify code using natural language instructions.")
     log.info("Starting Custom Edit test")
     Thread.sleep(2000)
 
     step("Open project view and file") {
       log.info("Opening project view and navigating to test file")
+      speak("Let's start by opening a sample code file that we'll enhance with AI assistance.")
       openProjectView()
       val path = arrayOf(testProjectDir.name, "src", "main", "kotlin", "Main.kt")
       log.debug("Navigating to file path: {}", path.joinToString("/"))
@@ -114,10 +115,11 @@ class CustomEditActionTest : DemoTestBase(
 
     step("Test Custom Edit") {
       log.info("Starting Custom Edit operation")
-      speak("Demonstrating the Custom Edit feature for AI-powered code modifications.")
+      speak("Now we'll use Custom Edit to improve our code. First, let's select the code we want to modify.")
 
       val editor = find(EditorFixture::class.java, byXpath("//div[@class='EditorComponentImpl']"))
       selectAllText(editor)
+      speak("With our code selected, we can access Custom Edit through the context menu.")
       editor.rightClick(editor.findAllText().firstOrNull()?.point?.location!!)
       Thread.sleep(1000)
 
@@ -134,10 +136,11 @@ class CustomEditActionTest : DemoTestBase(
           val dialog = find(CommonContainerFixture::class.java, byXpath("//div[@class='JDialog' and @title='Edit Code']"))
           val textField = dialog.find(CommonContainerFixture::class.java, byXpath("//div[@class='MultiplexingTextField']"))
           textField.click()
+          speak("The Custom Edit dialog allows us to describe our desired changes in natural language. Let's add error handling to our code.")
           keyboard {
             enterText("Add error handling")
           }
-          speak("Entering custom edit instruction: Add error handling")
+          speak("We've instructed the AI to add error handling. This will make our code more robust and reliable.")
           Thread.sleep(1000)
 
           val okButton = dialog.find(CommonContainerFixture::class.java, byXpath("//div[@class='JButton' and @text='OK']"))
@@ -150,11 +153,11 @@ class CustomEditActionTest : DemoTestBase(
       }
 
       log.debug("Custom Edit operation triggered")
-      speak("AI will now modify the code to add error handling.")
+      speak("Watch as the AI analyzes our code and intelligently adds appropriate error handling patterns. It considers the context and best practices for our programming language.")
       Thread.sleep(3000)
     }
 
-    speak("Custom Edit demonstration completed.")
+    speak("And there we have it! The AI has enhanced our code with proper error handling. Notice how it maintained the original functionality while making the code more robust. This is just one example of how Custom Edit can help improve your code through natural language instructions.")
     log.info("Custom Edit test completed successfully")
     Thread.sleep(2000)
   }

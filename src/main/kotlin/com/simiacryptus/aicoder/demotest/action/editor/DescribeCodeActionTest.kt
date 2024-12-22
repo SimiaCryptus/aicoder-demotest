@@ -83,26 +83,29 @@ class DescribeCodeActionTest : DemoTestBase(
 
   @Test
   fun testDescribeCode() = with(remoteRobot) {
-    speak("Welcome to the AI Coder Describe Code demo.")
+    speak("Welcome to the Describe Code feature demonstration. This powerful tool helps developers automatically generate clear and comprehensive documentation for their code.")
     log.info("Starting Describe Code test")
     Thread.sleep(2000)
 
     step("Open project view and file") {
       log.info("Opening project view and navigating to test file")
+      speak("Let's start by opening a Kotlin source file that needs documentation.")
       openProjectView()
       val path = arrayOf(testProjectDir.name, "src", "main", "kotlin", "Main.kt")
       log.debug("Navigating to file path: {}", path.joinToString("/"))
       val tree = find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
       waitFor(Duration.ofSeconds(10)) { tree.doubleClickPath(*path, fullMatch = false); true }
       Thread.sleep(2000)
+      speak("We'll use Main.kt as our example file. Notice how it currently lacks proper documentation.")
     }
 
     step("Test Describe Code") {
       log.info("Starting Code Description operation")
-      speak("Demonstrating the Describe Code feature for adding documentation.")
+      speak("To add documentation, we'll first select the code we want to document.")
 
       val editor = find(EditorFixture::class.java, byXpath("//div[@class='EditorComponentImpl']"))
       selectAllText(editor)
+      speak("With our code selected, we can now access the Describe Code feature through the context menu.")
       editor.rightClick(editor.findAllText().firstOrNull()?.point?.location!!)
       Thread.sleep(1000)
 
@@ -114,11 +117,19 @@ class DescribeCodeActionTest : DemoTestBase(
       ).firstOrNull()?.click()
 
       log.debug("Code Description operation triggered")
-      speak("AI will now analyze the code and add appropriate documentation comments.")
+      speak("Watch as the AI analyzes the code structure and generates appropriate documentation comments. It will identify:")
+      Thread.sleep(1000)
+      speak("- Function purposes and behaviors")
+      Thread.sleep(500)
+      speak("- Parameter descriptions and types")
+      Thread.sleep(500)
+      speak("- Return value details")
+      Thread.sleep(500)
+      speak("- Usage examples where appropriate")
       Thread.sleep(3000)
     }
 
-    speak("Describe Code demonstration completed.")
+    speak("And there we have it! The code is now properly documented with clear, maintainable comments that follow best practices. This documentation will help other developers understand the code's purpose and usage more easily.")
     log.info("Describe Code test completed successfully")
     Thread.sleep(2000)
   }

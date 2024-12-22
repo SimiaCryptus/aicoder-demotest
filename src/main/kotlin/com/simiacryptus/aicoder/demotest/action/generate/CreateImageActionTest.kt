@@ -90,12 +90,12 @@ class CreateImageActionTest : DemoTestBase(
 
   @Test
   fun testCreateImage() = with(remoteRobot) {
-    speak("Welcome to the AI Coder Create Image demo.")
+    speak("Welcome to the AI Coder Image Generation feature. This powerful tool helps visualize code structures and concepts using AI-powered image generation.")
     log.info("Starting Create Image test")
     sleep(2000)
 
     step("Open project view and select file") {
-      speak("Opening the project view to access source files.")
+      speak("Let's start by selecting a source file that we want to visualize. We'll use a simple Kotlin class for this demonstration.")
       openProjectView()
       val path = arrayOf(testProjectDir.name, "src", "main", "kotlin", "Main.kt")
       log.debug("Navigating to file path: {}", path.joinToString("/"))
@@ -106,13 +106,13 @@ class CreateImageActionTest : DemoTestBase(
     }
 
     step("Select 'AI Coder' menu") {
-      speak("Accessing the AI Coder menu.")
+      speak("Now we'll access the AI Coder menu, which contains various AI-powered development tools including our image generation feature.")
       selectAICoderMenu()
       sleep(2000)
     }
 
     step("Navigate to Create Image action") {
-      speak("Selecting the Create Image action.")
+      speak("Under the Generate submenu, we'll find the Create Image action. This tool can generate various types of diagrams including UML, flowcharts, and architectural visualizations.")
       waitFor(Duration.ofSeconds(15)) {
         try {
           // Find and hover over Generate menu
@@ -133,7 +133,7 @@ class CreateImageActionTest : DemoTestBase(
     }
 
     step("Configure image generation") {
-      speak("Configuring image generation settings.")
+      speak("In the configuration dialog, we can provide specific instructions for the type of visualization we want. Let's request a UML class diagram to understand our code structure better.")
       waitFor(Duration.ofSeconds(10)) {
         try {
           val dialog = find(CommonContainerFixture::class.java, byXpath("//div[@class='MyDialog' and @title='Generate Image']"))
@@ -145,7 +145,7 @@ class CreateImageActionTest : DemoTestBase(
             }
             enterText("Create a UML class diagram showing the structure and relationships")
           }
-          speak("Entered instructions for generating a UML class diagram.")
+          speak("Notice how we can specify exactly what we want - in this case, a UML diagram that will help us understand the class relationships in our code.")
           log.info("Image generation instructions entered")
           sleep(2000)
 
@@ -161,12 +161,12 @@ class CreateImageActionTest : DemoTestBase(
     }
 
     step("Wait for image generation") {
-      speak("Waiting for AI to generate the image. This may take a few moments.")
+      speak("The AI is now analyzing our code structure and generating a visual representation. This process combines code analysis with advanced image generation to create meaningful diagrams.")
       sleep(10000) // Wait for image generation to complete
       log.info("Image generation completed")
     }
 
-    speak("Create Image demonstration completed. The AI has generated a visual representation of the code structure.")
+    speak("And there we have it! The AI has created a visual representation of our code structure. This feature is particularly useful for documentation, presentations, or quickly understanding complex codebases. You can now use this image in your project documentation or share it with your team.")
     log.info("Create Image test completed successfully")
     sleep(2000)
   }
