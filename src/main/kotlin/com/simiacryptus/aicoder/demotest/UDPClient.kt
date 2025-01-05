@@ -46,21 +46,6 @@ object UDPClient {
     }
   }
 
-  fun stopUdpServer() {
-    isServerRunning = false
-    try {
-      udpSocket?.let { socket ->
-        if (!socket.isClosed) {
-          socket.close()
-          log.info("UDP socket closed successfully")
-        }
-      }
-      udpSocket = null
-    } catch (e: Exception) {
-      log.error("Error closing UDP socket", e)
-    }
-  }
-
   fun getReceivedMessages(): List<String> {
     return messageBuffer.toList()
   }

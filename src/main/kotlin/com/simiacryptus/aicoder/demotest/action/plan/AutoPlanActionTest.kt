@@ -88,7 +88,6 @@ class AutoPlanActionTest : DemoTestBase(
 
   companion object {
     private val log = LoggerFactory.getLogger(AutoPlanActionTest::class.java)
-    private const val AUTO_PLAN_XPATH = "//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Auto-Plan')]"
   }
 
   @Test
