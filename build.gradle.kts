@@ -16,7 +16,7 @@ repositories {
 val slf4j_version = "2.0.16"
 val remoterobot_version = "0.11.23"
 val jackson_version = "2.17.2"
-val logback_version = "1.5.8"
+val logback_version = "1.5.13"
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
