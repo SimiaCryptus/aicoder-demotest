@@ -4,6 +4,7 @@ import org.monte.media.av.Format
 import org.monte.media.av.FormatKeys
 import org.monte.media.av.FormatKeys.MediaType
 import org.monte.media.av.FormatKeys.MediaTypeKey
+import org.monte.media.av.codec.audio.AudioFormatKeys
 import org.monte.media.av.codec.audio.AudioFormatKeys.*
 import org.monte.media.av.codec.video.VideoFormatKeys
 import org.monte.media.math.Rational
@@ -17,6 +18,7 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
+import javax.sound.sampled.*
 import javax.swing.JFrame
 import javax.swing.SwingUtilities
 
@@ -27,10 +29,11 @@ data class RecordingConfig(
   val videoQuality: Float = 0.8f,
   val videoDepth: Int = 24,
   val keyFrameInterval: Int = 5 * 60,
-  val sampleRate: Double = 44100.0,
+  val sampleRate: Double = -1.0,
   val sampleSize: Int = 16,
-  val audioChannels: Int = 2,
+  val audioChannels: Int = 1,
   val enableAudio: Boolean = true,
+  val preferredSoundInput: String = "Primary Sound Driver",
   val splashScreenDuration: Long = 5000,
   val splashScreenDelay: Long = 10000,
   val fileFormat: String = FormatKeys.MIME_AVI,
@@ -50,14 +53,11 @@ open class ScreenRec(
   protected val recordingConfig: RecordingConfig = RecordingConfig(),
   protected val splashScreenConfig: SplashScreenConfig = SplashScreenConfig()
 ) {
-  // Add lifecycle methods to make the class more usable
-  fun start() = startScreenRecording()
-  fun stop() = stopScreenRecording()
-
   private var screenRecorder: ScreenRecorder? = null
   private val lock = Any()
   private val screenRecordingStarted = AtomicBoolean(false)
   private var splashFrame: JFrame? = null
+  private var audioMixer: Mixer? = null
 
   protected open fun hideSplashScreen() {
     SwingUtilities.invokeLater {
@@ -66,6 +66,45 @@ open class ScreenRec(
     }
   }
 
+  val inputs = AudioSystem.getMixerInfo().filter { it.test() }.mapNotNull { mixerInfo ->
+    log.info("Audio Mixer: ${mixerInfo}")
+    var hasValidLine = false
+    AudioSystem.getMixer(mixerInfo).use { mixer ->
+      mixer.sourceLineInfo.map { sourceLineInfo: Line.Info ->
+        log.info(" Audio Mixer Source Line: $sourceLineInfo (${sourceLineInfo.javaClass.canonicalName})")
+        if (sourceLineInfo is DataLine.Info) {
+          sourceLineInfo.lineClass?.let { lineClass ->
+            log.info("  Source Line Class: $lineClass")
+          }
+          sourceLineInfo.formats.forEach { format ->
+            log.info("  Audio Mixer Source Line Format: $format; Channels: ${format.channels}; Sample Rate: ${format.sampleRate}")
+          }
+          hasValidLine = true
+        }
+        if (sourceLineInfo is Port.Info) {
+          sourceLineInfo.lineClass?.let { lineClass ->
+            log.info("  Source Line Class: $lineClass")
+          }
+          sourceLineInfo.isSource?.let { isSource ->
+            log.info("  Source Line is Source: $isSource")
+          }
+        }
+      }.firstOrNull() ?: log.warn("No audio source line found")
+      mixer.targetLineInfo.map { targetLineInfo: Line.Info ->
+        log.info(" Audio Mixer Target Line: $targetLineInfo (${targetLineInfo.javaClass.canonicalName})")
+        if (targetLineInfo is DataLine.Info) {
+          targetLineInfo.formats.forEach { format ->
+            log.info("  Audio Mixer Target Line Format: $format; Channels: ${format.channels}; Sample Rate: ${format.sampleRate}")
+          }
+          hasValidLine = true
+        }
+//        if(targetLineInfo is Port.Info) targetLineInfo..forEach { format ->
+//          log.info("  Audio Mixer Target Line Format: $format; Channels: ${format.channels}; Sample Rate: ${format.sampleRate}")
+//        }
+      }.firstOrNull() ?: log.warn("No audio target line found")
+    }
+    if (hasValidLine) mixerInfo else null
+  }
   protected open fun startScreenRecording() {
     synchronized(lock) {
       if (screenRecordingStarted.get()) {
@@ -82,6 +121,7 @@ open class ScreenRec(
         val gd = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
         val outputFolder = recordingConfig.outputFolder
         outputFolder.mkdirs()
+        // Set up audio format with explicit sample rate
         val fileFormat = Format(
           MediaTypeKey, MediaType.FILE,
           FormatKeys.MimeTypeKey, recordingConfig.fileFormat,
@@ -101,18 +141,54 @@ open class ScreenRec(
           FormatKeys.EncodingKey, recordingConfig.mousePointerColor,
           FormatKeys.FrameRateKey, recordingConfig.frameRate
         )
-        val audioFormat = if (recordingConfig.enableAudio) Format(
-          MediaTypeKey, MediaType.AUDIO,
-          SampleRateKey, Rational.valueOf(recordingConfig.sampleRate),
-          SampleSizeInBitsKey, recordingConfig.sampleSize,
-          ChannelsKey, recordingConfig.audioChannels
-        ) else null
+        val audioFormat = try {
+          if (recordingConfig.enableAudio) {
+            Format(
+              MediaTypeKey, MediaType.AUDIO,
+              FormatKeys.EncodingKey, AudioFormatKeys.ENCODING_AVI_PCM,
+              SampleRateKey, Rational.valueOf(44100.0), // Use standard sample rate
+              SampleSizeInBitsKey, recordingConfig.sampleSize,
+              ChannelsKey, recordingConfig.audioChannels,
+              AudioFormatKeys.FrameSizeKey, 2,
+              AudioFormatKeys.SignedKey, true,
+              AudioFormatKeys.ByteOrderKey, true,
+            )
+          } else {
+            log.warn("Audio recording is disabled")
+            null
+          }
+        } catch (e: Exception) {
+          log.error("Error configuring audio format, disabling audio recording", e)
+          null
+        }
 
         try {
           log.info("Creating ScreenRecorder instance...")
-          val recorder = ScreenRecorder(
-            gd.defaultConfiguration, recordingConfig.captureSize, fileFormat, screenFormat, mouseFormat, audioFormat, recordingConfig.outputFolder
-          )
+          val recorder = object : ScreenRecorder(
+            /* cfg = */ gd.defaultConfiguration,
+            /* captureArea = */ recordingConfig.captureSize,
+            /* fileFormat = */ fileFormat,
+            /* screenFormat = */ screenFormat,
+            /* mouseFormat = */ mouseFormat,
+            /* audioFormat = */ audioFormat,
+            /* movieFolder = */ recordingConfig.outputFolder
+          ) {
+            override fun stop() {
+              try {
+                super.stop()
+              } catch (e: Exception) {
+                //log.debug("Error stopping ScreenRecorder", e)
+              }
+            }
+          }
+          if (audioFormat != null && recordingConfig.enableAudio) {
+            inputs.firstOrNull {
+              it.toString().contains(recordingConfig.preferredSoundInput, true)
+            }?.apply {
+              recorder.audioMixer = AudioSystem.getMixer(this)
+            } ?: log.warn("Preferred audio input not found")
+          }
+
           log.info("Starting ScreenRecorder...")
           recorder.start()
           screenRecorder = recorder
@@ -231,4 +307,12 @@ open class ScreenRec(
 
   }
 
+}
+
+private fun Mixer.Info.test(): Boolean {
+  return try {
+    AudioSystem.getMixer(this).use { it.sourceLineInfo.isNotEmpty() }
+  } catch (e: Exception) {
+    false
+  }
 }

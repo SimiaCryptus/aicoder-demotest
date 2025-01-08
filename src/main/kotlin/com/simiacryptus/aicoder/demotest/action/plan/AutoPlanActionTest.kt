@@ -192,6 +192,7 @@ class AutoPlanActionTest : DemoTestBase(
     }
 
     step("Interact with Auto-Plan interface") {
+      val maxIterations = 4
       log.debug("Starting Auto-Plan interface interaction")
       var url: String? = null
       waitFor(Duration.ofSeconds(90)) {
@@ -209,7 +210,6 @@ class AutoPlanActionTest : DemoTestBase(
         log.debug("Setting up WebDriverWait with 90 second timeout")
 
         val wait = WebDriverWait(driver, Duration.ofSeconds(90))
-        val chatInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("chat-input")))
         log.info("Chat interface loaded successfully")
         speak("Now we can describe our task in natural language. Auto-Plan will understand the requirements and create a detailed implementation plan.")
         sleep(1000)
@@ -217,6 +217,8 @@ class AutoPlanActionTest : DemoTestBase(
         try {
           // Submit task description
           log.debug("Submitting task description to chat interface")
+          val chatInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("chat-input")))
+          chatInput.click()
           chatInput.sendKeys("Create a new utility class for string manipulation with methods for common operations")
           speak("We're requesting a new utility class for string manipulation. Watch how Auto-Plan breaks this down into specific implementation tasks.")
 
@@ -230,28 +232,26 @@ class AutoPlanActionTest : DemoTestBase(
           speak("Auto-Plan is analyzing the task and creating an execution plan.")
 
           var planIndex = 3
-          var hasStopped = false
           while (true) {
-
-            if (planIndex > 8 && !hasStopped) {
+            if (planIndex > maxIterations) {
               log.info("Reached maximum demonstration iterations, initiating stop sequence")
               speak("Auto-Plan can continue to iterate over agent plans. However, for demonstration purposes, we will stop here.")
-              clickElement(driver, wait, ".tabs-container > div > button:nth-child(1)")
+              clickElement(driver, wait, "div.message-body > div.tabs-container > div.tabs > button:nth-child(1)")
               log.debug("Controls button clicked")
               sleep(1000)
-              clickElement(driver, wait, ".tabs-container > .tab-content.active > .href-link")
+              clickElement(driver, wait, "div.message-body > div.tabs-container > div.active a.href-link")
               log.info("Stop sequence completed")
-              hasStopped = true
               sleep(1000)
+              break
             }
 
-            val planButton = clickElement(driver, wait, "div.tabs-container > div.tabs > button:nth-child($planIndex)")
-            if (planButton.text === "Summary") {
+            val planButton = clickElement(driver, wait, "div.message-body > div.tabs-container > div.tabs > button:nth-child($planIndex)").text
+            if (planButton === "Summary") {
               log.info("Reached summary stage - execution plan complete")
               speak("Task analysis completed. Review the summary for the execution plan.")
               break
             } else {
-              log.debug("Processing agent iteration ${planIndex - 2}: ${planButton.text}")
+              log.debug("Processing agent iteration ${planIndex - 2}: ${planButton}")
               speak("In iteration ${planIndex - 2}, Auto-Plan is analyzing the code structure and planning the next implementation steps.")
             }
 
@@ -259,13 +259,24 @@ class AutoPlanActionTest : DemoTestBase(
             while (true) {
               log.debug("Processing task iteration $taskIndex")
               val taskButton =
-                clickElement(driver, wait, "div.tabs-container > div.active div.iteration.tabs-container > div.tabs > button:nth-child($taskIndex)")
-              if (taskButton.text.trim().equals("Thinking Status", ignoreCase = true)) {
+                try {
+                  getElement(
+                    driver,
+                    wait,
+                    "div.message-body > div.tabs-container > div.active div.iteration.tabs-container > div.tabs > button:nth-child($taskIndex)"
+                  )
+                } catch (e: Exception) {
+                  log.warn("Failed to find task button: ${e.message}", e)
+                  break
+                }
+              val text = taskButton.text
+              if (text.trim().equals("Thinking Status", ignoreCase = true)) {
                 log.info("Task ${taskIndex - 1} execution completed")
                 speak("Task execution complete. Updating Thinking State.")
                 break
               } else {
-                log.debug("Executing task ${taskIndex - 1}: ${taskButton.text}")
+                taskButton.click()
+                log.debug("Executing task ${taskIndex - 1}: $text")
                 speak("Task ${taskIndex - 1} in progress.")
                 sleep(3000)
               }
@@ -281,6 +292,7 @@ class AutoPlanActionTest : DemoTestBase(
         } catch (e: Exception) {
           log.error("Error during Auto-Plan interaction: ${e.message}", e)
           speak("Encountered an error during Auto-Plan execution. Please check the logs for details.")
+          throw e
         } finally {
           log.debug("Cleaning up web driver resources")
           driver.quit()

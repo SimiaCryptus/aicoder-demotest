@@ -291,9 +291,29 @@ abstract class DemoTestBase(
           }
         } catch (e: WebDriverException) {
           if (e is TimeoutException) throw e
-          if (System.currentTimeMillis() - startTime > 30000) throw e
-          log.info("Failed to click $selector: ${e.message}")
-          sleep(500)
+          val elapsed = System.currentTimeMillis() - startTime
+          if (elapsed > 30000) throw RuntimeException("Failed to click $selector: ${e.message} - timed out", e)
+          log.info("Retry failure to click $selector: ${e.message}")
+          sleep(100)
+        }
+      }
+    }
+
+    fun getElement(
+      driver: WebDriver, wait: WebDriverWait, selector: String
+    ): WebElement {
+      val startTime = System.currentTimeMillis()
+      while (true) {
+        try {
+          return wait.until(
+            ExpectedConditions.presenceOfElementLocated(By.cssSelector(selector))
+          )
+        } catch (e: WebDriverException) {
+          if (e is TimeoutException) throw e
+          val elapsed = System.currentTimeMillis() - startTime
+          if (elapsed > 30000) throw RuntimeException("Failed to click $selector: ${e.message} - timed out", e)
+          log.info("Retry failure to click $selector: ${e.message}")
+          sleep(100)
         }
       }
     }
@@ -309,7 +329,7 @@ abstract class DemoTestBase(
           if (e is TimeoutException) throw e
           if (System.currentTimeMillis() - startTime > 30000) throw e
           log.info("Failed to click $selector: ${e.message}")
-          sleep(500)
+          sleep(100)
         }
       }
     }
