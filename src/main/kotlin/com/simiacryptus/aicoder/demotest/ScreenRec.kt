@@ -26,6 +26,7 @@ import javax.swing.JFrame
 import javax.swing.SwingUtilities
 
 data class RecordingConfig(
+    val enableAudio: Boolean = false,
   val outputFolder: File = File("test-recordings"),
   val captureSize: Rectangle = defaultResolution(),
   val frameRate: Rational = Rational(30, 1),
@@ -35,7 +36,6 @@ data class RecordingConfig(
   val sampleRate: Double = -1.0,
   val sampleSize: Int = 16,
   val audioChannels: Int = 1,
-  val enableAudio: Boolean = true,
   val preferredSoundInput: String = "Primary Sound Driver",
   val splashScreenDuration: Long = 5000,
   val splashScreenDelay: Long = 10000,

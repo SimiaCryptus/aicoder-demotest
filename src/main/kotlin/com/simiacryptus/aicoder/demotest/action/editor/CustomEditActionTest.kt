@@ -85,11 +85,11 @@ class CustomEditActionTest : DemoTestBase(
               try {
                   val editor = find(EditorFixture::class.java, byXpath("//div[@class='EditorComponentImpl']"))
                   selectAllText(editor)
-                  tts("With our code selected, we can access Custom Edit through the context menu.")?.play(1000)
+                  tts("With our code selected, we can access Custom Edit through the context menu.")?.play(300)
                   editor.rightClick(editor.findAllText().firstOrNull()?.point?.location!!)
 
                   selectAICoderMenu()
-                  log.debug("Attempting to find and click Custom Edit menu item")
+                  tts("Now we'll select Custom Edit from the AI Coder menu.")?.play(300)
                   findAll(
                       CommonContainerFixture::class.java,
                       byXpath("//div[@text='AI Coder']//div[contains(@text, 'Edit Code')]")

@@ -96,34 +96,23 @@ class DiffChatActionTest : DemoTestBase(
           }
       }
 
-      step("Open context menu") {
-          tts("The Patch Chat feature is easily accessible through the context menu. You can also configure keyboard shortcuts for quicker access.")?.play(
+      step("Open context menu and select 'Patch Chat'") {
+          tts("The Patch Chat feature is easily accessible through the context menu. You can also configure keyboard shortcuts for quicker access. Under the AI Coder menu, you'll find various AI-powered features. Each one is designed for specific development tasks. Let's launch Patch Chat. This will open an interactive interface where we can discuss code improvements with the AI assistant.")?.play(
               2000
           )
-          val editor = find(EditorFixture::class.java, byXpath("//div[@class='EditorComponentImpl']"))
-          editor.rightClick()
-      }
-
-      step("Select 'AI Coder' menu") {
-          tts("Under the AI Coder menu, you'll find various AI-powered features. Each one is designed for specific development tasks.")?.play(
-              2000
-          )
-          selectAICoderMenu()
-      }
-
-      step("Click 'Patch Chat' action") {
-          tts("Let's launch Patch Chat. This will open an interactive interface where we can discuss code improvements with the AI assistant.")?.play(
-              2000
-          )
-          waitFor(Duration.ofSeconds(15)) {
+          waitFor(Duration.ofSeconds(90)) {
               try {
+                  val editor = find(EditorFixture::class.java, byXpath("//div[@class='EditorComponentImpl']"))
+                  editor.rightClick()
+                  selectAICoderMenu()
                   findAll(
                       CommonContainerFixture::class.java,
                       byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Patch Chat')]")
-                  )
-                      .firstOrNull()?.click()
-                  log.info("'Patch Chat' action clicked")
-                  true
+                  ).firstOrNull()?.let {
+                      it.click()
+                      log.info("'Patch Chat' action clicked")
+                      true
+                  } ?: false
               } catch (e: Exception) {
                   log.warn("Failed to find 'Patch Chat' action: ${e.message}")
                   false

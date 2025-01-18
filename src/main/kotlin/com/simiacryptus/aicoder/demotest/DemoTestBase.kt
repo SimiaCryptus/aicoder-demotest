@@ -39,9 +39,9 @@ abstract class DemoTestBase(
 ) {
   protected lateinit var remoteRobot: RemoteRobot
   protected val robot: java.awt.Robot = java.awt.Robot()
-  protected var testStartTime: LocalDateTime? = null
+  private var testStartTime: LocalDateTime? = null
   protected lateinit var testProjectDir: Path
-  protected var driverInitialized = false
+  private var driverInitialized = false
   protected val driver: WebDriver by lazy { initializeWebDriver() }
   private fun initializeWebDriver(): ChromeDriver {
     try {
@@ -130,7 +130,7 @@ abstract class DemoTestBase(
     testProjectDir = Files.createTempDirectory("test-project-")
     // Get template project path
     val templatePath = Paths.get(getTemplateProjectPath())
-    log.debug("Template project path: $templatePath")
+    log.debug("Template project path: {}", templatePath)
     if (!Files.exists(templatePath)) {
       log.error("Template project not found at path: $templatePath")
       throw IllegalStateException("Template project directory not found: $templatePath")

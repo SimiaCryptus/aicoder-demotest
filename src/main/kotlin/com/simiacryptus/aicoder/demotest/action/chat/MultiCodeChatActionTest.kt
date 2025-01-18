@@ -51,10 +51,6 @@ class MultiCodeChatActionTest : DemoTestBase(
     titleText = "Multi-Code Chat Demo",
   )
 ) {
-  override fun getTemplateProjectPath(): String {
-    return "demo_projects/TestProject"
-  }
-
 
   companion object {
     val log = LoggerFactory.getLogger(MultiCodeChatActionTest::class.java)
