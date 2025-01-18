@@ -7,16 +7,19 @@ plugins {
 
 group = "com.simiacryptus"
 version = properties("pluginVersion")
+
 repositories {
     mavenCentral()
     maven(url = "https://www.jetbrains.com/intellij-repository/releases")
     maven(url = "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies")
     maven(url = "https://packages.jetbrains.team/maven/p/iuia/qa-automation-maven")
 }
+
 val slf4j_version = "2.0.16"
 val remoterobot_version = "0.11.23"
 val jackson_version = "2.17.2"
 val logback_version = "1.5.13"
+
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
@@ -54,19 +57,24 @@ dependencies {
     implementation("org.junit.jupiter:junit-jupiter-api:5.7.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.0")
 }
+
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(17))
     }
 }
+
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
         jvmTarget = "17"
         freeCompilerArgs = listOf("-Xjsr305=strict")
+        //jvmArgs = listOf("--add-opens", "java.base/java.lang=ALL-UNNAMED")
     }
 }
+
 tasks.test {
     useJUnitPlatform()
+    jvmArgs = listOf("--add-opens", "java.base/java.lang=ALL-UNNAMED")
 }
 
 sourceSets {

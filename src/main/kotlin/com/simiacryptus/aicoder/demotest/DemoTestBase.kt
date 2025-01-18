@@ -18,16 +18,15 @@ import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.io.ByteArrayInputStream
+import java.io.File
 import java.lang.Thread.sleep
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.security.MessageDigest
 import java.time.Duration
 import java.time.LocalDateTime
-import javax.sound.sampled.AudioInputStream
-import javax.sound.sampled.AudioSystem
-import javax.sound.sampled.Clip
+import kotlin.math.absoluteValue
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -100,7 +99,9 @@ abstract class DemoTestBase(
 
   override fun sleepForSplash() {
     val startTime = System.currentTimeMillis()
-    if (super.recordingConfig.splashNarration.isNotBlank()) speak(super.recordingConfig.splashNarration)
+    if (super.recordingConfig.splashNarration.isNotBlank()) {
+      tts(super.recordingConfig.splashNarration)?.play()
+    }
     val sleep = super.recordingConfig.splashScreenDelay - (System.currentTimeMillis() - startTime)
     if(sleep > 0) sleep(sleep)
   }
@@ -143,6 +144,28 @@ abstract class DemoTestBase(
     log.debug("Opening project in IDE with path: $txt")
     waitFor(Duration.ofSeconds(20)) {
       try {
+        remoteRobot.findAll(CommonContainerFixture::class.java, byXpath("//div[@class='JDialog']")).firstOrNull()?.apply {
+          click()
+          keyboard {
+            escape()
+            sleep(500)
+          }
+        }
+
+        remoteRobot.findAll(CommonContainerFixture::class.java, byXpath("//div[@class='JDialog']")).firstOrNull()?.apply {
+          click()
+          keyboard {
+            enter()
+            sleep(500)
+          }
+        }
+
+        remoteRobot.findAll(CommonContainerFixture::class.java, byXpath("//div[@text='Cancel']")).firstOrNull()?.click()
+        remoteRobot.findAll(CommonContainerFixture::class.java, byXpath("//div[@class='JButton']")).apply {
+          if(size == 1) {
+            first().click()
+          }
+        }
         log.debug("Attempting to find and click main menu")
         val menu = remoteRobot.find(CommonContainerFixture::class.java, byXpath("//div[@tooltiptext='Main Menu']"))
         menu.click()
@@ -154,7 +177,9 @@ abstract class DemoTestBase(
         log.debug("Typing project path and pressing enter")
         remoteRobot.keyboard {
           this.enterText(txt.replace("\\", "\\\\"))
+          sleep(1000)
           this.enter()
+          sleep(1000)
           this.enter()
         }
         sleep(1000)
@@ -230,39 +255,44 @@ abstract class DemoTestBase(
     return aiCoderMenu
   }
 
-  fun speak(text: String, voice: String = "shimmer", speed : Double = 1.0) {
-    if (!recordingConfig.enableAudio) return
-    log.info("Speaking: $text")
+  val voices = arrayOf("alloy", "echo", "fable", "onyx", "nova", "shimmer")
+  open val voice: String =
+    this::class.java.simpleName.lowercase().let { voices[it.hashCode().absoluteValue % voices.size] }
+
+  fun tts(
+    text: String,
+    voice: String? = null,
+    speed: Double = 1.0
+  ): SpokenText? {
+    if (!recordingConfig.enableAudio) return null
+    val cacheDir = File("./.tts_cache")
+    if (!cacheDir.exists()) {
+      cacheDir.mkdirs()
+    }
+    @Suppress("NAME_SHADOWING") val voice = voice ?: this.voice
+    val cacheKey = "${text}_${voice}_${speed}".toByteArray()
+    val cacheFileName = MessageDigest.getInstance("SHA-256").digest(cacheKey).joinToString("") { "%02x".format(it) }
+    val cacheFile = File(cacheDir, "$cacheFileName.wav")
+    if (cacheFile.exists()) {
+      log.info("Using cached TTS for text: $text")
+      return SpokenText(text, cacheFile.readBytes().inputStream(), 0)
+    }
     val startTime = System.currentTimeMillis()
     val speechWavBytes = OpenAIClient().createSpeech(
-      ApiModel.SpeechRequest(input = text, model = AudioModels.TTS.modelName, voice = voice, speed = speed, response_format = "wav")
+      ApiModel.SpeechRequest(
+        input = text,
+        model = AudioModels.TTS.modelName,
+        voice = voice,
+        speed = speed,
+        response_format = "wav"
+      )
     ) ?: throw RuntimeException("No response")
+    // Save to cache
+    cacheFile.writeBytes(speechWavBytes)
     // Play the speech
-    val byteInputStream = ByteArrayInputStream(speechWavBytes)
-    log.info("Received speech response in ${System.currentTimeMillis() - startTime} ms")
-    AudioSystem.getAudioInputStream(byteInputStream).use { originalAudioInputStream ->
-      val format = originalAudioInputStream.format
-      val frameSize = format.frameSize
-      val audioData = originalAudioInputStream.readAllBytes()
-      // Ensure all values are positive
-      for (i in audioData.indices) {
-        audioData[i] = (audioData[i].toInt() and 0xFF).toByte()
-      }
-      val correctedAudioInputStream = AudioInputStream(ByteArrayInputStream(audioData), format, audioData.size.toLong() / frameSize)
-
-      val clip: Clip = AudioSystem.getClip()
-      clip.open(correctedAudioInputStream)
-      clip.apply {
-        start()
-        // Wait for the audio to finish playing
-        val millis = (frameLength * 1000L) / format.frameRate.toLong()
-        log.info("Playing audio for $millis ms")
-        sleep(millis)
-        // Ensure the clip is closed after playing
-        close()
-      }
-    }
-    log.info("Audio playback completed")
+    val renderTime = System.currentTimeMillis() - startTime
+    log.info("Received speech response in $renderTime ms")
+    return SpokenText(text, speechWavBytes.inputStream(), renderTime)
   }
 
   companion object {

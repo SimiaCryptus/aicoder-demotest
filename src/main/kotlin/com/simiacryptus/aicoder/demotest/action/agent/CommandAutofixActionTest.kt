@@ -46,41 +46,7 @@ import kotlin.io.path.name
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CommandAutofixActionTest : DemoTestBase(
   splashScreenConfig = SplashScreenConfig(
-    fontFamily = "JetBrains Mono",
-    titleColor = "#00ACC1",
-    subtitleColor = "#78909C",
-    timestampColor = "#B0BEC5",
     titleText = "Command Autofix Demo",
-    containerStyle = """
-        background: #1E1E1E;
-        padding: 40px 60px;
-        border-radius: 8px;
-        box-shadow: 0 0 30px rgba(0,172,193,0.2);
-        border: 1px solid #00ACC1;
-        animation: pulse 2s infinite;
-        position: relative;
-        overflow: hidden;
-    """.trimIndent(),
-    bodyStyle = """
-        margin: 0;
-        padding: 20px;
-        background: #2B2B2B;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-        text-align: center;
-        position: relative;
-        @keyframes pulse {
-          0% { box-shadow: 0 0 30px rgba(0,172,193,0.2); }
-          50% { box-shadow: 0 0 30px rgba(0,172,193,0.5); }
-          100% { box-shadow: 0 0 30px rgba(0,172,193,0.2); }
-        }
-        @keyframes typing {
-          from { width: 0 }
-          to { width: 100% }
-        }
-    """.trimIndent()
   )
 ) {
   override fun getTemplateProjectPath(): String {
@@ -94,58 +60,69 @@ class CommandAutofixActionTest : DemoTestBase(
   @Test
   fun testCommandAutofixAction() {
     with(remoteRobot) {
-      speak("Welcome to the Command Autofix feature demonstration. This powerful tool automatically detects and resolves build and compilation issues across your entire project.")
-      log.info("Starting testCommandAutofixAction")
-      sleep(2000)
+        tts("Welcome to the Command Autofix feature demonstration. This powerful tool automatically detects and resolves build and compilation issues across your entire project.")?.play(
+            2000
+        )
 
       step("Open project view") {
-        speak("Let's start by opening our project view. We'll be working with a sample project that has some build issues to fix.")
+          tts("Let's start by opening our project view. We'll be working with a sample project that has some build issues to fix.")?.play()
         openProjectView()
       }
 
       step("Select a directory") {
-        speak("We'll select the project root directory to analyze the entire codebase. Command Autofix works recursively through all project files.")
+          tts("We'll select the project root directory to analyze the entire codebase. Command Autofix works recursively through all project files.")?.play()
         val path = arrayOf(testProjectDir.name)
         val tree = remoteRobot.find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
         waitFor(Duration.ofSeconds(10)) { tree.rightClickPath(*path, fullMatch = false); true }
       }
 
       step("Click 'Auto-Fix' action") {
-        speak("Now we'll launch the Command Autofix feature through the AI Coder menu. This tool integrates seamlessly with your IDE's build system.")
+          tts("Now we'll launch the Command Autofix feature through the AI Coder menu. This tool integrates seamlessly with your IDE's build system.")?.play()
         waitFor(Duration.ofSeconds(10)) {
           try {
-            speak("Navigate to the Agents submenu, where you'll find various automated assistance tools.")
+              tts("Navigate to the Agents submenu, where you'll find various automated assistance tools.")?.play()
             val aiCoderMenu = selectAICoderMenu()
-            val agentsMenu = aiCoderMenu.find(CommonContainerFixture::class.java,
-              byXpath("//div[contains(@class, 'Menu') and contains(@text, 'Agents')]"))
+              val agentsMenu = aiCoderMenu.find(
+                  CommonContainerFixture::class.java,
+                  byXpath("//div[contains(@class, 'Menu') and contains(@text, 'Agents')]")
+              )
             robot.mouseMove(agentsMenu.locationOnScreen.x + 10, agentsMenu.locationOnScreen.y)
             agentsMenu.click()
             sleep(1000)
-            val autoFixMenu = agentsMenu.find(CommonContainerFixture::class.java,
-              byXpath("//div[contains(@class, 'MenuItem') and contains(@text, 'Run ... and Fix')]"))
+              val autoFixMenu = agentsMenu.find(
+                  CommonContainerFixture::class.java,
+                  byXpath("//div[contains(@class, 'MenuItem') and contains(@text, 'Run ... and Fix')]")
+              )
             robot.mouseMove(autoFixMenu.locationOnScreen.x + 10, autoFixMenu.locationOnScreen.y)
             autoFixMenu.click()
             log.info("'Auto-Fix' action clicked")
             true
           } catch (e: Exception) {
             log.warn("Failed to navigate Auto-Fix menu: ${e.message}")
-            speak("If the menu doesn't appear immediately, the IDE will automatically retry. This ensures reliable access to the feature.")
+              tts("If the menu doesn't appear immediately, the IDE will automatically retry. This ensures reliable access to the feature.")?.play()
             false
           }
         }
       }
 
       step("Configure Command Autofix") {
-        speak("Let's configure the Command Autofix settings. The tool offers several options to customize how fixes are applied.")
+          tts("Let's configure the Command Autofix settings. The tool offers several options to customize how fixes are applied.")?.play()
         waitFor(Duration.ofSeconds(15)) {
-          val dialog = find(CommonContainerFixture::class.java, byXpath("//div[@class='MyDialog' and @title='Command Autofix Settings']"))
+            val dialog = find(
+                CommonContainerFixture::class.java,
+                byXpath("//div[@class='MyDialog' and @title='Command Autofix Settings']")
+            )
           if (dialog.isShowing) {
 
-            val autoFixCheckbox = dialog.find(JCheckboxFixture::class.java, byXpath("//div[@class='JCheckBox' and @text='Auto-apply fixes']"))
+              val autoFixCheckbox = dialog.find(
+                  JCheckboxFixture::class.java,
+                  byXpath("//div[@class='JCheckBox' and @text='Auto-apply fixes']")
+              )
             autoFixCheckbox.select()
-            speak("We'll enable the 'Auto-apply fixes' option, which allows Command Autofix to automatically implement suggested fixes without manual confirmation.")
+              tts("We'll enable the 'Auto-apply fixes' option, which allows Command Autofix to automatically implement suggested fixes without manual confirmation.")?.play()
 
-            val okButton = dialog.find(CommonContainerFixture::class.java, byXpath("//div[@class='JButton' and @text='OK']"))
+              val okButton =
+                  dialog.find(CommonContainerFixture::class.java, byXpath("//div[@class='JButton' and @text='OK']"))
             okButton.click()
             log.info("Command Autofix configured and started")
             true
@@ -161,7 +138,7 @@ class CommandAutofixActionTest : DemoTestBase(
         val url = messages.firstOrNull { it.startsWith("http") }
         if (url != null) {
           log.info("Retrieved URL: $url")
-          speak("The Command Autofix interface opens in your browser, providing a detailed view of the analysis process and any fixes being applied.")
+            tts("The Command Autofix interface opens in your browser, providing a detailed view of the analysis process and any fixes being applied.")?.play()
           try {
             this@CommandAutofixActionTest.driver.get(url)
           } catch (e: Exception) {
@@ -174,34 +151,35 @@ class CommandAutofixActionTest : DemoTestBase(
             val wait = WebDriverWait(this@CommandAutofixActionTest.driver, Duration.ofSeconds(600))
             try {
               blockUntilDone(wait)
-              speak("Watch as Command Autofix analyzes your build output, identifies issues, and applies appropriate fixes. The AI considers your project's context and build configuration.")
-//              val codeElements = wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.tagName("code")))
+                tts("Watch as Command Autofix analyzes your build output, identifies issues, and applies appropriate fixes. The AI considers your project's context and build configuration.")?.play()
+                //              val codeElements = wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.tagName("code")))
 //              val buildSuccessful = codeElements.any { it.text.contains("BUILD SUCCESSFUL") }
 //              require(buildSuccessful) { "BUILD SUCCESSFUL not found in any code element" }
-              speak("Excellent! Command Autofix has successfully resolved the build issues. Notice how the build now completes without errors, demonstrating the effectiveness of the automated fixes.")
+                tts("Excellent! Command Autofix has successfully resolved the build issues. Notice how the build now completes without errors, demonstrating the effectiveness of the automated fixes.")?.play()
               break
             } catch (e: Exception) {
               attempt++
               log.warn("Error interacting with Command Autofix interface", e)
               blockUntilDone(wait)
-              speak("Sometimes multiple attempts may be needed for complex issues. Command Autofix will automatically retry with different approaches until the build succeeds.")
+                tts("Sometimes multiple attempts may be needed for complex issues. Command Autofix will automatically retry with different approaches until the build succeeds.")?.play()
               (driver as JavascriptExecutor).executeScript("window.scrollTo(0, 0)")
               val refreshButton = driver.findElement(By.xpath("//a[@class='href-link' and text()='♻']"))
               refreshButton.click()
               log.info("Refresh button clicked")
-              speak("Refreshing Command Autofix interface.")
+                tts("Refreshing Command Autofix interface.")?.play()
               driver.findElements(By.cssSelector(".tabs-container > .tabs > .tab-button")).get(attempt - 1).click()
             }
           }
           this@CommandAutofixActionTest.driver.quit()
         } else {
           log.error("No URL found in UDP messages")
-          speak("If you encounter any issues accessing the interface, ensure your IDE has permission to open browser windows.")
+            tts("If you encounter any issues accessing the interface, ensure your IDE has permission to open browser windows.")?.play()
         }
         clearMessageBuffer()
       }
 
-      speak("And that concludes our demonstration of Command Autofix. This powerful feature saves time by automatically resolving build issues, allowing you to focus on writing code rather than fixing build problems.")
+        tts("And that concludes our demonstration of Command Autofix. This powerful feature saves time by automatically resolving build issues, allowing you to focus on writing code rather than fixing build problems.")?.play()
+        Unit
     }
   }
 

@@ -27,43 +27,7 @@ import kotlin.io.path.name
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DescribeCodeActionTest : DemoTestBase(
   splashScreenConfig = SplashScreenConfig(
-    fontFamily = "Roboto",
-    titleColor = "#00ACC1",
-    subtitleColor = "#78909C",
-    timestampColor = "#B0BEC5",
     titleText = "Describe Code Demo",
-    containerStyle = """
-      background: #1E1E1E;
-      padding: 40px 60px;
-      border-radius: 8px;
-      box-shadow: 0 0 30px rgba(0,172,193,0.2);
-      border: 1px solid #00ACC1;
-      animation: glow 2s ease-in-out infinite alternate;
-      position: relative;
-    """.trimIndent(),
-    bodyStyle = """
-      margin: 0;
-      padding: 20px;
-      background: #2B2B2B;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      text-align: center;
-      font-family: 'JetBrains Mono', monospace;
-      @keyframes glow {
-        from {
-          box-shadow: 0 0 20px rgba(0,172,193,0.2);
-        }
-        to {
-          box-shadow: 0 0 30px rgba(0,172,193,0.6);
-        }
-      }
-      @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
-    """.trimIndent()
   )
 ) {
   companion object {
@@ -83,54 +47,57 @@ class DescribeCodeActionTest : DemoTestBase(
 
   @Test
   fun testDescribeCode() = with(remoteRobot) {
-    speak("Welcome to the Describe Code feature demonstration. This powerful tool helps developers automatically generate clear and comprehensive documentation for their code.")
-    log.info("Starting Describe Code test")
-    Thread.sleep(2000)
+      tts("Welcome to the Describe Code feature demonstration. This powerful tool helps developers automatically generate clear and comprehensive documentation for their code.")?.play(
+          2000
+      )
 
-    step("Open project view and file") {
-      log.info("Opening project view and navigating to test file")
-      speak("Let's start by opening a Kotlin source file that needs documentation.")
-      openProjectView()
-      val path = arrayOf(testProjectDir.name, "src", "main", "kotlin", "Main.kt")
-      log.debug("Navigating to file path: {}", path.joinToString("/"))
-      val tree = find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
-      waitFor(Duration.ofSeconds(10)) { tree.doubleClickPath(*path, fullMatch = false); true }
-      Thread.sleep(2000)
-      speak("We'll use Main.kt as our example file. Notice how it currently lacks proper documentation.")
-    }
+      step("Open project view and file") {
+          log.info("Opening project view and navigating to test file")
+          tts("Let's start by opening a Kotlin source file that needs documentation.")?.play()
+          openProjectView()
+          val path = arrayOf(testProjectDir.name, "src", "main", "kotlin", "Main.kt")
+          log.debug("Navigating to file path: {}", path.joinToString("/"))
+          val tree = find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
+          waitFor(Duration.ofSeconds(10)) { tree.doubleClickPath(*path, fullMatch = false); true }
+          Thread.sleep(2000)
+          tts("We'll use Main.kt as our example file. Notice how it currently lacks proper documentation.")?.play()
+      }
 
-    step("Test Describe Code") {
-      log.info("Starting Code Description operation")
-      speak("To add documentation, we'll first select the code we want to document.")
+      step("Test Describe Code") {
+          log.info("Starting Code Description operation")
+          tts("To add documentation, we'll first select the code we want to document.")?.play()
 
-      val editor = find(EditorFixture::class.java, byXpath("//div[@class='EditorComponentImpl']"))
-      selectAllText(editor)
-      speak("With our code selected, we can now access the Describe Code feature through the context menu.")
-      editor.rightClick(editor.findAllText().firstOrNull()?.point?.location!!)
-      Thread.sleep(1000)
+          val editor = find(EditorFixture::class.java, byXpath("//div[@class='EditorComponentImpl']"))
+          selectAllText(editor)
+          tts("With our code selected, we can now access the Describe Code feature through the context menu.")?.play(
+              1000
+          )
+          editor.rightClick(editor.findAllText().firstOrNull()?.point?.location!!)
 
-      selectAICoderMenu()
-      log.debug("Attempting to find and click Describe Code menu item")
-      findAll(
-        CommonContainerFixture::class.java,
-        byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Describe Code')]")
-      ).firstOrNull()?.click()
+          selectAICoderMenu()
+          log.debug("Attempting to find and click Describe Code menu item")
+          findAll(
+              CommonContainerFixture::class.java,
+              byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Describe Code')]")
+          ).firstOrNull()?.click()
 
-      log.debug("Code Description operation triggered")
-      speak("Watch as the AI analyzes the code structure and generates appropriate documentation comments. It will identify:")
-      Thread.sleep(1000)
-      speak("- Function purposes and behaviors")
-      Thread.sleep(500)
-      speak("- Parameter descriptions and types")
-      Thread.sleep(500)
-      speak("- Return value details")
-      Thread.sleep(500)
-      speak("- Usage examples where appropriate")
-      Thread.sleep(3000)
-    }
+          log.debug("Code Description operation triggered")
+          tts("Watch as the AI analyzes the code structure and generates appropriate documentation comments. It will identify:")?.play(
+              1000
+          )
+          Thread.sleep(1000)
+          tts("- Function purposes and behaviors")?.play()
+          Thread.sleep(500)
+          tts("- Parameter descriptions and types")?.play()
+          Thread.sleep(500)
+          tts("- Return value details")?.play()
+          Thread.sleep(500)
+          tts("- Usage examples where appropriate")?.play(3000)
+      }
 
-    speak("And there we have it! The code is now properly documented with clear, maintainable comments that follow best practices. This documentation will help other developers understand the code's purpose and usage more easily.")
-    log.info("Describe Code test completed successfully")
-    Thread.sleep(2000)
+      tts("And there we have it! The code is now properly documented with clear, maintainable comments that follow best practices. This documentation will help other developers understand the code's purpose and usage more easily.")?.play(
+          2000
+      )
+      return@with
   }
 }

@@ -18,7 +18,10 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.sound.sampled.*
+import javax.sound.sampled.AudioSystem
+import javax.sound.sampled.DataLine
+import javax.sound.sampled.Line
+import javax.sound.sampled.Mixer
 import javax.swing.JFrame
 import javax.swing.SwingUtilities
 
@@ -71,7 +74,7 @@ open class ScreenRec(
     var hasValidLine = false
     AudioSystem.getMixer(mixerInfo).use { mixer ->
       mixer.sourceLineInfo.map { sourceLineInfo: Line.Info ->
-        log.info(" Audio Mixer Source Line: $sourceLineInfo (${sourceLineInfo.javaClass.canonicalName})")
+        /*log.info(" Audio Mixer Source Line: $sourceLineInfo (${sourceLineInfo.javaClass.canonicalName})")
         if (sourceLineInfo is DataLine.Info) {
           sourceLineInfo.lineClass?.let { lineClass ->
             log.info("  Source Line Class: $lineClass")
@@ -88,13 +91,13 @@ open class ScreenRec(
           sourceLineInfo.isSource?.let { isSource ->
             log.info("  Source Line is Source: $isSource")
           }
-        }
+        }*/
       }.firstOrNull() ?: log.warn("No audio source line found")
       mixer.targetLineInfo.map { targetLineInfo: Line.Info ->
-        log.info(" Audio Mixer Target Line: $targetLineInfo (${targetLineInfo.javaClass.canonicalName})")
+//        log.info(" Audio Mixer Target Line: $targetLineInfo (${targetLineInfo.javaClass.canonicalName})")
         if (targetLineInfo is DataLine.Info) {
           targetLineInfo.formats.forEach { format ->
-            log.info("  Audio Mixer Target Line Format: $format; Channels: ${format.channels}; Sample Rate: ${format.sampleRate}")
+//            log.info("  Audio Mixer Target Line Format: $format; Channels: ${format.channels}; Sample Rate: ${format.sampleRate}")
           }
           hasValidLine = true
         }
@@ -151,7 +154,7 @@ open class ScreenRec(
               ChannelsKey, recordingConfig.audioChannels,
               AudioFormatKeys.FrameSizeKey, 2,
               AudioFormatKeys.SignedKey, true,
-              AudioFormatKeys.ByteOrderKey, true,
+              ByteOrderKey, java.nio.ByteOrder.BIG_ENDIAN,
             )
           } else {
             log.warn("Audio recording is disabled")

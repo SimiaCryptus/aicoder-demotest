@@ -40,35 +40,7 @@ import java.time.Duration
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ShellCommandActionTest : DemoTestBase(
   splashScreenConfig = SplashScreenConfig(
-    fontFamily = "Source Code Pro",
-    titleColor = "#4AF626",
-    subtitleColor = "#00ff00",
-    timestampColor = "#33ff33",
     titleText = "Shell Command Test",
-    containerStyle = """
-      background: rgba(0, 0, 0, 0.85);
-      padding: 30px 50px;
-      border-radius: 8px;
-      border: 2px solid #4AF626;
-      box-shadow: 0 0 30px rgba(74, 246, 38, 0.3);
-      position: relative;
-      animation: terminalGlow 2s infinite ease-in-out;
-    """.trimIndent(),
-    bodyStyle = """
-      margin: 0;
-      padding: 20px;
-      background: #000000;
-      background-image: 
-        linear-gradient(rgba(0, 30, 0, 0.3) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 30, 0, 0.3) 1px, transparent 1px);
-      background-size: 20px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      text-align: center;
-      font-family: 'Source Code Pro', monospace;
-    """.trimIndent(),
   )
 ) {
 
@@ -78,19 +50,19 @@ class ShellCommandActionTest : DemoTestBase(
 
   @Test
   fun testShellCommand() = with(remoteRobot) {
-    speak("Welcome to the Shell Command feature demonstration. This powerful tool combines AI assistance with shell command execution to help you manage your project more effectively.")
-    log.info("Starting Shell Command test")
-    Thread.sleep(2000)
+      tts("Welcome to the Shell Command feature demonstration. This powerful tool combines AI assistance with shell command execution to help you manage your project more effectively.")?.play(
+          2000
+      )
 
     step("Open project view") {
-      speak("Let's begin by accessing our project structure. The Shell Command feature works best when we have a clear context of our working directory.")
+        tts("Let's begin by accessing our project structure. The Shell Command feature works best when we have a clear context of our working directory.")?.play(
+            2000
+        )
       openProjectView()
-      log.info("Project view opened")
-      Thread.sleep(2000)
     }
 
     step("Select project root") {
-      speak("We'll select our project's source directory, which will become our working directory for command execution. This ensures our commands operate in the right context.")
+        tts("We'll select our project's source directory, which will become our working directory for command execution. This ensures our commands operate in the right context.")?.play()
       val path = arrayOf(testProjectDir.toFile().name, "src", "main", "kotlin")
       val tree = find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
       waitFor(Duration.ofSeconds(10)) {
@@ -102,7 +74,7 @@ class ShellCommandActionTest : DemoTestBase(
     }
 
     step("Navigate to Shell Agent") {
-      speak("Now we'll access the Shell Agent through the AI Coder menu. This intelligent agent combines shell command execution with AI assistance to help you accomplish tasks more efficiently.")
+        tts("Now we'll access the Shell Agent through the AI Coder menu. This intelligent agent combines shell command execution with AI assistance to help you accomplish tasks more efficiently.")?.play()
       waitFor(Duration.ofSeconds(10)) {
         try {
           val aiCoderMenu = selectAICoderMenu()
@@ -144,15 +116,16 @@ class ShellCommandActionTest : DemoTestBase(
 
       if (url != null) {
         log.info("Retrieved Shell Command interface URL: $url")
-        speak("The Shell Command interface opens in your browser, providing a chat-like experience where you can interact with both the AI assistant and your system's shell.")
+          tts("The Shell Command interface opens in your browser, providing a chat-like experience where you can interact with both the AI assistant and your system's shell.")?.play()
         driver.get(url)
         val wait = WebDriverWait(driver, Duration.ofSeconds(90))
 
         try {
           val chatInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("chat-input")))
           log.info("Chat interface loaded")
-          speak("Let's try a simple directory listing command. The AI assistant will help interpret the output and suggest relevant follow-up actions.")
-          Thread.sleep(1000)
+            tts("Let's try a simple directory listing command. The AI assistant will help interpret the output and suggest relevant follow-up actions.")?.play(
+                1000
+            )
 
           // Enter command
           val command = if (System.getProperty("os.name").lowercase().contains("windows")) {
@@ -166,29 +139,31 @@ class ShellCommandActionTest : DemoTestBase(
           // Submit command
           wait.until(ExpectedConditions.elementToBeClickable(By.id("send-message-button"))).click()
           log.info("Command submitted")
-          speak("Watch as the command executes and the AI analyzes its output in real-time.")
-          Thread.sleep(2000)
+            tts("Watch as the command executes and the AI analyzes its output in real-time.")?.play(2000)
 
           // Wait for response
           wait.until(ExpectedConditions.presenceOfElementLocated(By.className("response-message")))
-          speak("The command has completed. Notice how the AI provides context and explanations for the output, making it easier to understand your project's structure.")
-          Thread.sleep(3000)
+            tts("The command has completed. Notice how the AI provides context and explanations for the output, making it easier to understand your project's structure.")?.play(
+                3000
+            )
 
         } catch (e: Exception) {
           log.error("Error during Shell Command interaction: ${e.message}", e)
-          speak("We've encountered an issue. In a real scenario, the AI would help diagnose the problem and suggest potential solutions.")
+            tts("We've encountered an issue. In a real scenario, the AI would help diagnose the problem and suggest potential solutions.")?.play()
         } finally {
           driver.quit()
           log.info("Browser session closed")
         }
       } else {
         log.error("Failed to retrieve Shell Command interface URL")
-        speak("Error: Unable to launch Shell Command interface.")
+          tts("Error: Unable to launch Shell Command interface.")?.play()
       }
       clearMessageBuffer()
     }
 
-    speak("That concludes our demonstration of the Shell Command feature. You've seen how it combines the power of your system's shell with AI assistance to make command-line operations more intuitive and productive. Try it with more complex commands to see how the AI can help interpret outputs and suggest next steps.")
-    Thread.sleep(5000)
+      tts("That concludes our demonstration of the Shell Command feature. You've seen how it combines the power of your system's shell with AI assistance to make command-line operations more intuitive and productive. Try it with more complex commands to see how the AI can help interpret outputs and suggest next steps.")?.play(
+          5000
+      )
+      return@with
   }
 }

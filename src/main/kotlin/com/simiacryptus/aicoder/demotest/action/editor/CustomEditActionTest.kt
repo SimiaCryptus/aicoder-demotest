@@ -42,43 +42,7 @@ import kotlin.io.path.name
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CustomEditActionTest : DemoTestBase(
   splashScreenConfig = SplashScreenConfig(
-    fontFamily = "JetBrains Mono",
-    titleColor = "#00ACC1",
-    subtitleColor = "#78909C",
-    timestampColor = "#B0BEC5",
     titleText = "Custom Edit Demo",
-    containerStyle = """
-      background: #1E1E1E;
-      padding: 40px 60px;
-      border-radius: 8px;
-      box-shadow: 0 0 30px rgba(0,172,193,0.2);
-      animation: glow 2s ease-in-out infinite alternate;
-      border: 1px solid #00ACC1;
-      position: relative;
-      overflow: hidden;
-    """.trimIndent(),
-    bodyStyle = """
-      margin: 0;
-      padding: 20px;
-      background: #2B2B2B;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      text-align: center;
-      position: relative;
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(45deg, #00ACC1 0%, transparent 100%);
-        opacity: 0.05;
-        z-index: 0;
-      }
-    """.trimIndent()
   )
 ) {
   companion object {
@@ -98,67 +62,83 @@ class CustomEditActionTest : DemoTestBase(
 
   @Test
   fun testCustomEdit() = with(remoteRobot) {
-    speak("Welcome to the Custom Edit feature demonstration. This powerful tool helps you modify code using natural language instructions.")
-    log.info("Starting Custom Edit test")
-    Thread.sleep(2000)
+      tts("Welcome to the Custom Edit feature demonstration. This powerful tool helps you modify code using natural language instructions.")?.play(
+          2000
+      )
 
-    step("Open project view and file") {
-      log.info("Opening project view and navigating to test file")
-      speak("Let's start by opening a sample code file that we'll enhance with AI assistance.")
-      openProjectView()
-      val path = arrayOf(testProjectDir.name, "src", "main", "kotlin", "Main.kt")
-      log.debug("Navigating to file path: {}", path.joinToString("/"))
-      val tree = find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
-      waitFor(Duration.ofSeconds(10)) { tree.doubleClickPath(*path, fullMatch = false); true }
-      Thread.sleep(2000)
-    }
-
-    step("Test Custom Edit") {
-      log.info("Starting Custom Edit operation")
-      speak("Now we'll use Custom Edit to improve our code. First, let's select the code we want to modify.")
-
-      val editor = find(EditorFixture::class.java, byXpath("//div[@class='EditorComponentImpl']"))
-      selectAllText(editor)
-      speak("With our code selected, we can access Custom Edit through the context menu.")
-      editor.rightClick(editor.findAllText().firstOrNull()?.point?.location!!)
-      Thread.sleep(1000)
-
-      selectAICoderMenu()
-      log.debug("Attempting to find and click Custom Edit menu item")
-      findAll(
-        CommonContainerFixture::class.java,
-        byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Edit Code')]")
-      ).firstOrNull()?.click()
-
-      log.debug("Waiting for edit instruction dialog")
-      waitFor(Duration.ofSeconds(10)) {
-        try {
-          val dialog = find(CommonContainerFixture::class.java, byXpath("//div[@class='JDialog' and @title='Edit Code']"))
-          val textField = dialog.find(CommonContainerFixture::class.java, byXpath("//div[@class='MultiplexingTextField']"))
-          textField.click()
-          speak("The Custom Edit dialog allows us to describe our desired changes in natural language. Let's add error handling to our code.")
-          keyboard {
-            enterText("Add error handling")
-          }
-          speak("We've instructed the AI to add error handling. This will make our code more robust and reliable.")
-          Thread.sleep(1000)
-
-          val okButton = dialog.find(CommonContainerFixture::class.java, byXpath("//div[@class='JButton' and @text='OK']"))
-          okButton.click()
-          true
-        } catch (e: Exception) {
-          log.warn("Failed to interact with edit dialog: ${e.message}")
-          false
-        }
+      step("Open project view and file") {
+          log.info("Opening project view and navigating to test file")
+          tts("Let's start by opening a sample code file that we'll enhance with AI assistance.")?.play()
+          openProjectView()
+          val path = arrayOf(testProjectDir.name, "src", "main", "kotlin", "Main.kt")
+          log.debug("Navigating to file path: {}", path.joinToString("/"))
+          val tree = find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
+          waitFor(Duration.ofSeconds(10)) { tree.doubleClickPath(*path, fullMatch = false); true }
+          Thread.sleep(2000)
       }
 
-      log.debug("Custom Edit operation triggered")
-      speak("Watch as the AI analyzes our code and intelligently adds appropriate error handling patterns. It considers the context and best practices for our programming language.")
-      Thread.sleep(3000)
-    }
+      step("Test Custom Edit") {
+          log.info("Starting Custom Edit operation")
+          tts("Now we'll use Custom Edit to improve our code. First, let's select the code we want to modify.")?.play()
 
-    speak("And there we have it! The AI has enhanced our code with proper error handling. Notice how it maintained the original functionality while making the code more robust. This is just one example of how Custom Edit can help improve your code through natural language instructions.")
-    log.info("Custom Edit test completed successfully")
-    Thread.sleep(2000)
+          waitFor(Duration.ofSeconds(30)) {
+              try {
+                  val editor = find(EditorFixture::class.java, byXpath("//div[@class='EditorComponentImpl']"))
+                  selectAllText(editor)
+                  tts("With our code selected, we can access Custom Edit through the context menu.")?.play(1000)
+                  editor.rightClick(editor.findAllText().firstOrNull()?.point?.location!!)
+
+                  selectAICoderMenu()
+                  log.debug("Attempting to find and click Custom Edit menu item")
+                  findAll(
+                      CommonContainerFixture::class.java,
+                      byXpath("//div[@text='AI Coder']//div[contains(@text, 'Edit Code')]")
+                  ).firstOrNull()?.let {
+                      it.click()
+                      true
+                  } ?: false
+              } catch (e: Exception) {
+                  log.warn("Failed to interact with editor: ${e.message}")
+                  false
+              }
+          }
+
+          log.debug("Waiting for edit instruction dialog")
+          waitFor(Duration.ofSeconds(10)) {
+              try {
+                  val dialog = find(
+                      CommonContainerFixture::class.java,
+                      byXpath("//div[@class='JDialog' and @title='Edit Code']")
+                  )
+                  val textField =
+                      dialog.find(CommonContainerFixture::class.java, byXpath("//div[@class='MultiplexingTextField']"))
+                  textField.click()
+                  tts("The Custom Edit dialog allows us to describe our desired changes in natural language. Let's add error handling to our code.")?.play()
+                  keyboard {
+                      enterText("Add error handling")
+                  }
+                  tts("We've instructed the AI to add error handling. This will make our code more robust and reliable.")?.play()
+                  Thread.sleep(1000)
+
+                  val okButton =
+                      dialog.find(CommonContainerFixture::class.java, byXpath("//div[@class='JButton' and @text='OK']"))
+                  okButton.click()
+                  true
+              } catch (e: Exception) {
+                  log.warn("Failed to interact with edit dialog: ${e.message}")
+                  false
+              }
+          }
+
+          log.debug("Custom Edit operation triggered")
+          tts("Watch as the AI analyzes our code and intelligently adds appropriate error handling patterns. It considers the context and best practices for our programming language.")?.play(
+              3000
+          )
+      }
+
+      tts("And there we have it! The AI has enhanced our code with proper error handling. Notice how it maintained the original functionality while making the code more robust. This is just one example of how Custom Edit can help improve your code through natural language instructions.")?.play(
+          2000
+      )
+      return@with
   }
 }

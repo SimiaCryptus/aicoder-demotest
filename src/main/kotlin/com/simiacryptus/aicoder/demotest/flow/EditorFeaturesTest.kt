@@ -38,30 +38,7 @@ import kotlin.io.path.name
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EditorFeaturesTest : DemoTestBase(
   splashScreenConfig = SplashScreenConfig(
-    fontFamily = "JetBrains Mono",
-    titleColor = "#087EA4",
-    subtitleColor = "#4CAF50",
-    timestampColor = "#FF5722",
     titleText = "Editor Features Demo",
-    containerStyle = """
-      background: linear-gradient(145deg, #1e1e1e, #2d2d2d);
-      padding: 40px;
-      border-radius: 15px;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-      border: 1px solid #3c3c3c;
-      animation: slideIn 1.5s ease-out;
-  """.trimIndent(),
-    bodyStyle = """
-      margin: 0;
-      padding: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      text-align: center;
-      background-color: #1a1a1a;
-      color: #ffffff;
-  """.trimIndent()
   )
 ) {
   private fun setClipboardContent(text: String) {
@@ -84,63 +61,63 @@ class EditorFeaturesTest : DemoTestBase(
 
   @Test
   fun testEditorFeatures() = with(remoteRobot) {
-    speak("Welcome to the AI Coder Editor Features demonstration, where we'll explore powerful tools that enhance your coding workflow.")
-    log.info("Starting editor features test suite")
-    Thread.sleep(2000)
+      tts("Welcome to the AI Coder Editor Features demonstration, where we'll explore powerful tools that enhance your coding workflow.")?.play(
+          2000
+      )
 
-    step("Open project view and file") {
-      log.info("Opening project view and navigating to test file")
-      speak("Let's start by opening a sample Kotlin file where we'll demonstrate these features.")
-      openProjectView()
-      val path = arrayOf(testProjectDir.name, "src", "main", "kotlin", "Main.kt")
-      log.debug("Navigating to file path: {}", path.joinToString("/"))
-      val tree = find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
-      waitFor(Duration.ofSeconds(10)) { tree.doubleClickPath(*path, fullMatch = false); true }
-      Thread.sleep(2000)
-    }
-    val editor = find(EditorFixture::class.java, byXpath("//div[@class='EditorComponentImpl']"))
-    log.debug("Editor component found")
+      step("Open project view and file") {
+          log.info("Opening project view and navigating to test file")
+          tts("Let's start by opening a sample Kotlin file where we'll demonstrate these features.")?.play()
+          openProjectView()
+          val path = arrayOf(testProjectDir.name, "src", "main", "kotlin", "Main.kt")
+          log.debug("Navigating to file path: {}", path.joinToString("/"))
+          val tree = find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
+          waitFor(Duration.ofSeconds(10)) { tree.doubleClickPath(*path, fullMatch = false); true }
+          Thread.sleep(2000)
+      }
+      val editor = find(EditorFixture::class.java, byXpath("//div[@class='EditorComponentImpl']"))
+      log.debug("Editor component found")
 
-    fun openEditorContextMenu() {
-      log.debug("Opening editor context menu")
-      editor.rightClick(editor.findAllText().firstOrNull()?.point?.location!!)
-      Thread.sleep(1000)
-    }
+      fun openEditorContextMenu() {
+          log.debug("Opening editor context menu")
+          editor.rightClick(editor.findAllText().firstOrNull()?.point?.location!!)
+          Thread.sleep(1000)
+      }
 
-    step("Test Smart Paste") {
-      log.info("Starting Smart Paste test")
-      speak("First, let's look at Smart Paste, which intelligently converts code between different programming languages.")
-      speak("I'll copy a JavaScript function to the clipboard, and we'll convert it to Kotlin.")
-      // Set sample code in clipboard
-      setClipboardContent(
-        """
+      step("Test Smart Paste") {
+          log.info("Starting Smart Paste test")
+          tts("First, let's look at Smart Paste, which intelligently converts code between different programming languages.")?.play()
+          tts("I'll copy a JavaScript function to the clipboard, and we'll convert it to Kotlin.")?.play()
+          // Set sample code in clipboard
+          setClipboardContent(
+              """
                 function calculateSum(a, b) {
                     return a + b;
                 }
             """.trimIndent()
-      )
-      log.debug("Sample JavaScript code set to clipboard")
+          )
+          log.debug("Sample JavaScript code set to clipboard")
 
-      openEditorContextMenu()
-      selectAICoderMenu()
-      log.debug("Attempting to find and click Smart Paste menu item")
-      findAll(
-        CommonContainerFixture::class.java,
-        byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Smart Paste')]")
-      )
-        .firstOrNull()?.click()
-      log.debug("Smart Paste operation triggered")
-      speak("Notice how Smart Paste automatically converts the JavaScript syntax to idiomatic Kotlin code.")
-      Thread.sleep(3000) // Wait for AI processing
-    }
+          openEditorContextMenu()
+          selectAICoderMenu()
+          log.debug("Attempting to find and click Smart Paste menu item")
+          findAll(
+              CommonContainerFixture::class.java,
+              byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Smart Paste')]")
+          )
+              .firstOrNull()?.click()
+          log.debug("Smart Paste operation triggered")
+          tts("Notice how Smart Paste automatically converts the JavaScript syntax to idiomatic Kotlin code.")?.play()
+          Thread.sleep(3000) // Wait for AI processing
+      }
 
-    step("Test Fast Paste") {
-      log.info("Starting Fast Paste test")
-      speak("Next, we'll try Fast Paste, which is optimized for quick conversions of simpler code snippets.")
-      speak("This time, we'll convert a Java class that's wrapped in HTML markup.")
-      // Set HTML content in clipboard
-      setClipboardContent(
-        """
+      step("Test Fast Paste") {
+          log.info("Starting Fast Paste test")
+          tts("Next, we'll try Fast Paste, which is optimized for quick conversions of simpler code snippets.")?.play()
+          tts("This time, we'll convert a Java class that's wrapped in HTML markup.")?.play()
+          // Set HTML content in clipboard
+          setClipboardContent(
+              """
                 <pre><code>
                 public class Example {
                     public static void main(String[] args) {
@@ -149,41 +126,42 @@ class EditorFeaturesTest : DemoTestBase(
                 }
                 </code></pre>
             """.trimIndent()
+          )
+          log.debug("HTML-wrapped Java code set to clipboard")
+
+          openEditorContextMenu()
+          selectAICoderMenu()
+          log.debug("Attempting to find and click Fast Paste menu item")
+          findAll(
+              CommonContainerFixture::class.java,
+              byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Fast Paste')]")
+          ).firstOrNull()?.click()
+          log.debug("Fast Paste operation triggered")
+          tts("Fast Paste quickly strips the HTML formatting and converts the Java code to Kotlin.")?.play(3000)
+      }
+
+      step("Test Code Description") {
+          log.info("Starting Code Description test")
+          tts("Finally, let's use the Describe Code feature to automatically generate documentation.")?.play()
+          tts("We'll select all the code and let the AI analyze it to create meaningful comments.")?.play()
+          selectAllText(editor)
+          openEditorContextMenu()
+          selectAICoderMenu()
+          log.debug("Attempting to find and click Describe Code menu item")
+          findAll(
+              CommonContainerFixture::class.java,
+              byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Describe Code')]")
+          ).firstOrNull()?.click()
+          log.debug("Code Description operation triggered")
+          tts("The AI analyzes the code structure and purpose to generate comprehensive documentation comments.")?.play(
+              3000
+          )
+      }
+
+      tts("That concludes our demonstration of AI Coder's editor features. These tools help streamline your coding workflow by automating common tasks and maintaining consistent code quality.")?.play(
+          2000
       )
-      log.debug("HTML-wrapped Java code set to clipboard")
-
-      openEditorContextMenu()
-      selectAICoderMenu()
-      log.debug("Attempting to find and click Fast Paste menu item")
-      findAll(
-        CommonContainerFixture::class.java,
-        byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Fast Paste')]")
-      ).firstOrNull()?.click()
-      log.debug("Fast Paste operation triggered")
-      speak("Fast Paste quickly strips the HTML formatting and converts the Java code to Kotlin.")
-      Thread.sleep(3000) // Wait for AI processing
-    }
-
-    step("Test Code Description") {
-      log.info("Starting Code Description test")
-      speak("Finally, let's use the Describe Code feature to automatically generate documentation.")
-      speak("We'll select all the code and let the AI analyze it to create meaningful comments.")
-      selectAllText(editor)
-      openEditorContextMenu()
-      selectAICoderMenu()
-      log.debug("Attempting to find and click Describe Code menu item")
-      findAll(
-        CommonContainerFixture::class.java,
-        byXpath("//div[contains(@class, 'ActionMenuItem') and contains(@text, 'Describe Code')]")
-      ).firstOrNull()?.click()
-      log.debug("Code Description operation triggered")
-      speak("The AI analyzes the code structure and purpose to generate comprehensive documentation comments.")
-      Thread.sleep(3000) // Wait for AI processing
-    }
-
-    speak("That concludes our demonstration of AI Coder's editor features. These tools help streamline your coding workflow by automating common tasks and maintaining consistent code quality.")
-    log.info("Editor features test suite completed successfully")
-    Thread.sleep(2000)
+      return@with
   }
 
   companion object {
