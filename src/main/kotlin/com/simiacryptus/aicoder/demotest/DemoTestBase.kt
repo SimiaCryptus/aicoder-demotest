@@ -14,6 +14,12 @@ import org.junit.jupiter.api.*
 import org.openqa.selenium.*
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
+import org.openqa.selenium.edge.EdgeDriver
+import org.openqa.selenium.edge.EdgeOptions
+import org.openqa.selenium.firefox.FirefoxDriver
+import org.openqa.selenium.firefox.FirefoxDriverLogLevel
+import org.openqa.selenium.firefox.FirefoxOptions
+import org.openqa.selenium.remote.RemoteWebDriver
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
 import org.slf4j.Logger
@@ -43,27 +49,13 @@ abstract class DemoTestBase(
   protected lateinit var testProjectDir: Path
   private var driverInitialized = false
   protected val driver: WebDriver by lazy { initializeWebDriver() }
-  private fun initializeWebDriver(): ChromeDriver {
+  private fun initializeWebDriver(): RemoteWebDriver {
     try {
-      log.info("Setting up ChromeDriver using WebDriverManager")
-      WebDriverManager.chromedriver().setup()
-      log.info("Configuring Chrome options")
-      val options = ChromeOptions().apply {
-        addArguments(
-          "--start-maximized",
-          "--remote-allow-origins=*",
-          "--disable-dev-shm-usage",
-          "--no-sandbox",
-          "--disable-application-cache",
-          "--kiosk",
-        )
-      }
-      log.info("Initializing ChromeDriver with configured options")
-      val driver = ChromeDriver(options)
+      val driver = getChrome()
       log.info("Setting browser zoom level to 150%")
       (driver as JavascriptExecutor).executeScript("document.body.style.zoom='150%'")
       driverInitialized = true
-      log.info("ChromeDriver successfully initialized")
+      log.info("WebDriver successfully initialized")
       return driver
     } catch (e: Exception) {
       log.error("Failed to initialize WebDriver: ${e.message}", e)
@@ -330,22 +322,23 @@ abstract class DemoTestBase(
     }
 
     fun getElement(
-      driver: WebDriver, wait: WebDriverWait, selector: String
+      wait: WebDriverWait, selector: String
     ): WebElement {
       val startTime = System.currentTimeMillis()
-      while (true) {
+      while ((System.currentTimeMillis() - startTime) < 30000) {
         try {
           return wait.until(
             ExpectedConditions.presenceOfElementLocated(By.cssSelector(selector))
           )
         } catch (e: WebDriverException) {
           if (e is TimeoutException) throw e
-          val elapsed = System.currentTimeMillis() - startTime
-          if (elapsed > 30000) throw RuntimeException("Failed to click $selector: ${e.message} - timed out", e)
+          if ((System.currentTimeMillis() - startTime) > 30000)
+            throw RuntimeException("Failed to click $selector: ${e.message} - timed out", e)
           log.info("Retry failure to click $selector: ${e.message}")
           sleep(100)
         }
       }
+      throw RuntimeException("Failed to click $selector: timed out")
     }
 
     fun <T> runElement(
@@ -365,6 +358,75 @@ abstract class DemoTestBase(
     }
 
     const val UDP_PORT = 41390
+    fun getChrome(): ChromeDriver {
+      log.info("Setting up ChromeDriver using WebDriverManager")
+      WebDriverManager.chromedriver().setup()
+      log.info("Configuring Chrome options")
+      val options = ChromeOptions().apply {
+        addArguments(
+          "--start-maximized",
+          "--remote-allow-origins=*",
+          "--disable-dev-shm-usage",
+          "--no-sandbox",
+          "--disable-application-cache",
+          "--kiosk",
+        )
+      }
+      val driver = ChromeDriver(options)
+      log.info("Initializing ChromeDriver with configured options")
+      return driver
+    }
+
+    fun getChromium(): ChromeDriver {
+      log.info("Setting up ChromeDriver using WebDriverManager")
+      WebDriverManager.chromiumdriver().setup()
+      log.info("Configuring Chrome options")
+      val options = ChromeOptions().apply {
+        addArguments(
+          "--start-maximized",
+          "--remote-allow-origins=*",
+          "--disable-dev-shm-usage",
+          "--no-sandbox",
+          "--disable-application-cache",
+          "--kiosk",
+        )
+      }
+      val driver = ChromeDriver(options)
+      log.info("Initializing ChromeDriver with configured options")
+      return driver
+    }
+
+    fun getEdge(): EdgeDriver {
+      log.info("Setting up EdgeDriver using WebDriverManager")
+      WebDriverManager.edgedriver().setup()
+      log.info("Configuring Edge options")
+      val options = EdgeOptions().apply {
+        addArguments(
+          "--start-maximized",
+          "--disable-dev-shm-usage",
+          "--no-sandbox",
+          "--disable-application-cache",
+          "--kiosk",
+        )
+      }
+      val driver = EdgeDriver(options)
+      log.info("Initializing EdgeDriver with configured options")
+      return driver
+    }
+
+    fun getFirefox(): RemoteWebDriver {
+      log.info("Setting up FirefoxDriver using WebDriverManager")
+      WebDriverManager.firefoxdriver().apply {
+        setup()
+      }
+      log.info("Configuring Firefox options")
+      val options = FirefoxOptions().apply {
+        setLogLevel(FirefoxDriverLogLevel.TRACE)
+      }
+      val driver = FirefoxDriver(options)
+      log.info("Initializing FirefoxDriver with configured options")
+      return driver
+    }
   }
 
 }

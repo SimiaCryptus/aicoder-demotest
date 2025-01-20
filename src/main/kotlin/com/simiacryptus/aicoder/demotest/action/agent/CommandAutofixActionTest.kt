@@ -113,7 +113,6 @@ class CommandAutofixActionTest : DemoTestBase(
                 byXpath("//div[@class='MyDialog' and @title='Command Autofix Settings']")
             )
           if (dialog.isShowing) {
-
               val autoFixCheckbox = dialog.find(
                   JCheckboxFixture::class.java,
                   byXpath("//div[@class='JCheckBox' and @text='Auto-apply fixes']")
@@ -150,7 +149,6 @@ class CommandAutofixActionTest : DemoTestBase(
           while (attempt <= 5) {
             val wait = WebDriverWait(this@CommandAutofixActionTest.driver, Duration.ofSeconds(600))
             try {
-              blockUntilDone(wait)
                 tts("Watch as Command Autofix analyzes your build output, identifies issues, and applies appropriate fixes. The AI considers your project's context and build configuration.")?.play()
                 //              val codeElements = wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.tagName("code")))
 //              val buildSuccessful = codeElements.any { it.text.contains("BUILD SUCCESSFUL") }
@@ -160,7 +158,6 @@ class CommandAutofixActionTest : DemoTestBase(
             } catch (e: Exception) {
               attempt++
               log.warn("Error interacting with Command Autofix interface", e)
-              blockUntilDone(wait)
                 tts("Sometimes multiple attempts may be needed for complex issues. Command Autofix will automatically retry with different approaches until the build succeeds.")?.play()
               (driver as JavascriptExecutor).executeScript("window.scrollTo(0, 0)")
               val refreshButton = driver.findElement(By.xpath("//a[@class='href-link' and text()='♻']"))
@@ -183,16 +180,4 @@ class CommandAutofixActionTest : DemoTestBase(
     }
   }
 
-  private fun blockUntilDone(wait: WebDriverWait) {
-    wait.until {
-      try {
-        (driver as JavascriptExecutor).executeScript("window.scrollTo(0, document.body.scrollHeight)")
-        val loadingElements = driver.findElements(By.xpath("//span[@class='sr-only' and text()='Loading...']"))
-        loadingElements.all { !it.isDisplayed }
-      } catch (e: Exception) {
-        log.warn("Error waiting for loading elements", e)
-        false
-      }
-    }
-  }
 }

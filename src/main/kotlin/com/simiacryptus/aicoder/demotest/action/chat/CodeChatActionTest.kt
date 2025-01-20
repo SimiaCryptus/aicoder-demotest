@@ -9,6 +9,7 @@ import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
 import com.simiacryptus.aicoder.demotest.DemoTestBase
 import com.simiacryptus.aicoder.demotest.SplashScreenConfig
+import com.simiacryptus.aicoder.demotest.action.chat.MultiCodeChatActionTest.Companion
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.openqa.selenium.By
@@ -169,37 +170,35 @@ class CodeChatActionTest : DemoTestBase(
                   tts("The interface is ready for interaction. You can ask questions about the code, request improvements, or seek explanations - all in natural language.")?.play(
                       1000
                   )
-
-                  val tabsById = driver.findElements(By.cssSelector("div.tabs-container")).toList()
-                      .associateBy { it.getDomAttribute("id") }.toMutableMap()
-                  tabsById.forEach { (id, element) ->
-                      element.findElements(By.cssSelector(":scope > tabs > .tab-button"))
-                          .firstOrNull { it.text == "Hide" }?.click()
-                  }
-
                   log.debug("Submitting request to chat interface")
-                  chatInput.click()
+                  chatInput.apply {
+                      click()
+                      sendKeys("Create a user manual for this class")
+                  }
                   tts("Let's ask the AI to create a user manual for our class. This demonstrates how Code Chat can help with documentation tasks while maintaining full context of the code.")?.play(
                       1000
                   )
 
-                  wait.until(ExpectedConditions.elementToBeClickable(By.id("send-message-button"))).click()
+                  wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@type='submit']"))).click()
                   log.info("Request submitted successfully")
                   tts("The request is being processed. The AI analyzes both the code structure and your request to generate comprehensive, contextually relevant responses.")?.play(
                       2000
                   )
 
-                  driver.findElements(By.cssSelector("div.tabs-container")).toList()
-                      .associateBy { it.getDomAttribute("id") }.filterNot { tabsById.containsKey(it.key) }
-                      .forEach {
-                          log.info("New tab id: ${it.key}")
-                          tabsById[it.key] = it.value
-                      }
-
-                  tts("The AI has provided a detailed response. Notice how it structures the documentation based on the actual code implementation while following best practices.")?.play(
-                      3000
-                  )
-                  tts("The Code Chat feature makes it easy to have meaningful discussions about your code, whether you're seeking explanations, improvements, or documentation help.")?.play()
+                  try {
+                      val markdownTab =
+                          wait.until(ExpectedConditions.elementToBeClickable(By.xpath("(//button[contains(@class, 'tab-button') and contains(text(), 'Markdown')])[3]")))
+                      tts("The AI has provided a detailed response. Notice how it structures the documentation based on the actual code implementation while following best practices.")?.play(
+                          3000
+                      )
+                      markdownTab.click()
+                  } catch (e: Exception) {
+                      MultiCodeChatActionTest.log.warn("Copy button not found within the expected time. Skipping copy action.", e)
+                      tts("AI response is delayed. In a real scenario, consider refreshing or checking network connection.")?.play(
+                          3000
+                      )
+                  }
+                  tts("The Code Chat feature makes it easy to have meaningful discussions about your code, whether you're seeking explanations, improvements, or documentation help.")?.play(2000)
               } catch (e: Exception) {
                   log.error("Error during Code Chat interaction: ${e.message}", e)
                   tts("Encountered an error during Code Chat interaction. Please check the logs for details.")?.play()

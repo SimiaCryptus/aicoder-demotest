@@ -16,6 +16,7 @@ import org.openqa.selenium.support.ui.WebDriverWait
 import org.slf4j.LoggerFactory
 import java.lang.Thread.sleep
 import java.time.Duration
+import java.util.concurrent.TimeUnit
 import kotlin.io.path.name
 
 /**
@@ -160,7 +161,7 @@ class AutoPlanActionTest : DemoTestBase(
       }
 
       step("Interact with Auto-Plan interface") {
-          val maxIterations = 4
+          val maxIterations = 3
           log.debug("Starting Auto-Plan interface interaction")
           var url: String? = null
           waitFor(Duration.ofSeconds(90)) {
@@ -201,7 +202,7 @@ class AutoPlanActionTest : DemoTestBase(
 
                   var planIndex = 3
                   while (true) {
-                      if (planIndex > maxIterations) {
+                      if ((planIndex-2) > (maxIterations*2)) {
                           log.info("Reached maximum demonstration iterations, initiating stop sequence")
                           tts("Auto-Plan can continue to iterate over agent plans. However, for demonstration purposes, we will stop here.")?.play()
                           clickElement(
@@ -228,35 +229,40 @@ class AutoPlanActionTest : DemoTestBase(
                           break
                       } else {
                           val iteration = (planIndex - 2) / 2
-                          log.debug("Processing agent iteration $iteration: ${planButton}")
+                          log.info("Processing agent iteration $iteration: ${planButton}")
                           tts("In iteration $iteration, Auto-Plan is analyzing the code structure and planning the next implementation steps.")?.play()
                       }
 
                       var taskIndex = 2
-                      while (true) {
-                          log.debug("Processing task iteration $taskIndex")
+                      log.debug("Processing task ${taskIndex-1}")
+                      val startTime = System.currentTimeMillis()
+                      while ((System.currentTimeMillis() - startTime) < TimeUnit.MINUTES.toMillis(2)) {
                           val taskButton =
                               try {
                                   getElement(
-                                      driver,
-                                      wait,
+                                      WebDriverWait(driver, Duration.ofSeconds(1)),
                                       "div.message-body > div.tabs-container > div.active div.iteration.tabs-container > div.tabs > button:nth-child($taskIndex)"
                                   )
                               } catch (e: Exception) {
-                                  log.warn("Failed to find task button: ${e.message}", e)
-                                  break
+                                  //log.debug("Failed to find task button: ${e.message}", e)
+                                  continue
                               }
                           val text = taskButton.text
+                          if(text.isBlank()) {
+                              sleep(100)
+                              continue
+                          }
                           if (text.trim().equals("Thinking Status", ignoreCase = true)) {
-                              log.info("Task ${taskIndex - 1} execution completed")
+                              log.info("Iteration completed after ${taskIndex - 2} tasks")
                               tts("Task execution complete. Updating Thinking State.")?.play()
                               break
                           } else {
                               taskButton.click()
-                              log.debug("Executing task ${taskIndex - 1}: $text")
+                              log.info("Executing task ${taskIndex - 1}: $text")
                               tts("Task ${taskIndex - 1} in progress.")?.play(3000)
                           }
                           taskIndex += 1
+                          log.debug("Processing task ${taskIndex-1}")
                       }
                       planIndex += 2
                   }
