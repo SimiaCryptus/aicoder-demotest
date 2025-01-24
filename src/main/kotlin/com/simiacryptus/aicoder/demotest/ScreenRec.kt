@@ -18,10 +18,7 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.sound.sampled.AudioSystem
-import javax.sound.sampled.DataLine
-import javax.sound.sampled.Line
-import javax.sound.sampled.Mixer
+import javax.sound.sampled.*
 import javax.swing.JFrame
 import javax.swing.SwingUtilities
 
@@ -94,16 +91,13 @@ open class ScreenRec(
         }*/
       }.firstOrNull() ?: log.warn("No audio source line found")
       mixer.targetLineInfo.map { targetLineInfo: Line.Info ->
-//        log.info(" Audio Mixer Target Line: $targetLineInfo (${targetLineInfo.javaClass.canonicalName})")
+        log.info(" Audio Mixer Target Line: $targetLineInfo (${targetLineInfo.javaClass.canonicalName})")
         if (targetLineInfo is DataLine.Info) {
           targetLineInfo.formats.forEach { format ->
-//            log.info("  Audio Mixer Target Line Format: $format; Channels: ${format.channels}; Sample Rate: ${format.sampleRate}")
+            log.info("  Audio Mixer Target Line Format: $format; Channels: ${format.channels}; Sample Rate: ${format.sampleRate}")
           }
           hasValidLine = true
         }
-//        if(targetLineInfo is Port.Info) targetLineInfo..forEach { format ->
-//          log.info("  Audio Mixer Target Line Format: $format; Channels: ${format.channels}; Sample Rate: ${format.sampleRate}")
-//        }
       }.firstOrNull() ?: log.warn("No audio target line found")
     }
     if (hasValidLine) mixerInfo else null
