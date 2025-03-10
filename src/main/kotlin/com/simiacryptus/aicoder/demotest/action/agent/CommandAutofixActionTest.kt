@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.openqa.selenium.By
 import org.openqa.selenium.JavascriptExecutor
+import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
 import org.slf4j.LoggerFactory
 import java.lang.Thread.sleep
@@ -78,17 +79,20 @@ class CommandAutofixActionTest : DemoTestBase(
 
       step("Click 'Auto-Fix' action") {
           tts("Now we'll launch the Command Autofix feature through the AI Coder menu. This tool integrates seamlessly with your IDE's build system.")?.play()
-        waitFor(Duration.ofSeconds(10)) {
+          waitFor(Duration.ofSeconds(30)) {
           try {
+              tts("Now we'll access the Auto-Fix feature through the AI Coder menu.")?.play()
               tts("Navigate to the Agents submenu, where you'll find various automated assistance tools.")?.play()
             val aiCoderMenu = selectAICoderMenu()
               val agentsMenu = aiCoderMenu.find(
                   CommonContainerFixture::class.java,
                   byXpath("//div[contains(@class, 'Menu') and contains(@text, 'Agents')]")
               )
+              // Add delay for menu animation
+              sleep(500)
             robot.mouseMove(agentsMenu.locationOnScreen.x + 10, agentsMenu.locationOnScreen.y)
             agentsMenu.click()
-            sleep(1000)
+              sleep(2000)
               val autoFixMenu = agentsMenu.find(
                   CommonContainerFixture::class.java,
                   byXpath("//div[contains(@class, 'MenuItem') and contains(@text, 'Run ... and Fix')]")
@@ -99,6 +103,14 @@ class CommandAutofixActionTest : DemoTestBase(
             true
           } catch (e: Exception) {
             log.warn("Failed to navigate Auto-Fix menu: ${e.message}")
+              // Wait for initial analysis
+              tts("The AI is now analyzing your codebase and build configuration. This may take a few moments.")?.play()
+              sleep(5000)
+              // Wait longer for response and processing
+              sleep(10000)
+              tts("The AI is now processing the request and making necessary code changes. Let's review the modifications as they happen.")?.play()
+              // Give time to view changes
+              sleep(5000)
               tts("If the menu doesn't appear immediately, the IDE will automatically retry. This ensures reliable access to the feature.")?.play()
             false
           }
@@ -133,13 +145,19 @@ class CommandAutofixActionTest : DemoTestBase(
       sleep(1000)
 
       step("Interact with Command Autofix interface") {
-        val messages = getReceivedMessages()
-        val url = messages.firstOrNull { it.startsWith("http") }
+          var url: String? = null
+          waitFor(Duration.ofSeconds(90)) {
+              val messages = getReceivedMessages()
+              url = messages.firstOrNull { it.startsWith("http") }
+              url != null
+          }
         if (url != null) {
           log.info("Retrieved URL: $url")
             tts("The Command Autofix interface opens in your browser, providing a detailed view of the analysis process and any fixes being applied.")?.play()
           try {
             this@CommandAutofixActionTest.driver.get(url)
+              // Add longer initial wait for interface load
+              sleep(5000)
           } catch (e: Exception) {
             log.error("Failed to initialize browser", e)
             throw e
@@ -150,7 +168,10 @@ class CommandAutofixActionTest : DemoTestBase(
             val wait = WebDriverWait(this@CommandAutofixActionTest.driver, Duration.ofSeconds(600))
             try {
                 tts("Watch as Command Autofix analyzes your build output, identifies issues, and applies appropriate fixes. The AI considers your project's context and build configuration.")?.play()
-                //              val codeElements = wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.tagName("code")))
+                // Wait for response content
+                wait.until(ExpectedConditions.presenceOfElementLocated(By.className("response-message")))
+                // Give time to view response
+                sleep(5000)
 //              val buildSuccessful = codeElements.any { it.text.contains("BUILD SUCCESSFUL") }
 //              require(buildSuccessful) { "BUILD SUCCESSFUL not found in any code element" }
                 tts("Excellent! Command Autofix has successfully resolved the build issues. Notice how the build now completes without errors, demonstrating the effectiveness of the automated fixes.")?.play()

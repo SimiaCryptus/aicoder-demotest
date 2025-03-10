@@ -147,7 +147,20 @@ class CreateFileFromDescriptionActionTest : DemoTestBase(
                   log.info(
                       """Current rows: ${
                           rows.joinToString("\n") {
-                              it.replace("\n", "\n  ")
+                              it.lineSequence()
+                                  .map {
+                                      when {
+                                          it.isBlank() -> {
+                                              when {
+                                                  it.length < "  ".length -> "  "
+                                                  else -> it
+                                              }
+                                          }
+
+                                          else -> "  " + it
+                                      }
+                                  }
+                                  .joinToString("\n")
                           }
                       }
             

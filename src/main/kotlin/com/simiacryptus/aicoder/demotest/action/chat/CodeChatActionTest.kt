@@ -9,7 +9,6 @@ import com.intellij.remoterobot.utils.keyboard
 import com.intellij.remoterobot.utils.waitFor
 import com.simiacryptus.aicoder.demotest.DemoTestBase
 import com.simiacryptus.aicoder.demotest.SplashScreenConfig
-import com.simiacryptus.aicoder.demotest.action.chat.MultiCodeChatActionTest.Companion
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.openqa.selenium.By
@@ -87,8 +86,11 @@ class CodeChatActionTest : DemoTestBase(
           val path = arrayOf(projectName, "src", "main", "kotlin", "Main.kt")
           val tree = remoteRobot.find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
           for (i in (0 until path.size - 1)) {
-              waitFor(Duration.ofSeconds(10)) { tree.isPathExists(*path.sliceArray(0..i), fullMatch = false) }
+              val sliceArray = path.sliceArray(0..i)
+              log.info("Checking path exists: ${sliceArray.joinToString("/")}")
+              waitFor(Duration.ofSeconds(10)) { tree.isPathExists(*sliceArray, fullMatch = false) }
           }
+          waitFor(Duration.ofSeconds(10)) { tree.clickPath(*path, fullMatch = false); true }
           waitFor(Duration.ofSeconds(10)) { tree.doubleClickPath(*path, fullMatch = false); true }
       }
 
@@ -166,6 +168,15 @@ class CodeChatActionTest : DemoTestBase(
               try {
                   // Get chat input element
                   val chatInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("chat-input")))
+                  // Clear input and wait
+                  chatInput.clear()
+                  sleep(1000)
+                  // Clear any existing text and wait
+                  chatInput.clear()
+                  sleep(1000)
+                  // Clear any existing text
+                  chatInput.clear()
+                  sleep(1000)
                   log.info("Chat interface loaded successfully")
                   tts("The interface is ready for interaction. You can ask questions about the code, request improvements, or seek explanations - all in natural language.")?.play(
                       1000
@@ -173,14 +184,31 @@ class CodeChatActionTest : DemoTestBase(
                   log.debug("Submitting request to chat interface")
                   chatInput.apply {
                       click()
-                      sendKeys("Create a user manual for this class")
+                      // Type message more slowly for demo
+                      "Please explain this code and suggest improvements".forEach { c ->
+                          sendKeys(c.toString())
+                          sleep(100)
+                      }
+                      // Wait before submitting
+                      sleep(2000)
+                      // Type message character by character for demo
+                      "Create a user manual for this class".forEach { c ->
+                          sendKeys(c.toString())
+                          sleep(100)
+                      }
                   }
+                  // Wait before submitting
+                  sleep(2000)
                   tts("Let's ask the AI to create a user manual for our class. This demonstrates how Code Chat can help with documentation tasks while maintaining full context of the code.")?.play(
                       1000
                   )
 
                   wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@type='submit']"))).click()
+                  // Wait longer for response
+                  sleep(10000)
                   log.info("Request submitted successfully")
+                  // Wait longer for response
+                  sleep(5000)
                   tts("The request is being processed. The AI analyzes both the code structure and your request to generate comprehensive, contextually relevant responses.")?.play(
                       2000
                   )

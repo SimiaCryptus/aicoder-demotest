@@ -74,7 +74,7 @@ class OutlineActionTest : DemoTestBase(
 
                   val outlineMenu = aiCoderMenu.find(
                       CommonContainerFixture::class.java,
-                      byXpath("//div[contains(@class, 'MenuItem') and contains(@text, 'Outline Tool')]")
+                      byXpath("//div[contains(@class, 'MenuItem') and contains(@text, 'Simple Outline Tool')]")
                   )
                   robot.mouseMove(outlineMenu.locationOnScreen.x + 10, aiCoderMenu.locationOnScreen.y)
                   sleep(200)

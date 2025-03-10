@@ -12,10 +12,12 @@ import com.simiacryptus.aicoder.demotest.SplashScreenConfig
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.openqa.selenium.By
+import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
 import org.slf4j.LoggerFactory
 import java.awt.event.KeyEvent
+import java.lang.Thread.sleep
 import java.time.Duration
 import kotlin.io.path.name
 
@@ -160,6 +162,16 @@ class DiffChatActionTest : DemoTestBase(
 
                   // Wait for and handle the response
                   wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".message-container")))
+                  // Scroll to show full response
+                  (driver as JavascriptExecutor).executeScript(
+                      """
+      document.querySelector(".message-container").scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+      });
+  """
+                  )
+                  sleep(2000)
                   tts("Let's review the AI's suggestions. Notice how each patch comes with an explanation of the changes and their benefits. You can apply patches directly from this interface.")?.play(
                       3000
                   )

@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.slf4j.LoggerFactory
 import java.awt.event.KeyEvent
+import java.lang.Thread.sleep
 import java.time.Duration
 import kotlin.io.path.name
 
@@ -57,7 +58,7 @@ class CustomEditActionTest : DemoTestBase(
         key(KeyEvent.VK_A)
       }
     }
-    Thread.sleep(500)
+    sleep(500)
   }
 
   @Test
@@ -74,26 +75,35 @@ class CustomEditActionTest : DemoTestBase(
           log.debug("Navigating to file path: {}", path.joinToString("/"))
           val tree = find(JTreeFixture::class.java, byXpath(PROJECT_TREE_XPATH)).apply { expandAll(path) }
           waitFor(Duration.ofSeconds(10)) { tree.doubleClickPath(*path, fullMatch = false); true }
-          Thread.sleep(2000)
+          sleep(2000)
       }
 
       step("Test Custom Edit") {
+          tts("Let's examine the code we want to improve. Take a moment to notice its current structure.")?.play()
+          sleep(5000)
           log.info("Starting Custom Edit operation")
+          // Add longer initial delay to show code
+          sleep(3000)
           tts("Now we'll use Custom Edit to improve our code. First, let's select the code we want to modify.")?.play()
 
           waitFor(Duration.ofSeconds(30)) {
               try {
                   val editor = find(EditorFixture::class.java, byXpath("//div[@class='EditorComponentImpl']"))
                   selectAllText(editor)
-                  tts("With our code selected, we can access Custom Edit through the context menu.")?.play(300)
+                  // Add delay after selection
+                  sleep(2000)
+                  tts("With our code selected, we can access Custom Edit through the context menu.")?.play(2000)
                   editor.rightClick(editor.findAllText().firstOrNull()?.point?.location!!)
 
                   selectAICoderMenu()
+                  // Add delay for menu visibility
+                  sleep(1000)
                   tts("Now we'll select Custom Edit from the AI Coder menu.")?.play(300)
                   findAll(
                       CommonContainerFixture::class.java,
                       byXpath("//div[@text='AI Coder']//div[contains(@text, 'Edit Code')]")
                   ).firstOrNull()?.let {
+                      sleep(500)
                       it.click()
                       true
                   } ?: false
@@ -118,7 +128,7 @@ class CustomEditActionTest : DemoTestBase(
                       enterText("Add error handling")
                   }
                   tts("We've instructed the AI to add error handling. This will make our code more robust and reliable.")?.play()
-                  Thread.sleep(1000)
+                  sleep(1000)
 
                   val okButton =
                       dialog.find(CommonContainerFixture::class.java, byXpath("//div[@class='JButton' and @text='OK']"))

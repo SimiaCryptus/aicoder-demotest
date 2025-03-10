@@ -193,7 +193,7 @@ abstract class DemoTestBase(
 
   private fun cleanupTestProject() {
     if (::testProjectDir.isInitialized) {
-      testProjectDir.toFile().deleteRecursively()
+      //testProjectDir.toFile().deleteRecursively()
       log.info("Cleaned up test project directory")
     }
   }
