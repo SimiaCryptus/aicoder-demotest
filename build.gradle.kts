@@ -29,7 +29,7 @@ dependencies {
     implementation(group = "org.apache.httpcomponents.client5", name = "httpclient5", version = "5.3.1") {
         exclude(group = "org.slf4j", module = "slf4j-api")
     }
-    implementation("org.jsoup:jsoup:1.18.1")
+    implementation("org.jsoup:jsoup:1.19.1")
 
     implementation("ch.randelshofer:org.monte.media.screenrecorder:17.1")
     implementation("ch.randelshofer:org.monte.media:17.1")
