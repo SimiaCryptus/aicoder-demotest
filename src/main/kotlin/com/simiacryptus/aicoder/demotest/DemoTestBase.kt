@@ -32,6 +32,7 @@ import java.nio.file.Paths
 import java.security.MessageDigest
 import java.time.Duration
 import java.time.LocalDateTime
+import java.util.concurrent.TimeUnit
 import kotlin.math.absoluteValue
 
 
@@ -185,6 +186,7 @@ abstract class DemoTestBase(
         false
       }
     }
+    sleep(TimeUnit.SECONDS.toMillis(30))
   }
 
   protected open fun waitAfterProjectOpen() {
