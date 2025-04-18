@@ -195,7 +195,7 @@ Implements both conditional and fixed waits for stability.
 
 
 ### Logging
-Uses SLF4J for logging with dedicated logger:
+Uses SLF4J for logging with dedicated log:
 ```kotlin
 val log = LoggerFactory.getLogger(CodeChatActionTest::class.java)
 ```
